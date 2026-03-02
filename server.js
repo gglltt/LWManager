@@ -7,14 +7,14 @@ const rateLimit = require("express-rate-limit");
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
+const potenzeRoutes = require("./routes/potenze");
 const { requireAuth } = require("./middleware/auth");
 
 const app = express();
 
 /**
- * RENDER FIX:
- * Must trust proxy completely so express-rate-limit
- * can read X-Forwarded-For safely.
+ * Render is behind a reverse proxy and sets X-Forwarded-For.
+ * express-rate-limit requires Express "trust proxy" to be enabled.
  */
 app.set("trust proxy", true);
 
@@ -31,13 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Rate limit (safe for proxy)
+// Rate limit
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: false // disable strict proxy validation
+  validate: false
 });
 
 app.use("/auth", authLimiter);
@@ -46,12 +46,13 @@ app.use("/auth", authLimiter);
 app.get("/", (req, res) => res.redirect("/auth/login"));
 app.use("/auth", authRoutes);
 
-// Protected route
+// Protected app routes
 app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", { user: req.user });
 });
 
-// Logout
+app.use("/potenze", potenzeRoutes);
+
 app.get("/logout", (req, res) => {
   res.clearCookie("lw_token");
   return res.redirect("/auth/login");
@@ -63,7 +64,4 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`LWManager running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`LWManager running on port ${PORT}`));

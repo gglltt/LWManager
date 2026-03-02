@@ -17,7 +17,7 @@ body {
 }
 
 .container {
-  width: min(980px, calc(100% - 32px));
+  width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
 }
 
@@ -27,6 +27,7 @@ body {
   backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
+  z-index: 10;
 }
 
 .topbar__inner {
@@ -55,11 +56,16 @@ body {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 22px;
-  max-width: 520px;
+  max-width: 560px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
 
+.cardWide {
+  max-width: 1100px;
+}
+
 h1 { margin: 0 0 14px 0; font-size: 22px; }
+h2.sectionTitle { margin: 12px 0 10px 0; font-size: 16px; color: var(--text); }
 
 .form {
   display: grid;
@@ -68,7 +74,7 @@ h1 { margin: 0 0 14px 0; font-size: 22px; }
 
 label { font-size: 14px; color: var(--muted); }
 
-input {
+input, select, textarea {
   width: 100%;
   padding: 10px 12px;
   border-radius: 12px;
@@ -76,8 +82,11 @@ input {
   background: rgba(9, 12, 20, 0.7);
   color: var(--text);
   outline: none;
+  font-family: inherit;
 }
-input:focus { border-color: #3a67ff; }
+input:focus, select:focus, textarea:focus { border-color: #3a67ff; }
+
+textarea { resize: vertical; min-height: 90px; }
 
 button, .button {
   margin-top: 6px;
@@ -94,6 +103,19 @@ button, .button {
 }
 button:hover, .button:hover { filter: brightness(1.07); }
 
+.button.secondary {
+  background: rgba(58, 103, 255, 0.15);
+  border: 1px solid rgba(58, 103, 255, 0.35);
+}
+.button.secondary:hover { filter: none; border-color: rgba(58, 103, 255, 0.6); }
+
+.button.danger {
+  background: rgba(255, 92, 122, 0.15);
+  border: 1px solid rgba(255, 92, 122, 0.45);
+  color: #ffd7de;
+}
+.button.danger:hover { filter: none; border-color: rgba(255, 92, 122, 0.7); }
+
 .alert {
   padding: 10px 12px;
   border-radius: 12px;
@@ -108,10 +130,116 @@ button:hover, .button:hover { filter: brightness(1.07); }
 
 .kv { display: grid; gap: 8px; font-size: 15px; }
 
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 14px 0;
+}
+
 .footer {
   padding: 20px 0;
   color: var(--muted);
   text-align: center;
   border-top: 1px solid var(--border);
   margin-top: 32px;
+}
+
+/* Dashboard menu cards */
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 12px;
+}
+.menuCard {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(9, 12, 20, 0.45);
+  color: var(--text);
+  text-decoration: none;
+}
+.menuCard:hover {
+  border-color: rgba(58, 103, 255, 0.5);
+}
+.menuIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(58, 103, 255, 0.15);
+  border: 1px solid rgba(58, 103, 255, 0.25);
+  font-size: 20px;
+}
+.menuTitle { font-weight: 800; }
+.menuDesc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+/* Potenze table */
+.tableWrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+  background: rgba(9, 12, 20, 0.35);
+}
+.table th, .table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(34, 48, 77, 0.6);
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+.table th {
+  color: var(--muted);
+  font-weight: 700;
+  background: rgba(18, 26, 42, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.noteCell { max-width: 260px; }
+.actionsCell { white-space: nowrap; }
+
+.inlineForm { display: inline; margin: 0; }
+
+.linkBtn {
+  background: transparent;
+  border: 0;
+  color: #9fb2ff;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 700;
+  text-decoration: none;
+  margin-right: 10px;
+}
+.linkBtn:hover { color: #c9d4ff; text-decoration: underline; }
+.linkBtn.danger { color: #ff93a6; }
+.linkBtn.danger:hover { color: #ffd7de; }
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.pageHeaderActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .menuGrid { grid-template-columns: 1fr; }
 }

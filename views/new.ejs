@@ -1,0 +1,101 @@
+<%- include("../partials/header") %>
+
+<section class="card">
+  <div class="pageHeader">
+    <div>
+      <h1>Nuovo giocatore</h1>
+      <p class="muted">Inserimento consentito solo ad admin (livello 5).</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/potenze">← Potenze</a>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/potenze/new" class="form">
+    <label>Nickname (obbligatorio)</label>
+    <input type="text" name="nickname" required minlength="2" maxlength="40" value="<%= form.nickname || '' %>" />
+
+    <label>Ruolo (opzionale)</label>
+    <select name="role">
+      <option value="">—</option>
+      <% roles.forEach(r => { %>
+        <option value="<%= r %>" <%= (form.role === r ? 'selected' : '') %>><%= r %></option>
+      <% }) %>
+    </select>
+
+    <hr class="divider" />
+
+    <div class="grid2">
+      <div>
+        <label>Power T1</label>
+        <input type="number" name="powerT1" min="0" step="1" value="<%= form.powerT1 || '' %>" />
+      </div>
+      <div>
+        <label>Type T1</label>
+        <select name="typeT1">
+          <option value="">—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= (form.typeT1 === t ? 'selected' : '') %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label>Power T2</label>
+        <input type="number" name="powerT2" min="0" step="1" value="<%= form.powerT2 || '' %>" />
+      </div>
+      <div>
+        <label>Type T2</label>
+        <select name="typeT2">
+          <option value="">—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= (form.typeT2 === t ? 'selected' : '') %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label>Power T3</label>
+        <input type="number" name="powerT3" min="0" step="1" value="<%= form.powerT3 || '' %>" />
+      </div>
+      <div>
+        <label>Type T3</label>
+        <select name="typeT3">
+          <option value="">—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= (form.typeT3 === t ? 'selected' : '') %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label>Power T4</label>
+        <input type="number" name="powerT4" min="0" step="1" value="<%= form.powerT4 || '' %>" />
+      </div>
+      <div>
+        <label>Type T4</label>
+        <select name="typeT4">
+          <option value="">—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= (form.typeT4 === t ? 'selected' : '') %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <label>Note (opzionale)</label>
+    <textarea name="notes" rows="5" placeholder="Testo libero..."><%= form.notes || '' %></textarea>
+
+    <button type="submit">Salva</button>
+  </form>
+</section>
+
+<%- include("../partials/footer") %>

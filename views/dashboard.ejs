@@ -7,14 +7,25 @@
     <div><b>Email:</b> <%= user.email %></div>
     <div><b>Nickname:</b> <%= user.nickname %></div>
     <div><b>Auth Level:</b> <%= user.authLevel %> (1=base, 5=admin)</div>
-    <div><b>Verificato:</b> <%= user.isVerified ? "Sì" : "No" %></div>
   </div>
 
-  <p class="muted">
-    Questo è solo lo step base. Qui costruiremo i moduli successivi di LWManager.
-  </p>
+  <hr class="divider" />
 
-  <a class="button" href="/logout">Logout</a>
+  <h2 class="sectionTitle">Menu</h2>
+
+  <div class="menuGrid">
+    <a class="menuCard" href="/potenze" title="Gestione Potenze">
+      <div class="menuIcon">⚡</div>
+      <div class="menuText">
+        <div class="menuTitle">Potenze</div>
+        <div class="menuDesc">Lista giocatori, potenze e tipi (T1–T4)</div>
+      </div>
+    </a>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <a class="button" href="/logout">Logout</a>
+  </div>
 </section>
 
 <%- include("partials/footer") %>

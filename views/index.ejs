@@ -1,0 +1,105 @@
+<%- include("../partials/header") %>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Potenze</h1>
+      <p class="muted">Gestione lista giocatori. Ultimo aggiornamento gestito automaticamente dal sistema.</p>
+    </div>
+
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/dashboard">← Dashboard</a>
+
+      <% if (isAdmin) { %>
+        <a class="button" href="/potenze/new">+ Nuovo giocatore</a>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <div class="tableWrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nickname</th>
+          <th>Ruolo</th>
+          <th>T1</th>
+          <th>Tipo T1</th>
+          <th>T2</th>
+          <th>Tipo T2</th>
+          <th>T3</th>
+          <th>Tipo T3</th>
+          <th>T4</th>
+          <th>Tipo T4</th>
+          <th>Aggiornato</th>
+          <th>Note</th>
+          <% if (isAdmin) { %>
+            <th>Azioni</th>
+          <% } %>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!players || players.length === 0) { %>
+          <tr>
+            <td colspan="<%= isAdmin ? 13 : 12 %>" class="muted">Nessun giocatore inserito.</td>
+          </tr>
+        <% } %>
+
+        <% players.forEach(p => { %>
+          <tr>
+            <td><b><%= p.nickname %></b></td>
+            <td><%= p.role || "-" %></td>
+
+            <td><%= (p.powerT1 === null || p.powerT1 === undefined) ? "-" : p.powerT1 %></td>
+            <td><%= p.typeT1 || "-" %></td>
+
+            <td><%= (p.powerT2 === null || p.powerT2 === undefined) ? "-" : p.powerT2 %></td>
+            <td><%= p.typeT2 || "-" %></td>
+
+            <td><%= (p.powerT3 === null || p.powerT3 === undefined) ? "-" : p.powerT3 %></td>
+            <td><%= p.typeT3 || "-" %></td>
+
+            <td><%= (p.powerT4 === null || p.powerT4 === undefined) ? "-" : p.powerT4 %></td>
+            <td><%= p.typeT4 || "-" %></td>
+
+            <td>
+              <%= p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-" %>
+            </td>
+
+            <td class="noteCell">
+              <% if (p.notes && p.notes.trim().length > 0) { %>
+                <span title="<%= p.notes %>"><%= p.notes.length > 80 ? (p.notes.slice(0, 80) + "…") : p.notes %></span>
+              <% } else { %>
+                -
+              <% } %>
+            </td>
+
+            <% if (isAdmin) { %>
+              <td class="actionsCell">
+                <a class="linkBtn" href="/potenze/<%= p._id %>/edit">Modifica</a>
+                <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
+                  <button class="linkBtn danger" type="submit">Elimina</button>
+                </form>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (!isAdmin) { %>
+    <p class="muted" style="margin-top: 12px;">
+      Solo gli utenti di livello 5 possono inserire, modificare o cancellare giocatori.
+    </p>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>
