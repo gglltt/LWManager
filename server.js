@@ -11,6 +11,12 @@ const { requireAuth } = require("./middleware/auth");
 
 const app = express();
 
+/**
+ * IMPORTANTISSIMO su Render
+ * Render è dietro proxy → serve trust proxy
+ */
+app.set("trust proxy", 1);
+
 // DB
 connectDB();
 
