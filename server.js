@@ -12,10 +12,11 @@ const { requireAuth } = require("./middleware/auth");
 const app = express();
 
 /**
- * IMPORTANTISSIMO su Render
- * Render è dietro proxy → serve trust proxy
+ * RENDER FIX:
+ * Must trust proxy completely so express-rate-limit
+ * can read X-Forwarded-For safely.
  */
-app.set("trust proxy", 1);
+app.set("trust proxy", true);
 
 // DB
 connectDB();
@@ -30,12 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Basic security rate limits (adjust as needed)
+// Rate limit (safe for proxy)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 60,
-  standardHeaders: "draft-7",
-  legacyHeaders: false
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false // disable strict proxy validation
 });
 
 app.use("/auth", authLimiter);
@@ -44,12 +46,12 @@ app.use("/auth", authLimiter);
 app.get("/", (req, res) => res.redirect("/auth/login"));
 app.use("/auth", authRoutes);
 
-// Protected example route
+// Protected route
 app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", { user: req.user });
 });
 
-// Logout shortcut
+// Logout
 app.get("/logout", (req, res) => {
   res.clearCookie("lw_token");
   return res.redirect("/auth/login");
@@ -61,4 +63,7 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`LWManager running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`LWManager running on port ${PORT}`);
+});
