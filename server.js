@@ -12,10 +12,6 @@ const { requireAuth } = require("./middleware/auth");
 
 const app = express();
 
-/**
- * Render is behind a reverse proxy and sets X-Forwarded-For.
- * express-rate-limit requires Express "trust proxy" to be enabled.
- */
 app.set("trust proxy", true);
 
 // DB
@@ -46,7 +42,7 @@ app.use("/auth", authLimiter);
 app.get("/", (req, res) => res.redirect("/auth/login"));
 app.use("/auth", authRoutes);
 
-// Protected app routes
+// App routes
 app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", { user: req.user });
 });

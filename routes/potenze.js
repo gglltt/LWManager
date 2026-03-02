@@ -1,5 +1,5 @@
 const express = require("express");
-const Player = require("../models/player.js");
+const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
 
 const router = express.Router();
@@ -19,6 +19,7 @@ function parseOptionalNumber(v) {
   const n = Number(s);
   if (Number.isNaN(n)) return null;
 
+  // arrotonda a 2 decimali
   return Math.round(n * 100) / 100;
 }
 
@@ -51,6 +52,7 @@ function isAdmin(user) {
   return user && user.authLevel >= 5;
 }
 
+// LIST
 router.get("/", requireAuth, async (req, res) => {
   try {
     const players = await Player.find({}).sort({ updatedAt: -1, nickname: 1 });
@@ -78,7 +80,31 @@ router.get("/", requireAuth, async (req, res) => {
   }
 });
 
-// CREATE
+// NEW (FORM)  ✅ questa era la rotta mancante
+router.get("/new", requireAuth, requireLevel(5), async (req, res) => {
+  return res.render("potenze/new", {
+    user: req.user,
+    types: TYPE_OPTIONS,
+    roles: ROLE_OPTIONS,
+    error: null,
+    message: null,
+    form: {
+      nickname: "",
+      role: "",
+      powerT1: "",
+      typeT1: "",
+      powerT2: "",
+      typeT2: "",
+      powerT3: "",
+      typeT3: "",
+      powerT4: "",
+      typeT4: "",
+      notes: ""
+    }
+  });
+});
+
+// NEW (CREATE)
 router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const nickCheck = validateNickname(req.body.nickname);
@@ -109,17 +135,44 @@ router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
       powerT4: parseOptionalNumber(req.body.powerT4),
       typeT4: normalizeType(req.body.typeT4),
 
-      notes: sanitizeText(req.body.notes)
+      notes: sanitizeText(req.body.notes, 2000)
     });
 
     return res.redirect("/potenze");
+  } catch (err) {
+    console.error(err);
+    return res.render("potenze/new", {
+      user: req.user,
+      types: TYPE_OPTIONS,
+      roles: ROLE_OPTIONS,
+      error: "Errore interno durante la creazione del giocatore.",
+      message: null,
+      form: { ...req.body }
+    });
+  }
+});
+
+// EDIT (FORM) ✅ questa era la seconda rotta mancante
+router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
+  try {
+    const player = await Player.findById(req.params.id);
+    if (!player) return res.status(404).send("404 - Giocatore non trovato");
+
+    return res.render("potenze/edit", {
+      user: req.user,
+      types: TYPE_OPTIONS,
+      roles: ROLE_OPTIONS,
+      error: null,
+      message: null,
+      player
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).send("500 - Errore interno");
   }
 });
 
-// UPDATE
+// EDIT (UPDATE)
 router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
@@ -153,10 +206,21 @@ router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
     player.powerT4 = parseOptionalNumber(req.body.powerT4);
     player.typeT4 = normalizeType(req.body.typeT4);
 
-    player.notes = sanitizeText(req.body.notes);
+    player.notes = sanitizeText(req.body.notes, 2000);
 
-    await player.save();
+    await player.save(); // updatedAt gestito automaticamente
 
+    return res.redirect("/potenze");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("500 - Errore interno");
+  }
+});
+
+// DELETE
+router.post("/:id/delete", requireAuth, requireLevel(5), async (req, res) => {
+  try {
+    await Player.deleteOne({ _id: req.params.id });
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
