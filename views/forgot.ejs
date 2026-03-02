@@ -1,0 +1,23 @@
+<%- include("partials/header") %>
+
+<section class="card">
+  <h1>Password dimenticata</h1>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/auth/forgot" class="form">
+    <label>Email</label>
+    <input type="email" name="email" required placeholder="nome@dominio.it" />
+    <button type="submit">Invia link reset</button>
+  </form>
+
+  <p class="muted"><a href="/auth/login">Torna al login</a></p>
+</section>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,27 @@
+<%- include("partials/header") %>
+
+<section class="card">
+  <h1>Reimposta Password</h1>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/auth/reset/<%= token %>" class="form">
+    <label>Nuova password (min 8 caratteri)</label>
+    <input type="password" name="password" required minlength="8" placeholder="********" />
+
+    <label>Conferma password</label>
+    <input type="password" name="confirm" required minlength="8" placeholder="********" />
+
+    <button type="submit">Aggiorna password</button>
+  </form>
+
+  <p class="muted"><a href="/auth/login">Torna al login</a></p>
+</section>
+
+<%- include("partials/footer") %>

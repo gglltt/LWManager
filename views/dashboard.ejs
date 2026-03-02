@@ -1,0 +1,20 @@
+<%- include("partials/header") %>
+
+<section class="card">
+  <h1>Dashboard</h1>
+
+  <div class="kv">
+    <div><b>Email:</b> <%= user.email %></div>
+    <div><b>Nickname:</b> <%= user.nickname %></div>
+    <div><b>Auth Level:</b> <%= user.authLevel %> (1=base, 5=admin)</div>
+    <div><b>Verificato:</b> <%= user.isVerified ? "Sì" : "No" %></div>
+  </div>
+
+  <p class="muted">
+    Questo è solo lo step base. Qui costruiremo i moduli successivi di LWManager.
+  </p>
+
+  <a class="button" href="/logout">Logout</a>
+</section>
+
+<%- include("partials/footer") %>
