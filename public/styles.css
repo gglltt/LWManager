@@ -36,34 +36,43 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 0;
+  gap: 12px;
 }
 
 .brand {
   font-weight: 800;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Nav: su mobile va a capo */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .nav a {
   color: var(--muted);
   text-decoration: none;
-  margin-left: 12px;
   font-size: 14px;
 }
 .nav a:hover { color: var(--text); }
 
 .card {
-  margin: 28px auto;
+  margin: 20px auto;
   background: rgba(18, 26, 42, 0.9);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 22px;
+  padding: 18px;
   max-width: 560px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
 
 .cardWide { max-width: 1100px; }
 
-h1 { margin: 0 0 14px 0; font-size: 22px; }
+h1 { margin: 0 0 10px 0; font-size: 22px; }
 h2.sectionTitle { margin: 12px 0 10px 0; font-size: 16px; color: var(--text); }
 
 .form { display: grid; gap: 10px; }
@@ -122,7 +131,7 @@ button:hover, .button:hover { filter: brightness(1.07); }
 .alert.success { border-color: rgba(43, 213, 118, 0.4); color: var(--ok); }
 .alert.error { border-color: rgba(255, 92, 122, 0.4); color: var(--err); }
 
-.muted { color: var(--muted); font-size: 14px; }
+.muted { color: var(--muted); font-size: 13px; }
 
 .kv { display: grid; gap: 8px; font-size: 15px; }
 
@@ -170,43 +179,39 @@ button:hover, .button:hover { filter: brightness(1.07); }
 .menuTitle { font-weight: 800; }
 .menuDesc { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
-/* Potenze table */
-/* Desktop: NO horizontal scrollbar */
+/* Potenze table - compact + mobile first */
 .tableWrap {
-  overflow-x: hidden;
   border-radius: 12px;
   border: 1px solid var(--border);
+  overflow-x: hidden;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   background: rgba(9, 12, 20, 0.35);
-  table-layout: fixed; /* fa “stringere” le colonne */
+  table-layout: fixed;
 }
 
-/* Riduciamo un pelo padding e permettiamo truncation elegante */
 .table th, .table td {
-  padding: 9px 8px;
+  padding: 8px 6px;
   border-bottom: 1px solid rgba(34, 48, 77, 0.6);
   text-align: left;
   vertical-align: top;
-  font-size: 13px;
+  font-size: 12.5px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .table th {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: 800;
   background: rgba(18, 26, 42, 0.8);
   position: sticky;
   top: 0;
   z-index: 1;
 }
 
-/* Link intestazioni ordinabili */
 .thLink {
   color: var(--muted);
   text-decoration: none;
@@ -216,30 +221,70 @@ button:hover, .button:hover { filter: brightness(1.07); }
   text-decoration: underline;
 }
 
-/* Celle specifiche */
-.noteCell {
-  max-width: 260px;
+/* 2-line cell layout */
+.cell2 {
+  display: grid;
+  gap: 2px;
+}
+.cellTop {
+  line-height: 1.1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cellSub {
+  line-height: 1.1;
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.actionsCell { white-space: nowrap; }
+.cellSingle {
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* column sizing - tuned for mobile */
+.tableCompact .colNick { width: 22%; }
+.tableCompact .colRole { width: 6%; text-align: center; }
+.tableCompact .colTier { width: 11%; }
+.tableCompact .colTotal { width: 10%; }
+.tableCompact .colDate { width: 16%; }
+.tableCompact .colActions { width: 8%; text-align: center; }
+
+.tableCompact td.colRole, .tableCompact th.colRole,
+.tableCompact td.colActions, .tableCompact th.colActions {
+  text-align: center;
+}
+
+/* Action icons */
+.actionIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.iconBtn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  text-decoration: none;
+}
+.iconBtn:hover { filter: brightness(1.15); }
+.iconBtn.danger { color: #ff93a6; }
 
 .inlineForm { display: inline; margin: 0; }
 
-.linkBtn {
-  background: transparent;
-  border: 0;
-  color: #9fb2ff;
-  cursor: pointer;
-  padding: 0;
-  font-weight: 700;
-  text-decoration: none;
-  margin-right: 10px;
-}
-.linkBtn:hover { color: #c9d4ff; text-decoration: underline; }
-.linkBtn.danger { color: #ff93a6; }
-.linkBtn.danger:hover { color: #ffd7de; }
-
+/* Page header */
 .pageHeader {
   display: flex;
   align-items: flex-start;
@@ -254,19 +299,25 @@ button:hover, .button:hover { filter: brightness(1.07); }
   flex-wrap: wrap;
 }
 
+/* Forms grid */
 .grid2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-/* Mobile / schermi piccoli: riabilitiamo lo scroll perché è inevitabile */
-@media (max-width: 980px) {
-  .tableWrap { overflow-x: auto; }
-  .table { min-width: 1100px; table-layout: auto; }
-}
-
 @media (max-width: 720px) {
+  .container { width: calc(100% - 20px); }
+  .card { padding: 16px; }
   .grid2 { grid-template-columns: 1fr; }
-  .menuGrid { grid-template-columns: 1fr; }
+
+  /* table fits mobile without scroll */
+  .tableCompact .colNick { width: 26%; }
+  .tableCompact .colRole { width: 6%; }
+  .tableCompact .colTier { width: 12%; }
+  .tableCompact .colTotal { width: 11%; }
+  .tableCompact .colDate { width: 18%; }
+  .tableCompact .colActions { width: 9%; }
+
+  .nav a { font-size: 13px; }
 }

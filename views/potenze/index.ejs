@@ -8,6 +8,15 @@
     return n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function fmtDate(d) {
+    if (!d) return "-";
+    const dt = new Date(d);
+    if (Number.isNaN(dt.getTime())) return "-";
+    const dateStr = dt.toLocaleDateString("it-IT");
+    const timeStr = dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    return { dateStr, timeStr };
+  }
+
   function sortLink(field) {
     const currentSort = sort || "updatedAt";
     const currentDir = dir || "desc";
@@ -25,20 +34,27 @@
     if (currentSort !== field) return "";
     return currentDir === "asc" ? " ▲" : " ▼";
   }
+
+  function tooltipText(p) {
+    const parts = [];
+    if (p.notes && String(p.notes).trim().length > 0) parts.push(`Note: ${String(p.notes).trim()}`);
+    parts.push(`Aggiornato: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-"}`);
+    return parts.join(" | ");
+  }
 %>
 
 <section class="card cardWide">
   <div class="pageHeader">
     <div>
       <h1>Potenze</h1>
-      <p class="muted">Gestione lista giocatori. Ultimo aggiornamento gestito automaticamente dal sistema.</p>
+      <p class="muted">Vista compatta per mobile. Note disponibili nel tooltip sul nickname.</p>
     </div>
 
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← Dashboard</a>
 
       <% if (isAdmin) { %>
-        <a class="button" href="/potenze/new">+ Nuovo giocatore</a>
+        <a class="button" href="/potenze/new">+ Nuovo</a>
       <% } %>
     </div>
   </div>
@@ -52,75 +68,103 @@
   <% } %>
 
   <div class="tableWrap">
-    <table class="table">
+    <table class="table tableCompact">
       <thead>
         <tr>
-          <th><a class="thLink" href="<%= sortLink('nickname') %>">Nickname<%= sortArrow('nickname') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('role') %>">Ruolo<%= sortArrow('role') %></a></th>
+          <th class="colNick"><a class="thLink" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a></th>
+          <th class="colRole"><a class="thLink" href="<%= sortLink('role') %>">R<%= sortArrow('role') %></a></th>
 
-          <th><a class="thLink" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('typeT1') %>">Tipo T1<%= sortArrow('typeT1') %></a></th>
+          <th class="colTier"><a class="thLink" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a></th>
+          <th class="colTier"><a class="thLink" href="<%= sortLink('powerT2') %>">T2<%= sortArrow('powerT2') %></a></th>
+          <th class="colTier"><a class="thLink" href="<%= sortLink('powerT3') %>">T3<%= sortArrow('powerT3') %></a></th>
+          <th class="colTier"><a class="thLink" href="<%= sortLink('powerT4') %>">T4<%= sortArrow('powerT4') %></a></th>
 
-          <th><a class="thLink" href="<%= sortLink('powerT2') %>">T2<%= sortArrow('powerT2') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('typeT2') %>">Tipo T2<%= sortArrow('typeT2') %></a></th>
+          <th class="colTotal"><a class="thLink" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a></th>
+          <th class="colDate"><a class="thLink" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a></th>
 
-          <th><a class="thLink" href="<%= sortLink('powerT3') %>">T3<%= sortArrow('powerT3') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('typeT3') %>">Tipo T3<%= sortArrow('typeT3') %></a></th>
-
-          <th><a class="thLink" href="<%= sortLink('powerT4') %>">T4<%= sortArrow('powerT4') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('typeT4') %>">Tipo T4<%= sortArrow('typeT4') %></a></th>
-
-          <th><a class="thLink" href="<%= sortLink('total') %>">Totale<%= sortArrow('total') %></a></th>
-          <th><a class="thLink" href="<%= sortLink('updatedAt') %>">Aggiornato<%= sortArrow('updatedAt') %></a></th>
-
-          <th>Note</th>
           <% if (isAdmin) { %>
-            <th>Azioni</th>
+            <th class="colActions">Az</th>
           <% } %>
         </tr>
       </thead>
+
       <tbody>
         <% if (!players || players.length === 0) { %>
           <tr>
-            <td colspan="<%= isAdmin ? 14 : 13 %>" class="muted">Nessun giocatore inserito.</td>
+            <td colspan="<%= isAdmin ? 9 : 8 %>" class="muted">Nessun giocatore inserito.</td>
           </tr>
         <% } %>
 
-        <% players.forEach(p => { %>
-          <tr>
-            <td><b><%= p.nickname %></b></td>
-            <td><%= p.role || "-" %></td>
+        <% players.forEach(p => { 
+             const dt = fmtDate(p.updatedAt);
+        %>
+          <tr title="<%= tooltipText(p) %>">
+            <td class="colNick">
+              <div class="cell2">
+                <div class="cellTop">
+                  <b title="<%= tooltipText(p) %>"><%= p.nickname %></b>
+                </div>
+                <div class="cellSub muted">
+                  <% if (p.notes && String(p.notes).trim().length > 0) { %>
+                    📝 note
+                  <% } else { %>
+                    &nbsp;
+                  <% } %>
+                </div>
+              </div>
+            </td>
 
-            <td><%= fmt2(p.powerT1) %></td>
-            <td><%= p.typeT1 || "-" %></td>
+            <td class="colRole">
+              <div class="cellSingle"><%= p.role || "-" %></div>
+            </td>
 
-            <td><%= fmt2(p.powerT2) %></td>
-            <td><%= p.typeT2 || "-" %></td>
+            <td class="colTier">
+              <div class="cell2">
+                <div class="cellTop"><%= fmt2(p.powerT1) %></div>
+                <div class="cellSub muted"><%= p.typeT1 || "-" %></div>
+              </div>
+            </td>
 
-            <td><%= fmt2(p.powerT3) %></td>
-            <td><%= p.typeT3 || "-" %></td>
+            <td class="colTier">
+              <div class="cell2">
+                <div class="cellTop"><%= fmt2(p.powerT2) %></div>
+                <div class="cellSub muted"><%= p.typeT2 || "-" %></div>
+              </div>
+            </td>
 
-            <td><%= fmt2(p.powerT4) %></td>
-            <td><%= p.typeT4 || "-" %></td>
+            <td class="colTier">
+              <div class="cell2">
+                <div class="cellTop"><%= fmt2(p.powerT3) %></div>
+                <div class="cellSub muted"><%= p.typeT3 || "-" %></div>
+              </div>
+            </td>
 
-            <td><b><%= fmt2(p.total) %></b></td>
+            <td class="colTier">
+              <div class="cell2">
+                <div class="cellTop"><%= fmt2(p.powerT4) %></div>
+                <div class="cellSub muted"><%= p.typeT4 || "-" %></div>
+              </div>
+            </td>
 
-            <td><%= p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-" %></td>
+            <td class="colTotal">
+              <div class="cellSingle"><b><%= fmt2(p.total) %></b></div>
+            </td>
 
-            <td class="noteCell">
-              <% if (p.notes && String(p.notes).trim().length > 0) { %>
-                <span title="<%= p.notes %>"><%= p.notes.length > 80 ? (p.notes.slice(0, 80) + "…") : p.notes %></span>
-              <% } else { %>
-                -
-              <% } %>
+            <td class="colDate">
+              <div class="cell2">
+                <div class="cellTop"><%= dt.dateStr %></div>
+                <div class="cellSub muted"><%= dt.timeStr %></div>
+              </div>
             </td>
 
             <% if (isAdmin) { %>
-              <td class="actionsCell">
-                <a class="linkBtn" href="/potenze/<%= p._id %>/edit">Modifica</a>
-                <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
-                  <button class="linkBtn danger" type="submit">Elimina</button>
-                </form>
+              <td class="colActions">
+                <div class="actionIcons">
+                  <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+                  <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
+                    <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+                  </form>
+                </div>
               </td>
             <% } %>
           </tr>
