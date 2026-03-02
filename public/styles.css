@@ -60,17 +60,12 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
 }
 
-.cardWide {
-  max-width: 1100px;
-}
+.cardWide { max-width: 1100px; }
 
 h1 { margin: 0 0 14px 0; font-size: 22px; }
 h2.sectionTitle { margin: 12px 0 10px 0; font-size: 16px; color: var(--text); }
 
-.form {
-  display: grid;
-  gap: 10px;
-}
+.form { display: grid; gap: 10px; }
 
 label { font-size: 14px; color: var(--muted); }
 
@@ -160,9 +155,7 @@ button:hover, .button:hover { filter: brightness(1.07); }
   color: var(--text);
   text-decoration: none;
 }
-.menuCard:hover {
-  border-color: rgba(58, 103, 255, 0.5);
-}
+.menuCard:hover { border-color: rgba(58, 103, 255, 0.5); }
 .menuIcon {
   width: 44px;
   height: 44px;
@@ -181,7 +174,7 @@ button:hover, .button:hover { filter: brightness(1.07); }
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 1100px;
   background: rgba(9, 12, 20, 0.35);
 }
 .table th, .table td {
@@ -198,6 +191,15 @@ button:hover, .button:hover { filter: brightness(1.07); }
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.thLink {
+  color: var(--muted);
+  text-decoration: none;
+}
+.thLink:hover {
+  color: var(--text);
+  text-decoration: underline;
 }
 
 .noteCell { max-width: 260px; }

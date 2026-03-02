@@ -1,5 +1,32 @@
 <%- include("../partials/header") %>
 
+<%
+  function fmt2(v) {
+    if (v === null || v === undefined || v === "") return "-";
+    const n = Number(v);
+    if (Number.isNaN(n)) return "-";
+    return n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function sortLink(field) {
+    const currentSort = sort || "updatedAt";
+    const currentDir = dir || "desc";
+
+    let nextDir = "asc";
+    if (currentSort === field && currentDir === "asc") nextDir = "desc";
+    if (currentSort === field && currentDir === "desc") nextDir = "asc";
+
+    return `/potenze?sort=${encodeURIComponent(field)}&dir=${encodeURIComponent(nextDir)}`;
+  }
+
+  function sortArrow(field) {
+    const currentSort = sort || "updatedAt";
+    const currentDir = dir || "desc";
+    if (currentSort !== field) return "";
+    return currentDir === "asc" ? " ▲" : " ▼";
+  }
+%>
+
 <section class="card cardWide">
   <div class="pageHeader">
     <div>
@@ -28,17 +55,24 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Nickname</th>
-          <th>Ruolo</th>
-          <th>T1</th>
-          <th>Tipo T1</th>
-          <th>T2</th>
-          <th>Tipo T2</th>
-          <th>T3</th>
-          <th>Tipo T3</th>
-          <th>T4</th>
-          <th>Tipo T4</th>
-          <th>Aggiornato</th>
+          <th><a class="thLink" href="<%= sortLink('nickname') %>">Nickname<%= sortArrow('nickname') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('role') %>">Ruolo<%= sortArrow('role') %></a></th>
+
+          <th><a class="thLink" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('typeT1') %>">Tipo T1<%= sortArrow('typeT1') %></a></th>
+
+          <th><a class="thLink" href="<%= sortLink('powerT2') %>">T2<%= sortArrow('powerT2') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('typeT2') %>">Tipo T2<%= sortArrow('typeT2') %></a></th>
+
+          <th><a class="thLink" href="<%= sortLink('powerT3') %>">T3<%= sortArrow('powerT3') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('typeT3') %>">Tipo T3<%= sortArrow('typeT3') %></a></th>
+
+          <th><a class="thLink" href="<%= sortLink('powerT4') %>">T4<%= sortArrow('powerT4') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('typeT4') %>">Tipo T4<%= sortArrow('typeT4') %></a></th>
+
+          <th><a class="thLink" href="<%= sortLink('total') %>">Totale<%= sortArrow('total') %></a></th>
+          <th><a class="thLink" href="<%= sortLink('updatedAt') %>">Aggiornato<%= sortArrow('updatedAt') %></a></th>
+
           <th>Note</th>
           <% if (isAdmin) { %>
             <th>Azioni</th>
@@ -48,7 +82,7 @@
       <tbody>
         <% if (!players || players.length === 0) { %>
           <tr>
-            <td colspan="<%= isAdmin ? 13 : 12 %>" class="muted">Nessun giocatore inserito.</td>
+            <td colspan="<%= isAdmin ? 14 : 13 %>" class="muted">Nessun giocatore inserito.</td>
           </tr>
         <% } %>
 
@@ -57,24 +91,24 @@
             <td><b><%= p.nickname %></b></td>
             <td><%= p.role || "-" %></td>
 
-            <td><%= (p.powerT1 === null || p.powerT1 === undefined) ? "-" : p.powerT1 %></td>
+            <td><%= fmt2(p.powerT1) %></td>
             <td><%= p.typeT1 || "-" %></td>
 
-            <td><%= (p.powerT2 === null || p.powerT2 === undefined) ? "-" : p.powerT2 %></td>
+            <td><%= fmt2(p.powerT2) %></td>
             <td><%= p.typeT2 || "-" %></td>
 
-            <td><%= (p.powerT3 === null || p.powerT3 === undefined) ? "-" : p.powerT3 %></td>
+            <td><%= fmt2(p.powerT3) %></td>
             <td><%= p.typeT3 || "-" %></td>
 
-            <td><%= (p.powerT4 === null || p.powerT4 === undefined) ? "-" : p.powerT4 %></td>
+            <td><%= fmt2(p.powerT4) %></td>
             <td><%= p.typeT4 || "-" %></td>
 
-            <td>
-              <%= p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-" %>
-            </td>
+            <td><b><%= fmt2(p.total) %></b></td>
+
+            <td><%= p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-" %></td>
 
             <td class="noteCell">
-              <% if (p.notes && p.notes.trim().length > 0) { %>
+              <% if (p.notes && String(p.notes).trim().length > 0) { %>
                 <span title="<%= p.notes %>"><%= p.notes.length > 80 ? (p.notes.slice(0, 80) + "…") : p.notes %></span>
               <% } else { %>
                 -

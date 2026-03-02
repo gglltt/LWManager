@@ -21,14 +21,7 @@
 
   <form method="POST" action="/potenze/<%= player._id %>/edit" class="form">
     <label>Nickname (obbligatorio)</label>
-    <input
-      type="text"
-      name="nickname"
-      required
-      minlength="2"
-      maxlength="40"
-      value="<%= player.nickname || '' %>"
-    />
+    <input type="text" name="nickname" required minlength="2" maxlength="40" value="<%= player.nickname || '' %>" />
 
     <label>Ruolo (opzionale)</label>
     <select name="role">
@@ -42,8 +35,15 @@
 
     <div class="grid2">
       <div>
-        <label>Power T1</label>
-        <input type="number" name="powerT1" min="0" step="0.10" inputmode="decimal" value="<%= (player.powerT1 ?? '') %>" />
+        <label>Power T1 (2 decimali)</label>
+        <input
+          type="text"
+          name="powerT1"
+          inputmode="decimal"
+          placeholder="0,00"
+          pattern="^\d+([.,]\d{0,2})?$"
+          value="<%= (player.powerT1 ?? '') %>"
+        />
       </div>
       <div>
         <label>Type T1</label>
@@ -56,8 +56,15 @@
       </div>
 
       <div>
-        <label>Power T2</label>
-        <input type="number" name="powerT2" min="0" step="0.10" inputmode="decimal" value="<%= (player.powerT2 ?? '') %>" />
+        <label>Power T2 (2 decimali)</label>
+        <input
+          type="text"
+          name="powerT2"
+          inputmode="decimal"
+          placeholder="0,00"
+          pattern="^\d+([.,]\d{0,2})?$"
+          value="<%= (player.powerT2 ?? '') %>"
+        />
       </div>
       <div>
         <label>Type T2</label>
@@ -70,8 +77,15 @@
       </div>
 
       <div>
-        <label>Power T3</label>
-        <input type="number" name="powerT3" min="0" step="0.10" inputmode="decimal" value="<%= (player.powerT3 ?? '') %>" />
+        <label>Power T3 (2 decimali)</label>
+        <input
+          type="text"
+          name="powerT3"
+          inputmode="decimal"
+          placeholder="0,00"
+          pattern="^\d+([.,]\d{0,2})?$"
+          value="<%= (player.powerT3 ?? '') %>"
+        />
       </div>
       <div>
         <label>Type T3</label>
@@ -84,8 +98,15 @@
       </div>
 
       <div>
-        <label>Power T4</label>
-        <input type="number" name="powerT4" min="0" step="0.10" inputmode="decimal" value="<%= (player.powerT4 ?? '') %>" />
+        <label>Power T4 (2 decimali)</label>
+        <input
+          type="text"
+          name="powerT4"
+          inputmode="decimal"
+          placeholder="0,00"
+          pattern="^\d+([.,]\d{0,2})?$"
+          value="<%= (player.powerT4 ?? '') %>"
+        />
       </div>
       <div>
         <label>Type T4</label>

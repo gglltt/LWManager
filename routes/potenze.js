@@ -7,6 +7,8 @@ const router = express.Router();
 const TYPE_OPTIONS = ["Carri", "Aerei", "Missili", "Misto"];
 const ROLE_OPTIONS = ["R1", "R2", "R3", "R4", "R5"];
 
+const SORT_FIELDS = ["nickname", "role", "powerT1", "typeT1", "powerT2", "typeT2", "powerT3", "typeT3", "powerT4", "typeT4", "total", "updatedAt"];
+
 function parseOptionalNumber(v) {
   if (v === null || v === undefined) return null;
 
@@ -52,10 +54,43 @@ function isAdmin(user) {
   return user && user.authLevel >= 5;
 }
 
-// LIST
+function normalizeSortParams(req) {
+  const sort = SORT_FIELDS.includes(String(req.query.sort || "")) ? String(req.query.sort) : "updatedAt";
+  const dirRaw = String(req.query.dir || "desc").toLowerCase();
+  const dir = dirRaw === "asc" ? "asc" : "desc";
+  return { sort, dir };
+}
+
+function dirToMongo(dir) {
+  return dir === "asc" ? 1 : -1;
+}
+
+// LIST + SORT
 router.get("/", requireAuth, async (req, res) => {
   try {
-    const players = await Player.find({}).sort({ updatedAt: -1, nickname: 1 });
+    const { sort, dir } = normalizeSortParams(req);
+
+    // compute total in DB
+    const totalExpr = {
+      $add: [
+        { $ifNull: ["$powerT1", 0] },
+        { $ifNull: ["$powerT2", 0] },
+        { $ifNull: ["$powerT3", 0] },
+        { $ifNull: ["$powerT4", 0] }
+      ]
+    };
+
+    const sortStage = {};
+    sortStage[sort] = dirToMongo(dir);
+
+    // stable secondary sorts
+    // if sorting by nickname already, secondary sort by updatedAt desc; otherwise nickname asc
+    const secondary = sort === "nickname" ? { updatedAt: -1 } : { nickname: 1 };
+
+    const players = await Player.aggregate([
+      { $addFields: { total: totalExpr } },
+      { $sort: { ...sortStage, ...secondary } }
+    ]);
 
     return res.render("potenze/index", {
       user: req.user,
@@ -64,7 +99,9 @@ router.get("/", requireAuth, async (req, res) => {
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: null,
-      message: null
+      message: null,
+      sort,
+      dir
     });
   } catch (err) {
     console.error(err);
@@ -75,12 +112,14 @@ router.get("/", requireAuth, async (req, res) => {
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: "Errore interno nel caricamento della lista.",
-      message: null
+      message: null,
+      sort: "updatedAt",
+      dir: "desc"
     });
   }
 });
 
-// NEW (FORM)  ✅ questa era la rotta mancante
+// NEW (FORM)
 router.get("/new", requireAuth, requireLevel(5), async (req, res) => {
   return res.render("potenze/new", {
     user: req.user,
@@ -152,7 +191,7 @@ router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
   }
 });
 
-// EDIT (FORM) ✅ questa era la seconda rotta mancante
+// EDIT (FORM)
 router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
@@ -208,7 +247,7 @@ router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
 
     player.notes = sanitizeText(req.body.notes, 2000);
 
-    await player.save(); // updatedAt gestito automaticamente
+    await player.save();
 
     return res.redirect("/potenze");
   } catch (err) {
