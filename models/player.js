@@ -3,6 +3,18 @@ const mongoose = require("mongoose");
 const TYPE_ENUM = ["Carri", "Aerei", "Missili", "Misto"];
 const ROLE_ENUM = ["R1", "R2", "R3", "R4", "R5"];
 
+const decimalField = {
+  type: Number,
+  default: null,
+  min: 0,
+  set: (v) => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    if (Number.isNaN(n)) return null;
+    return Math.round(n * 100) / 100; // 2 decimali
+  }
+};
+
 const PlayerSchema = new mongoose.Schema(
   {
     nickname: {
@@ -18,16 +30,16 @@ const PlayerSchema = new mongoose.Schema(
       default: null
     },
 
-    powerT1: { type: Number, default: null, min: 0 },
+    powerT1: decimalField,
     typeT1: { type: String, enum: TYPE_ENUM, default: null },
 
-    powerT2: { type: Number, default: null, min: 0 },
+    powerT2: decimalField,
     typeT2: { type: String, enum: TYPE_ENUM, default: null },
 
-    powerT3: { type: Number, default: null, min: 0 },
+    powerT3: decimalField,
     typeT3: { type: String, enum: TYPE_ENUM, default: null },
 
-    powerT4: { type: Number, default: null, min: 0 },
+    powerT4: decimalField,
     typeT4: { type: String, enum: TYPE_ENUM, default: null },
 
     notes: {
