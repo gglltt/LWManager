@@ -25,7 +25,11 @@ body {
 .topbar {
   border-bottom: 1px solid var(--border);
   background: rgba(11, 15, 25, 0.7);
+
+  /* Supporto Safari / iOS */
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  
   position: sticky;
   top: 0;
   z-index: 10;
