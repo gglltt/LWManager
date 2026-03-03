@@ -1,0 +1,77 @@
+<%- include("../partials/header") %>
+
+<%
+  function fmtDate(d) {
+    if (!d) return "-";
+    const dt = new Date(d);
+    if (Number.isNaN(dt.getTime())) return "-";
+    return dt.toLocaleString("it-IT");
+  }
+%>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Gestione Utenti</h1>
+      <p class="muted">Solo admin (livello 5). Email non modificabile. Non puoi cancellare te stesso.</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/dashboard">← Dashboard</a>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <div class="tableWrap">
+    <table class="table tableCompact">
+      <thead>
+        <tr>
+          <th class="colUEmail">Email</th>
+          <th class="colUNick">Nickname</th>
+          <th class="colULevel">Liv</th>
+          <th class="colUVer">Ver</th>
+          <th class="colUDate">Agg.</th>
+          <th class="colActions">Az</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!users || users.length === 0) { %>
+          <tr><td colspan="6" class="muted">Nessun utente.</td></tr>
+        <% } %>
+
+        <% users.forEach(u => { %>
+          <tr>
+            <td class="colUEmail" title="<%= u.email %>"><%= u.email %></td>
+            <td class="colUNick" title="<%= u.nickname %>"><%= u.nickname %></td>
+            <td class="colULevel"><b><%= u.authLevel %></b></td>
+            <td class="colUVer"><%= u.verified ? "✅" : "❌" %></td>
+            <td class="colUDate" title="<%= fmtDate(u.updatedAt) %>"><%= fmtDate(u.updatedAt) %></td>
+            <td class="colActions">
+              <div class="actionIcons">
+                <a class="iconBtn" href="/utenti/<%= u._id %>/edit" title="Modifica">✏️</a>
+
+                <% const selfId = String(user?._id || user?.id || ""); %>
+                <% if (String(u._id) !== selfId) { %>
+                  <form method="POST" action="/utenti/<%= u._id %>/delete" class="inlineForm"
+                        onsubmit="return confirm('Confermi la cancellazione di <%= u.email %>?');">
+                    <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+                  </form>
+                <% } else { %>
+                  <span class="muted" title="Non puoi cancellare te stesso">—</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

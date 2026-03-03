@@ -8,6 +8,7 @@ const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const potenzeRoutes = require("./routes/potenze");
+const utentiRoutes = require("./routes/utenti");
 const { requireAuth } = require("./middleware/auth");
 
 const app = express();
@@ -48,6 +49,7 @@ app.get("/dashboard", requireAuth, (req, res) => {
 });
 
 app.use("/potenze", potenzeRoutes);
+app.use("/utenti", utentiRoutes);
 
 app.get("/logout", (req, res) => {
   res.clearCookie("lw_token");
