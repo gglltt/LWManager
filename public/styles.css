@@ -74,6 +74,7 @@ body {
 
 h1 { margin: 0 0 10px 0; font-size: 22px; }
 h2 { margin: 14px 0 8px 0; font-size: 16px; }
+
 .muted { color: var(--muted); font-size: 13px; }
 
 .alert {
@@ -196,17 +197,8 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
 }
 
 .menuText { min-width: 0; }
-.menuTitle {
-  font-weight: 900;
-  line-height: 1.1;
-  font-size: 15px;
-}
-.menuDesc {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.2;
-}
+.menuTitle { font-weight: 900; line-height: 1.1; font-size: 15px; }
+.menuDesc { margin-top: 4px; color: var(--muted); font-size: 12.5px; line-height: 1.2; }
 
 /* ========================= */
 /* SORT BAR (mobile/cards)   */
@@ -293,12 +285,7 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
   text-align: center;
 }
 
-.actionIcons {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-}
+.actionIcons { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
 
 .iconBtn {
   background: transparent;
@@ -318,10 +305,7 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
 /* MOBILE CARDS (Potenze)    */
 /* ========================= */
 
-.playerCards {
-  display: none;
-  gap: 12px;
-}
+.playerCards { display: none; gap: 12px; }
 
 .playerCard {
   border: 1px solid rgba(34, 48, 77, 0.8);
@@ -361,6 +345,7 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
 .playerMeta {
   display: flex;
   gap: 8px;
@@ -381,23 +366,43 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
 
 .playerCardMid { padding: 10px 6px 6px; }
 
+/* 4 columns ALWAYS (requested) */
 .powerGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
+
+/* optional hook class if you want to target only this grid */
+.powerGrid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 .powerCell {
   border: 1px solid rgba(34, 48, 77, 0.7);
   background: rgba(18, 26, 42, 0.65);
   border-radius: 12px;
-  padding: 8px 8px 7px;
+  padding: 7px 7px 7px;
   min-width: 0;
 }
 
-.powerLabel { font-size: 11px; font-weight: 900; letter-spacing: 0.2px; }
-.powerVal { margin-top: 4px; font-size: 13px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.powerType { margin-top: 3px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* first row: T1:Carri */
+.powerHead {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* second row: number */
+.powerVal {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .playerCardBottom {
   display: flex;
@@ -428,11 +433,14 @@ h2 { margin: 14px 0 8px 0; font-size: 16px; }
   .sortBar { display: flex; }
   .playerCards { display: grid; }
   .desktopOnly { display: none; }
-
-  .powerGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* small screens: tighten a bit so 4 cols stay comfortable */
 @media (max-width: 420px) {
   .playerNick { font-size: 15px; }
-  .powerVal { font-size: 12.5px; }
+
+  .powerGrid { gap: 5px; }
+  .powerCell { padding: 6px; border-radius: 11px; }
+  .powerHead { font-size: 10.5px; }
+  .powerVal { font-size: 12.5px; margin-top: 5px; }
 }

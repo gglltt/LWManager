@@ -41,6 +41,11 @@
     parts.push(`Aggiornato: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-"}`);
     return parts.join(" | ");
   }
+
+  function labelType(tLabel, tType) {
+    const type = tType && String(tType).trim().length > 0 ? String(tType).trim() : "-";
+    return `${tLabel}:${type}`;
+  }
 %>
 
 <section class="card cardWide">
@@ -66,7 +71,7 @@
     <div class="alert error"><%= error %></div>
   <% } %>
 
-  <!-- MOBILE: quick sort bar (cards) -->
+  <!-- MOBILE: quick sort bar -->
   <div class="sortBar">
     <span class="muted">Ordina:</span>
     <a class="sortPill" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a>
@@ -80,8 +85,8 @@
       <div class="muted">Nessun giocatore inserito.</div>
     <% } %>
 
-    <% (players || []).forEach(p => {
-         const dt = fmtDate(p.updatedAt);
+    <% (players || []).forEach(p => { 
+      const dt = fmtDate(p.updatedAt);
     %>
       <div class="playerCard" title="<%= tooltipText(p) %>">
         <div class="playerCardTop">
@@ -105,26 +110,25 @@
         </div>
 
         <div class="playerCardMid">
-          <div class="powerGrid">
+          <div class="powerGrid powerGrid4">
             <div class="powerCell">
-              <div class="powerLabel muted">T1</div>
+              <div class="powerHead muted"><%= labelType("T1", p.typeT1) %></div>
               <div class="powerVal"><%= fmt2(p.powerT1) %></div>
-              <div class="powerType muted"><%= p.typeT1 || "-" %></div>
             </div>
+
             <div class="powerCell">
-              <div class="powerLabel muted">T2</div>
+              <div class="powerHead muted"><%= labelType("T2", p.typeT2) %></div>
               <div class="powerVal"><%= fmt2(p.powerT2) %></div>
-              <div class="powerType muted"><%= p.typeT2 || "-" %></div>
             </div>
+
             <div class="powerCell">
-              <div class="powerLabel muted">T3</div>
+              <div class="powerHead muted"><%= labelType("T3", p.typeT3) %></div>
               <div class="powerVal"><%= fmt2(p.powerT3) %></div>
-              <div class="powerType muted"><%= p.typeT3 || "-" %></div>
             </div>
+
             <div class="powerCell">
-              <div class="powerLabel muted">T4</div>
+              <div class="powerHead muted"><%= labelType("T4", p.typeT4) %></div>
               <div class="powerVal"><%= fmt2(p.powerT4) %></div>
-              <div class="powerType muted"><%= p.typeT4 || "-" %></div>
             </div>
           </div>
         </div>
@@ -177,7 +181,7 @@
         <% } %>
 
         <% (players || []).forEach(p => {
-             const dt = fmtDate(p.updatedAt);
+          const dt = fmtDate(p.updatedAt);
         %>
           <tr title="<%= tooltipText(p) %>">
             <td class="colNick">
@@ -193,9 +197,7 @@
               </div>
             </td>
 
-            <td class="colRole">
-              <div class="cellSingle"><%= p.role || "-" %></div>
-            </td>
+            <td class="colRole"><div class="cellSingle"><%= p.role || "-" %></div></td>
 
             <td class="colTier">
               <div class="cell2">
@@ -225,9 +227,7 @@
               </div>
             </td>
 
-            <td class="colTotal">
-              <div class="cellSingle"><b><%= fmt2(p.total) %></b></div>
-            </td>
+            <td class="colTotal"><div class="cellSingle"><b><%= fmt2(p.total) %></b></div></td>
 
             <td class="colDate">
               <div class="cell2">
