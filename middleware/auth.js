@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+
+const ROLE_LEVEL = {
+  standard: 1,
+  admin: 5
+};
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
@@ -10,16 +14,19 @@ function getJwtSecret() {
   return secret;
 }
 
-async function requireAuth(req, res, next) {
+function requireAuth(req, res, next) {
   try {
     const token = req.cookies?.lw_token;
     if (!token) return res.redirect("/auth/login");
 
     const decoded = jwt.verify(token, getJwtSecret());
-    const user = await User.findById(decoded.sub).select("-passwordHash");
-    if (!user) return res.redirect("/auth/login");
+    const role = decoded?.role === "admin" ? "admin" : "standard";
 
-    req.user = user;
+    req.user = {
+      role,
+      authLevel: ROLE_LEVEL[role]
+    };
+
     return next();
   } catch (err) {
     res.clearCookie("lw_token");
