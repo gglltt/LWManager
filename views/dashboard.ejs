@@ -21,6 +21,16 @@
         <div class="menuDesc">Lista giocatori, potenze e tipi (T1–T4)</div>
       </div>
     </a>
+
+    <% if (user && user.authLevel >= 5) { %>
+      <a class="menuCard" href="/utenti" title="Gestione Utenti (admin)">
+        <div class="menuIcon">👤</div>
+        <div class="menuText">
+          <div class="menuTitle">Gestione Utenti</div>
+          <div class="menuDesc">Modifica livello (1–5) e nickname, elimina utenti</div>
+        </div>
+      </a>
+    <% } %>
   </div>
 
   <div style="margin-top: 16px;">

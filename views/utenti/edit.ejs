@@ -1,0 +1,40 @@
+<%- include("../partials/header") %>
+
+<section class="card">
+  <div class="pageHeader">
+    <div>
+      <h1>Modifica Utente</h1>
+      <p class="muted">Email non modificabile.</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/utenti">← Utenti</a>
+    </div>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="POST" action="/utenti/<%= target._id %>/edit" class="form">
+    <label>Email (non modificabile)</label>
+    <input type="text" value="<%= target.email %>" disabled />
+
+    <label>Nickname</label>
+    <input type="text" name="nickname" required minlength="2" maxlength="40" value="<%= target.nickname || '' %>" />
+
+    <label>Livello (1–5)</label>
+    <select name="authLevel" required>
+      <% for (let i = 1; i <= 5; i++) { %>
+        <option value="<%= i %>" <%= (Number(target.authLevel) === i ? 'selected' : '') %>><%= i %></option>
+      <% } %>
+    </select>
+
+    <button type="submit">Salva</button>
+  </form>
+</section>
+
+<%- include("../partials/footer") %>
