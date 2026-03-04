@@ -1,11 +1,12 @@
 <%- include("../partials/header") %>
 
-<section class="card">
+<section class="card cardWide">
   <div class="pageHeader">
     <div>
       <h1>Modifica giocatore</h1>
       <p class="muted">Ultimo aggiornamento: <%= player.updatedAt ? new Date(player.updatedAt).toLocaleString("it-IT") : "-" %></p>
     </div>
+
     <div class="pageHeaderActions">
       <a class="button secondary" href="/potenze">← Potenze</a>
     </div>
@@ -19,114 +20,106 @@
     <div class="alert error"><%= error %></div>
   <% } %>
 
-  <form method="POST" action="/potenze/<%= player._id %>/edit" class="form">
-    <label>Nickname (obbligatorio)</label>
-    <input type="text" name="nickname" required minlength="2" maxlength="40" value="<%= player.nickname || '' %>" />
-
-    <label>Ruolo (opzionale)</label>
-    <select name="role">
-      <option value="">—</option>
-      <% roles.forEach(r => { %>
-        <option value="<%= r %>" <%= (player.role === r ? 'selected' : '') %>><%= r %></option>
-      <% }) %>
-    </select>
-
-    <hr class="divider" />
-
-    <div class="grid2">
-      <div>
-        <label>Power T1 (2 decimali)</label>
-        <input
-          type="text"
-          name="powerT1"
-          inputmode="decimal"
-          placeholder="0,00"
-          pattern="^\d+([.,]\d{0,2})?$"
-          value="<%= (player.powerT1 ?? '') %>"
-        />
-      </div>
-      <div>
-        <label>Type T1</label>
-        <select name="typeT1">
-          <option value="">—</option>
-          <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= (player.typeT1 === t ? 'selected' : '') %>><%= t %></option>
-          <% }) %>
-        </select>
+  <form class="form" method="POST" action="/potenze/<%= player._id %>">
+    <div class="formGrid2">
+      <div class="field">
+        <label for="nickname">Nickname (obbligatorio)</label>
+        <input id="nickname" name="nickname" type="text" required value="<%= player.nickname || '' %>" />
       </div>
 
-      <div>
-        <label>Power T2 (2 decimali)</label>
-        <input
-          type="text"
-          name="powerT2"
-          inputmode="decimal"
-          placeholder="0,00"
-          pattern="^\d+([.,]\d{0,2})?$"
-          value="<%= (player.powerT2 ?? '') %>"
-        />
-      </div>
-      <div>
-        <label>Type T2</label>
-        <select name="typeT2">
-          <option value="">—</option>
-          <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= (player.typeT2 === t ? 'selected' : '') %>><%= t %></option>
-          <% }) %>
-        </select>
-      </div>
-
-      <div>
-        <label>Power T3 (2 decimali)</label>
-        <input
-          type="text"
-          name="powerT3"
-          inputmode="decimal"
-          placeholder="0,00"
-          pattern="^\d+([.,]\d{0,2})?$"
-          value="<%= (player.powerT3 ?? '') %>"
-        />
-      </div>
-      <div>
-        <label>Type T3</label>
-        <select name="typeT3">
-          <option value="">—</option>
-          <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= (player.typeT3 === t ? 'selected' : '') %>><%= t %></option>
-          <% }) %>
-        </select>
-      </div>
-
-      <div>
-        <label>Power T4 (2 decimali)</label>
-        <input
-          type="text"
-          name="powerT4"
-          inputmode="decimal"
-          placeholder="0,00"
-          pattern="^\d+([.,]\d{0,2})?$"
-          value="<%= (player.powerT4 ?? '') %>"
-        />
-      </div>
-      <div>
-        <label>Type T4</label>
-        <select name="typeT4">
-          <option value="">—</option>
-          <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= (player.typeT4 === t ? 'selected' : '') %>><%= t %></option>
+      <div class="field">
+        <label for="role">Ruolo (opzionale)</label>
+        <select id="role" name="role">
+          <option value="" <%= !player.role ? 'selected' : '' %>>—</option>
+          <% roles.forEach(r => { %>
+            <option value="<%= r %>" <%= player.role === r ? 'selected' : '' %>><%= r %></option>
           <% }) %>
         </select>
       </div>
     </div>
 
-    <label>Note (opzionale)</label>
-    <textarea name="notes" rows="5" placeholder="Testo libero..."><%= player.notes || '' %></textarea>
+    <hr class="divider" />
 
-    <button type="submit">Salva modifiche</button>
-  </form>
+    <div class="formGrid2">
+      <div class="field">
+        <label for="powerT1">Power T1 (2 decimali)</label>
+        <input id="powerT1" name="powerT1" type="text" inputmode="decimal" value="<%= (player.powerT1 ?? '') %>" placeholder="0,00" />
+        <div class="help">Accetta “,” o “.”</div>
+      </div>
 
-  <form method="POST" action="/potenze/<%= player._id %>/delete" style="margin-top: 12px;" onsubmit="return confirm('Confermi la cancellazione di <%= player.nickname %>?');">
-    <button class="button danger" type="submit">Elimina giocatore</button>
+      <div class="field">
+        <label for="typeT1">Type T1</label>
+        <select id="typeT1" name="typeT1">
+          <option value="" <%= !player.typeT1 ? 'selected' : '' %>>—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= player.typeT1 === t ? 'selected' : '' %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="powerT2">Power T2 (2 decimali)</label>
+        <input id="powerT2" name="powerT2" type="text" inputmode="decimal" value="<%= (player.powerT2 ?? '') %>" placeholder="0,00" />
+        <div class="help">Accetta “,” o “.”</div>
+      </div>
+
+      <div class="field">
+        <label for="typeT2">Type T2</label>
+        <select id="typeT2" name="typeT2">
+          <option value="" <%= !player.typeT2 ? 'selected' : '' %>>—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= player.typeT2 === t ? 'selected' : '' %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="powerT3">Power T3 (2 decimali)</label>
+        <input id="powerT3" name="powerT3" type="text" inputmode="decimal" value="<%= (player.powerT3 ?? '') %>" placeholder="0,00" />
+        <div class="help">Accetta “,” o “.”</div>
+      </div>
+
+      <div class="field">
+        <label for="typeT3">Type T3</label>
+        <select id="typeT3" name="typeT3">
+          <option value="" <%= !player.typeT3 ? 'selected' : '' %>>—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= player.typeT3 === t ? 'selected' : '' %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="powerT4">Power T4 (2 decimali)</label>
+        <input id="powerT4" name="powerT4" type="text" inputmode="decimal" value="<%= (player.powerT4 ?? '') %>" placeholder="0,00" />
+        <div class="help">Accetta “,” o “.”</div>
+      </div>
+
+      <div class="field">
+        <label for="typeT4">Type T4</label>
+        <select id="typeT4" name="typeT4">
+          <option value="" <%= !player.typeT4 ? 'selected' : '' %>>—</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t %>" <%= player.typeT4 === t ? 'selected' : '' %>><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="notes">Note (opzionale)</label>
+      <textarea id="notes" name="notes" placeholder="Testo libero..."><%= player.notes || '' %></textarea>
+    </div>
+
+    <div class="formActions">
+      <button type="submit">Salva modifiche</button>
+
+      <form class="inlineForm" method="POST" action="/potenze/<%= player._id %>/delete" onsubmit="return confirm('Confermi la cancellazione di <%= player.nickname %>?');">
+        <button class="button danger" type="submit">Elimina giocatore</button>
+      </form>
+
+      <a class="button secondary" href="/potenze">Annulla</a>
+    </div>
   </form>
 </section>
 
