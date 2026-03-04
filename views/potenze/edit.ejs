@@ -20,7 +20,7 @@
     <div class="alert error"><%= error %></div>
   <% } %>
 
-  <form class="form" method="POST" action="/potenze/<%= player._id %>">
+  <form class="form" method="POST" action="/potenze/<%= player._id %>/edit">
     <div class="formGrid2">
       <div class="field">
         <label for="nickname">Nickname (obbligatorio)</label>
@@ -114,9 +114,11 @@
     <div class="formActions">
       <button type="submit">Salva modifiche</button>
 
-      <form class="inlineForm" method="POST" action="/potenze/<%= player._id %>/delete" onsubmit="return confirm('Confermi la cancellazione di <%= player.nickname %>?');">
-        <button class="button danger" type="submit">Elimina giocatore</button>
-      </form>
+      <% if (isAdmin) { %>
+        <form class="inlineForm" method="POST" action="/potenze/<%= player._id %>/delete" onsubmit="return confirm('Confermi la cancellazione di <%= player.nickname %>?');">
+          <button class="button danger" type="submit">Elimina giocatore</button>
+        </form>
+      <% } %>
 
       <a class="button secondary" href="/potenze">Annulla</a>
     </div>

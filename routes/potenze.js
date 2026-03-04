@@ -55,7 +55,7 @@ function isAdmin(user) {
 }
 
 function normalizeSortParams(req) {
-  const sort = SORT_FIELDS.includes(String(req.query.sort || "")) ? String(req.query.sort) : "updatedAt";
+  const sort = SORT_FIELDS.includes(String(req.query.sort || "")) ? String(req.query.sort) : "powerT1";
   const dirRaw = String(req.query.dir || "desc").toLowerCase();
   const dir = dirRaw === "asc" ? "asc" : "desc";
   return { sort, dir };
@@ -63,6 +63,10 @@ function normalizeSortParams(req) {
 
 function dirToMongo(dir) {
   return dir === "asc" ? 1 : -1;
+}
+
+function escapeRegex(v) {
+  return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 // LIST + SORT
@@ -87,7 +91,11 @@ router.get("/", requireAuth, async (req, res) => {
     // if sorting by nickname already, secondary sort by updatedAt desc; otherwise nickname asc
     const secondary = sort === "nickname" ? { updatedAt: -1 } : { nickname: 1 };
 
+    const q = String(req.query.q || "").trim();
+    const search = q ? { nickname: { $regex: escapeRegex(q), $options: "i" } } : {};
+
     const players = await Player.aggregate([
+      { $match: search },
       { $addFields: { total: totalExpr } },
       { $sort: { ...sortStage, ...secondary } }
     ]);
@@ -101,7 +109,8 @@ router.get("/", requireAuth, async (req, res) => {
       error: null,
       message: null,
       sort,
-      dir
+      dir,
+      q
     });
   } catch (err) {
     console.error(err);
@@ -113,16 +122,18 @@ router.get("/", requireAuth, async (req, res) => {
       roles: ROLE_OPTIONS,
       error: "Errore interno nel caricamento della lista.",
       message: null,
-      sort: "updatedAt",
-      dir: "desc"
+      sort: "powerT1",
+      dir: "desc",
+      q: ""
     });
   }
 });
 
 // NEW (FORM)
-router.get("/new", requireAuth, requireLevel(5), async (req, res) => {
+router.get("/new", requireAuth, async (req, res) => {
   return res.render("potenze/new", {
     user: req.user,
+    isAdmin: isAdmin(req.user),
     types: TYPE_OPTIONS,
     roles: ROLE_OPTIONS,
     error: null,
@@ -144,12 +155,13 @@ router.get("/new", requireAuth, requireLevel(5), async (req, res) => {
 });
 
 // NEW (CREATE)
-router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
+router.post("/new", requireAuth, async (req, res) => {
   try {
     const nickCheck = validateNickname(req.body.nickname);
     if (!nickCheck.ok) {
       return res.render("potenze/new", {
         user: req.user,
+        isAdmin: isAdmin(req.user),
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: nickCheck.msg,
@@ -182,6 +194,7 @@ router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
     console.error(err);
     return res.render("potenze/new", {
       user: req.user,
+      isAdmin: isAdmin(req.user),
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: "Errore interno durante la creazione del giocatore.",
@@ -192,13 +205,14 @@ router.post("/new", requireAuth, requireLevel(5), async (req, res) => {
 });
 
 // EDIT (FORM)
-router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
+router.get("/:id/edit", requireAuth, async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
     if (!player) return res.status(404).send("404 - Giocatore non trovato");
 
     return res.render("potenze/edit", {
       user: req.user,
+      isAdmin: isAdmin(req.user),
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: null,
@@ -212,7 +226,7 @@ router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
 });
 
 // EDIT (UPDATE)
-router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
+router.post("/:id/edit", requireAuth, async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
     if (!player) return res.status(404).send("404 - Giocatore non trovato");
@@ -222,6 +236,7 @@ router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
       const fake = { ...player.toObject(), ...req.body };
       return res.render("potenze/edit", {
         user: req.user,
+        isAdmin: isAdmin(req.user),
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: nickCheck.msg,

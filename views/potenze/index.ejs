@@ -25,7 +25,9 @@
     if (currentSort === field && currentDir === "asc") nextDir = "desc";
     if (currentSort === field && currentDir === "desc") nextDir = "asc";
 
-    return `/potenze?sort=${encodeURIComponent(field)}&dir=${encodeURIComponent(nextDir)}`;
+    const params = new URLSearchParams({ sort: field, dir: nextDir });
+    if (q && String(q).trim().length > 0) params.set("q", String(q).trim());
+    return `/potenze?${params.toString()}`;
   }
 
   function sortArrow(field) {
@@ -57,9 +59,7 @@
 
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← Dashboard</a>
-      <% if (isAdmin) { %>
-        <a class="button" href="/potenze/new">+ Nuovo</a>
-      <% } %>
+      <a class="button" href="/potenze/new">+ Nuovo</a>
     </div>
   </div>
 
@@ -70,6 +70,22 @@
   <% if (error) { %>
     <div class="alert error"><%= error %></div>
   <% } %>
+
+  <form method="GET" action="/potenze" class="filterBar">
+    <input type="hidden" name="sort" value="<%= sort %>" />
+    <input type="hidden" name="dir" value="<%= dir %>" />
+    <input
+      type="text"
+      name="q"
+      value="<%= q || "" %>"
+      placeholder="Filtro nickname (es. GGL)"
+      class="filterInput"
+    />
+    <button type="submit" class="button">Ricerca</button>
+    <% if (q && String(q).trim().length > 0) { %>
+      <a class="button secondary" href="/potenze?sort=<%= encodeURIComponent(sort) %>&dir=<%= encodeURIComponent(dir) %>" title="Rimuovi filtro">✕</a>
+    <% } %>
+  </form>
 
   <!-- MOBILE: quick sort bar -->
   <div class="sortBar">
@@ -101,14 +117,14 @@
             </div>
           </div>
 
-          <% if (isAdmin) { %>
-            <div class="playerActions">
-              <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+          <div class="playerActions">
+            <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+            <% if (isAdmin) { %>
               <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
                 <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
               </form>
-            </div>
-          <% } %>
+            <% } %>
+          </div>
         </div>
 
         <div class="playerCardMid">
@@ -171,16 +187,14 @@
           <th class="colTotal"><a class="thLink" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a></th>
           <th class="colDate"><a class="thLink" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a></th>
 
-          <% if (isAdmin) { %>
-            <th class="colActions">Az</th>
-          <% } %>
+          <th class="colActions">Az</th>
         </tr>
       </thead>
 
       <tbody>
         <% if (!players || players.length === 0) { %>
           <tr>
-            <td colspan="<%= isAdmin ? 9 : 8 %>" class="muted">Nessun giocatore inserito.</td>
+            <td colspan="9" class="muted">Nessun giocatore inserito.</td>
           </tr>
         <% } %>
 
@@ -240,16 +254,16 @@
               </div>
             </td>
 
-            <% if (isAdmin) { %>
-              <td class="colActions">
-                <div class="actionIcons">
-                  <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+            <td class="colActions">
+              <div class="actionIcons">
+                <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+                <% if (isAdmin) { %>
                   <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
                     <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
                   </form>
-                </div>
-              </td>
-            <% } %>
+                <% } %>
+              </div>
+            </td>
           </tr>
         <% }) %>
       </tbody>
@@ -258,7 +272,7 @@
 
   <% if (!isAdmin) { %>
     <p class="muted" style="margin-top: 12px;">
-      Solo gli utenti di livello 5 possono inserire, modificare o cancellare giocatori.
+      Modalità standard: puoi creare e modificare i giocatori, ma non puoi cancellarli.
     </p>
   <% } %>
 </section>

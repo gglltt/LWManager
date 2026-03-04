@@ -321,6 +321,20 @@ textarea:focus{
 .menuTitle{ font-weight:900; line-height:1.1; font-size:15px; }
 .menuDesc{ margin-top:4px; color:var(--muted); font-size:12.5px; line-height:1.2; }
 
+
+.filterBar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:8px 0 14px;
+}
+
+.filterInput{
+  flex:1 1 260px;
+  min-width:180px;
+}
+
 /* ========================= */
 /* POTENZE: SORT PILLS       */
 /* ========================= */

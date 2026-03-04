@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1>Login</h1>
+  <h1>Accesso con PIN</h1>
 
   <% if (message) { %>
     <div class="alert success"><%= message %></div>
@@ -12,17 +12,14 @@
   <% } %>
 
   <form method="POST" action="/auth/login" class="form">
-    <label>Email</label>
-    <input type="email" name="email" required placeholder="nome@dominio.it" />
-
-    <label>Password</label>
-    <input type="password" name="password" required placeholder="********" />
+    <label>PIN (6 cifre)</label>
+    <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" />
 
     <button type="submit">Accedi</button>
   </form>
 
   <p class="muted">
-    Non hai un account? <a href="/auth/register">Registrati</a>
+    Usa il PIN standard per accesso base o il PIN amministratore per funzioni avanzate.
   </p>
 </section>
 

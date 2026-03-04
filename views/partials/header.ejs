@@ -13,14 +13,7 @@
       <nav class="nav">
         <a href="/dashboard">Dashboard</a>
         <a href="/potenze">Potenze</a>
-
-        <% if (typeof user !== "undefined" && user && user.authLevel >= 5) { %>
-          <a href="/utenti">Utenti</a>
-        <% } %>
-
         <a href="/auth/login">Login</a>
-        <a href="/auth/register">Registrati</a>
-        <a href="/auth/forgot">Password dimenticata</a>
         <a href="/logout">Logout</a>
       </nav>
     </div>

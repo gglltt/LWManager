@@ -4,9 +4,7 @@
   <h1>Dashboard</h1>
 
   <div class="kv">
-    <div><b>Email:</b> <%= user.email %></div>
-    <div><b>Nickname:</b> <%= user.nickname %></div>
-    <div><b>Auth Level:</b> <%= user.authLevel %> (1=base, 5=admin)</div>
+    <div><b>Modalità accesso:</b> <%= user && user.authLevel >= 5 ? "Amministratore" : "Standard" %></div>
   </div>
 
   <hr class="divider" />
@@ -21,16 +19,6 @@
         <div class="menuDesc">Lista giocatori, potenze e tipi (T1–T4)</div>
       </div>
     </a>
-
-    <% if (user && user.authLevel >= 5) { %>
-      <a class="menuCard" href="/utenti" title="Gestione Utenti (admin)">
-        <div class="menuIcon">👤</div>
-        <div class="menuText">
-          <div class="menuTitle">Gestione Utenti</div>
-          <div class="menuDesc">Modifica livello (1–5) e nickname, elimina utenti</div>
-        </div>
-      </a>
-    <% } %>
   </div>
 
   <div style="margin-top: 16px;">
