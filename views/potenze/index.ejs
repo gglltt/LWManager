@@ -75,6 +75,7 @@
   <div class="sortBar">
     <span class="muted">Ordina:</span>
     <a class="sortPill" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a>
+    <a class="sortPill" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a>
     <a class="sortPill" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a>
     <a class="sortPill" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a>
   </div>
@@ -91,11 +92,12 @@
       <div class="playerCard" title="<%= tooltipText(p) %>">
         <div class="playerCardTop">
           <div class="playerTitle">
-            <div class="playerNick"><%= p.nickname %></div>
-            <div class="playerMeta muted">
-              <span>R: <%= p.role || "-" %></span>
-              <span class="dot">•</span>
-              <span>Tot: <b><%= fmt2(p.total) %></b></span>
+            <div class="playerTitleLine">
+              <span class="playerNick"><%= p.nickname %></span>
+              <span class="playerMeta muted">
+                <span>- R<%= p.role || "-" %></span>
+                <span>- <%= fmt2(p.total) %></span>
+              </span>
             </div>
           </div>
 
