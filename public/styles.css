@@ -460,6 +460,15 @@ textarea:focus{
 }
 
 .playerTitle{ min-width:0; }
+
+.playerTitleLine{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  min-width:0;
+  white-space:nowrap;
+}
+
 .playerNick{
   font-weight:900;
   font-size:16px;
@@ -467,19 +476,18 @@ textarea:focus{
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  max-width:100%;
 }
 
 .playerMeta{
-  display:flex;
+  display:inline-flex;
   gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin-top:4px;
+  align-items:baseline;
+  min-width:0;
   font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
-
-.playerMeta .dot{ opacity:.7; }
 
 .playerActions{
   display:inline-flex;
