@@ -9,9 +9,9 @@
   }
 
   function fmtDate(d) {
-    if (!d) return "-";
+    if (!d) return { dateStr: "-", timeStr: "-" };
     const dt = new Date(d);
-    if (Number.isNaN(dt.getTime())) return "-";
+    if (Number.isNaN(dt.getTime())) return { dateStr: "-", timeStr: "-" };
     const dateStr = dt.toLocaleDateString("it-IT");
     const timeStr = dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
     return { dateStr, timeStr };
@@ -47,12 +47,11 @@
   <div class="pageHeader">
     <div>
       <h1>Potenze</h1>
-      <p class="muted">Vista compatta per mobile. Note disponibili nel tooltip sul nickname.</p>
+      <p class="muted">Su smartphone la lista è mostrata come card verticali (una per giocatore).</p>
     </div>
 
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← Dashboard</a>
-
       <% if (isAdmin) { %>
         <a class="button" href="/potenze/new">+ Nuovo</a>
       <% } %>
@@ -67,7 +66,89 @@
     <div class="alert error"><%= error %></div>
   <% } %>
 
-  <div class="tableWrap">
+  <!-- MOBILE: quick sort bar (cards) -->
+  <div class="sortBar">
+    <span class="muted">Ordina:</span>
+    <a class="sortPill" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a>
+    <a class="sortPill" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a>
+    <a class="sortPill" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a>
+  </div>
+
+  <!-- MOBILE: cards -->
+  <div class="playerCards">
+    <% if (!players || players.length === 0) { %>
+      <div class="muted">Nessun giocatore inserito.</div>
+    <% } %>
+
+    <% (players || []).forEach(p => {
+         const dt = fmtDate(p.updatedAt);
+    %>
+      <div class="playerCard" title="<%= tooltipText(p) %>">
+        <div class="playerCardTop">
+          <div class="playerTitle">
+            <div class="playerNick"><%= p.nickname %></div>
+            <div class="playerMeta muted">
+              <span>R: <%= p.role || "-" %></span>
+              <span class="dot">•</span>
+              <span>Tot: <b><%= fmt2(p.total) %></b></span>
+            </div>
+          </div>
+
+          <% if (isAdmin) { %>
+            <div class="playerActions">
+              <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+              <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
+                <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+
+        <div class="playerCardMid">
+          <div class="powerGrid">
+            <div class="powerCell">
+              <div class="powerLabel muted">T1</div>
+              <div class="powerVal"><%= fmt2(p.powerT1) %></div>
+              <div class="powerType muted"><%= p.typeT1 || "-" %></div>
+            </div>
+            <div class="powerCell">
+              <div class="powerLabel muted">T2</div>
+              <div class="powerVal"><%= fmt2(p.powerT2) %></div>
+              <div class="powerType muted"><%= p.typeT2 || "-" %></div>
+            </div>
+            <div class="powerCell">
+              <div class="powerLabel muted">T3</div>
+              <div class="powerVal"><%= fmt2(p.powerT3) %></div>
+              <div class="powerType muted"><%= p.typeT3 || "-" %></div>
+            </div>
+            <div class="powerCell">
+              <div class="powerLabel muted">T4</div>
+              <div class="powerVal"><%= fmt2(p.powerT4) %></div>
+              <div class="powerType muted"><%= p.typeT4 || "-" %></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="playerCardBottom">
+          <div class="dateBlock">
+            <div class="dateTop"><%= dt.dateStr %></div>
+            <div class="dateSub muted"><%= dt.timeStr %></div>
+          </div>
+
+          <div class="notesHint muted">
+            <% if (p.notes && String(p.notes).trim().length > 0) { %>
+              📝 note
+            <% } else { %>
+              &nbsp;
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- DESKTOP: table -->
+  <div class="tableWrap desktopOnly">
     <table class="table tableCompact">
       <thead>
         <tr>
@@ -95,15 +176,13 @@
           </tr>
         <% } %>
 
-        <% players.forEach(p => { 
+        <% (players || []).forEach(p => {
              const dt = fmtDate(p.updatedAt);
         %>
           <tr title="<%= tooltipText(p) %>">
             <td class="colNick">
               <div class="cell2">
-                <div class="cellTop">
-                  <b title="<%= tooltipText(p) %>"><%= p.nickname %></b>
-                </div>
+                <div class="cellTop"><b><%= p.nickname %></b></div>
                 <div class="cellSub muted">
                   <% if (p.notes && String(p.notes).trim().length > 0) { %>
                     📝 note
