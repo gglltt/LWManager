@@ -69,6 +69,19 @@ function escapeRegex(v) {
   return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function existsNicknameInsensitive(nickname, excludeId = null) {
+  const query = {
+    nickname: { $regex: `^${escapeRegex(nickname)}$`, $options: "i" }
+  };
+
+  if (excludeId) {
+    query._id = { $ne: excludeId };
+  }
+
+  const existing = await Player.findOne(query).select("_id").lean();
+  return Boolean(existing);
+}
+
 // LIST + SORT
 router.get("/", requireAuth, async (req, res) => {
   try {
@@ -170,6 +183,19 @@ router.post("/new", requireAuth, async (req, res) => {
       });
     }
 
+    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value);
+    if (nicknameAlreadyExists) {
+      return res.render("potenze/new", {
+        user: req.user,
+        isAdmin: isAdmin(req.user),
+        types: TYPE_OPTIONS,
+        roles: ROLE_OPTIONS,
+        error: "Nickname già presente (controllo non case-sensitive).",
+        message: null,
+        form: { ...req.body }
+      });
+    }
+
     await Player.create({
       nickname: nickCheck.value,
       role: normalizeRole(req.body.role),
@@ -240,6 +266,20 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: nickCheck.msg,
+        message: null,
+        player: fake
+      });
+    }
+
+    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, player._id);
+    if (nicknameAlreadyExists) {
+      const fake = { ...player.toObject(), ...req.body };
+      return res.render("potenze/edit", {
+        user: req.user,
+        isAdmin: isAdmin(req.user),
+        types: TYPE_OPTIONS,
+        roles: ROLE_OPTIONS,
+        error: "Nickname già presente (controllo non case-sensitive).",
         message: null,
         player: fake
       });
