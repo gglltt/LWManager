@@ -20,13 +20,15 @@
       </div>
     </a>
 
-    <a class="menuCard" href="/registro" title="Registro Eventi">
-      <div class="menuIcon">📘</div>
-      <div class="menuText">
-        <div class="menuTitle">Registro</div>
-        <div class="menuDesc">Log attività (login e operazioni sui player)</div>
-      </div>
-    </a>
+    <% if (user && user.authLevel >= 5) { %>
+      <a class="menuCard" href="/registro" title="Registro Eventi">
+        <div class="menuIcon">📘</div>
+        <div class="menuText">
+          <div class="menuTitle">Registro</div>
+          <div class="menuDesc">Log attività (login e operazioni sui player)</div>
+        </div>
+      </a>
+    <% } %>
   </div>
 
   <div style="margin-top: 16px;">

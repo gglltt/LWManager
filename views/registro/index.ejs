@@ -42,17 +42,31 @@
         <% if (!events || events.length === 0) { %>
           <tr><td colspan="5" class="muted">Nessun evento disponibile.</td></tr>
         <% } %>
-        <% (events || []).forEach(event => {
+        <% (events || []).forEach((event, idx) => {
           const dt = new Date(event.createdAt);
           const date = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleDateString("it-IT");
           const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          const details = event.details || "-";
+          const detailsPreview = details.length > 80 ? `${details.slice(0, 80)}…` : details;
         %>
           <tr>
             <td><%= date %></td>
             <td><%= time %></td>
             <td><%= event.sourceIp %></td>
             <td><%= event.eventType %></td>
-            <td style="white-space: normal;"><%= event.details || "-" %></td>
+            <td>
+              <div class="logDetailsCell">
+                <span class="logDetailsPreview"><%= detailsPreview %></span>
+                <% if (details !== "-") { %>
+                  <button
+                    type="button"
+                    class="button secondary logDetailsBtn"
+                    data-log-details="<%= details %>">
+                    Apri
+                  </button>
+                <% } %>
+              </div>
+            </td>
           </tr>
         <% }) %>
       </tbody>
@@ -74,5 +88,56 @@
     <% } %>
   </div>
 </section>
+
+<div class="logModal" id="logModal" hidden>
+  <div class="logModalBackdrop" data-log-close="true"></div>
+  <div class="logModalDialog" role="dialog" aria-modal="true" aria-labelledby="logModalTitle">
+    <div class="logModalHeader">
+      <h3 id="logModalTitle">Dettagli evento</h3>
+      <button type="button" class="iconBtn" id="logModalClose" aria-label="Chiudi">✖</button>
+    </div>
+    <pre class="logModalBody" id="logModalBody"></pre>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById("logModal");
+    const modalBody = document.getElementById("logModalBody");
+    const closeBtn = document.getElementById("logModalClose");
+    if (!modal || !modalBody || !closeBtn) return;
+
+    function closeModal() {
+      modal.hidden = true;
+      modalBody.textContent = "";
+    }
+
+    function openModal(text) {
+      modalBody.textContent = text;
+      modal.hidden = false;
+    }
+
+    document.querySelectorAll("[data-log-details]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        openModal(btn.getAttribute("data-log-details") || "-");
+      });
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target && target.getAttribute("data-log-close") === "true") {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+</script>
 
 <%- include("../partials/footer") %>
