@@ -1,11 +1,11 @@
 const express = require("express");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireLevel } = require("../middleware/auth");
 const { EventLog, EVENT_TYPES } = require("../models/eventLog");
 
 const router = express.Router();
 const PAGE_SIZE = 50;
 
-router.get("/", requireAuth, async (req, res) => {
+router.get("/", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const pageRaw = Number.parseInt(req.query.page, 10);
     const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
