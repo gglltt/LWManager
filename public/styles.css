@@ -630,6 +630,10 @@ textarea:focus{
   font-size:11.5px;
 }
 
+.logModal[hidden]{
+  display:none !important;
+}
+
 .logModal{
   position:fixed;
   inset:0;

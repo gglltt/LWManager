@@ -89,7 +89,7 @@
   </div>
 </section>
 
-<div class="logModal" id="logModal" hidden>
+<div class="logModal" id="logModal" hidden aria-hidden="true">
   <div class="logModalBackdrop" data-log-close="true"></div>
   <div class="logModalDialog" role="dialog" aria-modal="true" aria-labelledby="logModalTitle">
     <div class="logModalHeader">
@@ -110,11 +110,13 @@
     function closeModal() {
       modal.hidden = true;
       modalBody.textContent = "";
+      modal.setAttribute("aria-hidden", "true");
     }
 
     function openModal(text) {
       modalBody.textContent = text;
       modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
     }
 
     document.querySelectorAll("[data-log-details]").forEach((btn) => {
@@ -123,11 +125,15 @@
       });
     });
 
-    closeBtn.addEventListener("click", closeModal);
+    closeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeModal();
+    });
 
     modal.addEventListener("click", (event) => {
       const target = event.target;
-      if (target && target.getAttribute("data-log-close") === "true") {
+      if (target && target.closest("[data-log-close='true']")) {
         closeModal();
       }
     });
