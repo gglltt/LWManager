@@ -23,6 +23,24 @@ const EventLogSchema = new mongoose.Schema(
       trim: true,
       maxlength: 120
     },
+    browserType: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 120
+    },
+    sourceMachine: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 120
+    },
+    sourceCity: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 120
+    },
     details: {
       type: String,
       default: "",
