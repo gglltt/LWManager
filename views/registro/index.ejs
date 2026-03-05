@@ -34,13 +34,16 @@
           <th>Data</th>
           <th>Ora</th>
           <th>IP sorgente</th>
+          <th>Browser</th>
+          <th>Macchina</th>
+          <th>Città</th>
           <th>Attività</th>
           <th>Dettagli</th>
         </tr>
       </thead>
       <tbody>
         <% if (!events || events.length === 0) { %>
-          <tr><td colspan="5" class="muted">Nessun evento disponibile.</td></tr>
+          <tr><td colspan="8" class="muted">Nessun evento disponibile.</td></tr>
         <% } %>
         <% (events || []).forEach((event, idx) => {
           const dt = new Date(event.createdAt);
@@ -53,6 +56,9 @@
             <td><%= date %></td>
             <td><%= time %></td>
             <td><%= event.sourceIp %></td>
+            <td><%= event.browserType || "unknown" %></td>
+            <td><%= event.sourceMachine || "unknown" %></td>
+            <td><%= event.sourceCity || "unknown" %></td>
             <td><%= event.eventType %></td>
             <td>
               <div class="logDetailsCell">
