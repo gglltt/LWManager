@@ -1,0 +1,78 @@
+<%- include("../partials/header") %>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Registro Eventi</h1>
+      <p class="muted">Elenco eventi ordinati dal più recente al più vecchio.</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/dashboard">← Dashboard</a>
+    </div>
+  </div>
+
+  <% if (typeof error !== "undefined" && error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="GET" action="/registro" class="filterBar">
+    <select name="eventType" class="filterInput">
+      <option value="">Tutte le attività</option>
+      <% (eventTypes || []).forEach(type => { %>
+        <option value="<%= type %>" <%= selectedEventType === type ? "selected" : "" %>><%= type %></option>
+      <% }) %>
+    </select>
+    <button class="button" type="submit">Filtra</button>
+  </form>
+
+  <div class="muted" style="margin-bottom:8px;">Totale risultati: <%= total || 0 %></div>
+
+  <div class="tableWrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Ora</th>
+          <th>IP sorgente</th>
+          <th>Attività</th>
+          <th>Dettagli</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!events || events.length === 0) { %>
+          <tr><td colspan="5" class="muted">Nessun evento disponibile.</td></tr>
+        <% } %>
+        <% (events || []).forEach(event => {
+          const dt = new Date(event.createdAt);
+          const date = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleDateString("it-IT");
+          const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        %>
+          <tr>
+            <td><%= date %></td>
+            <td><%= time %></td>
+            <td><%= event.sourceIp %></td>
+            <td><%= event.eventType %></td>
+            <td style="white-space: normal;"><%= event.details || "-" %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <% const prevPage = page > 1 ? page - 1 : null; %>
+    <% const nextPage = page < totalPages ? page + 1 : null; %>
+
+    <% if (prevPage) { %>
+      <a class="button secondary" href="/registro?page=<%= prevPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>">← Precedente</a>
+    <% } %>
+
+    <span class="muted">Pagina <%= page %> di <%= totalPages %></span>
+
+    <% if (nextPage) { %>
+      <a class="button secondary" href="/registro?page=<%= nextPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>">Successiva →</a>
+    <% } %>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

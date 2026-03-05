@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { createEventLog } = require("../utils/eventLog");
 
 const router = express.Router();
 
@@ -37,14 +38,16 @@ function signAuthCookie(res, role) {
   });
 }
 
-router.get("/login", (req, res) => {
+router.get("/login", async (req, res) => {
+  await createEventLog(req, "login_page_view", "Accesso pagina login");
   return res.render("login", { error: null, message: null });
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const pin = normalizePin(req.body.pin);
 
   if (!isSixDigitPin(pin)) {
+    await createEventLog(req, "login_failed", "Tentativo login: formato PIN non valido");
     return res.render("login", { error: "Inserisci un PIN valido di 6 cifre.", message: null });
   }
 
@@ -58,9 +61,11 @@ router.post("/login", (req, res) => {
   }
 
   if (!role) {
+    await createEventLog(req, "login_failed", "Tentativo login: PIN errato");
     return res.render("login", { error: "PIN non valido.", message: null });
   }
 
+  await createEventLog(req, "login_success", `Login effettuato con ruolo=${role}`);
   signAuthCookie(res, role);
   return res.redirect("/dashboard");
 });
