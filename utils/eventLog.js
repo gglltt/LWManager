@@ -1,4 +1,5 @@
 const { EventLog } = require("../models/eventLog");
+const dns = require("node:dns").promises;
 
 const PLAYER_FIELDS = [
   "nickname",
@@ -43,14 +44,22 @@ function getBrowserType(req) {
   return "Other";
 }
 
-function getSourceMachine(req) {
-  const forwardedHost = getHeaderValue(req, "x-forwarded-host");
-  if (forwardedHost) {
-    return forwardedHost.split(",")[0].trim();
+async function getSourceMachine(req) {
+  const sourceIp = getSourceIp(req);
+  if (!sourceIp || sourceIp === "unknown") {
+    return "unknown";
   }
 
-  const hostname = getHeaderValue(req, "x-forwarded-server") || getHeaderValue(req, "host");
-  return hostname || "unknown";
+  try {
+    const hostnames = await dns.reverse(sourceIp);
+    if (Array.isArray(hostnames) && hostnames.length > 0) {
+      return String(hostnames[0] || "").trim() || sourceIp;
+    }
+  } catch (_err) {
+    // If reverse DNS is unavailable, keep the caller IP as source machine identifier.
+  }
+
+  return sourceIp;
 }
 
 function getSourceCity(req) {
@@ -81,11 +90,12 @@ function buildPlayerDetails(player) {
 
 async function createEventLog(req, eventType, details = "") {
   try {
+    const sourceIp = getSourceIp(req);
     await EventLog.create({
       eventType,
-      sourceIp: getSourceIp(req),
+      sourceIp,
       browserType: getBrowserType(req),
-      sourceMachine: getSourceMachine(req),
+      sourceMachine: await getSourceMachine(req),
       sourceCity: getSourceCity(req),
       details: String(details || "")
     });
