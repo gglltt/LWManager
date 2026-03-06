@@ -28,22 +28,18 @@
   <div class="muted" style="margin-bottom:8px;">Totale risultati: <%= total || 0 %></div>
 
   <div class="tableWrap">
-    <table class="table">
+    <table class="table tableEssentialLogs">
       <thead>
         <tr>
-          <th>Data</th>
-          <th>Ora</th>
-          <th>IP sorgente</th>
-          <th>Browser</th>
-          <th>Macchina</th>
-          <th>Città</th>
+          <th>Quando</th>
           <th>Attività</th>
+          <th>Origine</th>
           <th>Dettagli</th>
         </tr>
       </thead>
       <tbody>
         <% if (!events || events.length === 0) { %>
-          <tr><td colspan="8" class="muted">Nessun evento disponibile.</td></tr>
+          <tr><td colspan="4" class="muted">Nessun evento disponibile.</td></tr>
         <% } %>
         <% (events || []).forEach((event, idx) => {
           const dt = new Date(event.createdAt);
@@ -51,15 +47,28 @@
           const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
           const details = event.details || "-";
           const detailsPreview = details.length > 80 ? `${details.slice(0, 80)}…` : details;
+          const sourceSummary = [event.sourceIp, event.sourceCity || "unknown"].filter(Boolean).join(" · ");
+          const fullDetails = [
+            `Data: ${date} ${time}`,
+            `Attività: ${event.eventType || "-"}`,
+            `IP sorgente: ${event.sourceIp || "unknown"}`,
+            `Browser: ${event.browserType || "unknown"}`,
+            `Macchina: ${event.sourceMachine || "unknown"}`,
+            `Città: ${event.sourceCity || "unknown"}`,
+            "",
+            "Dettagli:",
+            details
+          ].join("\n");
         %>
           <tr>
-            <td><%= date %></td>
-            <td><%= time %></td>
-            <td><%= event.sourceIp %></td>
-            <td><%= event.browserType || "unknown" %></td>
-            <td><%= event.sourceMachine || "unknown" %></td>
-            <td><%= event.sourceCity || "unknown" %></td>
+            <td>
+              <div class="cell2">
+                <span class="cellTop"><%= date %></span>
+                <span class="cellSub muted"><%= time %></span>
+              </div>
+            </td>
             <td><%= event.eventType %></td>
+            <td><%= sourceSummary %></td>
             <td>
               <div class="logDetailsCell">
                 <span class="logDetailsPreview"><%= detailsPreview %></span>
@@ -67,7 +76,7 @@
                   <button
                     type="button"
                     class="button secondary logDetailsBtn"
-                    data-log-details="<%= details %>">
+                    data-log-details="<%= fullDetails %>">
                     Apri
                   </button>
                 <% } %>
