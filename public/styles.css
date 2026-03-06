@@ -419,6 +419,21 @@ textarea:focus{
 .tableCompact td.colActions,
 .tableCompact th.colActions{ text-align:center; }
 
+
+.tableEssentialLogs th:nth-child(1){ width:18%; }
+.tableEssentialLogs th:nth-child(2){ width:20%; }
+.tableEssentialLogs th:nth-child(3){ width:28%; }
+.tableEssentialLogs th:nth-child(4){ width:34%; }
+
+.tableEssentialLogs td:nth-child(2),
+.tableEssentialLogs td:nth-child(3){
+  white-space:nowrap;
+}
+
+.tableEssentialLogs td:nth-child(4){
+  white-space:normal;
+}
+
 .actionIcons{
   display:inline-flex;
   align-items:center;
