@@ -1,6 +1,7 @@
 const express = require("express");
 const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
+const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
 
 const router = express.Router();
 
@@ -196,7 +197,7 @@ router.post("/new", requireAuth, async (req, res) => {
       });
     }
 
-    await Player.create({
+    const createdPlayer = await Player.create({
       nickname: nickCheck.value,
       role: normalizeRole(req.body.role),
 
@@ -215,6 +216,7 @@ router.post("/new", requireAuth, async (req, res) => {
       notes: sanitizeText(req.body.notes, 2000)
     });
 
+    await createEventLog(req, "nuovo_player", buildPlayerDetails(createdPlayer));
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
@@ -303,6 +305,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
     player.notes = sanitizeText(req.body.notes, 2000);
 
     await player.save();
+    await createEventLog(req, "modifica_player", buildPlayerDetails(player));
 
     return res.redirect("/potenze");
   } catch (err) {
@@ -314,7 +317,11 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
 // DELETE
 router.post("/:id/delete", requireAuth, requireLevel(5), async (req, res) => {
   try {
+    const player = await Player.findById(req.params.id).lean();
     await Player.deleteOne({ _id: req.params.id });
+    if (player) {
+      await createEventLog(req, "cancellazione_player", buildPlayerDetails(player));
+    }
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);

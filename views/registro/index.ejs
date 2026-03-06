@@ -1,0 +1,164 @@
+<%- include("../partials/header") %>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Registro Eventi</h1>
+      <p class="muted">Elenco eventi ordinati dal più recente al più vecchio.</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/dashboard">← Dashboard</a>
+    </div>
+  </div>
+
+  <% if (typeof error !== "undefined" && error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+
+  <form method="GET" action="/registro" class="filterBar">
+    <select name="eventType" class="filterInput">
+      <option value="">Tutte le attività</option>
+      <% (eventTypes || []).forEach(type => { %>
+        <option value="<%= type %>" <%= selectedEventType === type ? "selected" : "" %>><%= type %></option>
+      <% }) %>
+    </select>
+    <button class="button" type="submit">Filtra</button>
+  </form>
+
+  <div class="muted" style="margin-bottom:8px;">Totale risultati: <%= total || 0 %></div>
+
+  <div class="tableWrap">
+    <table class="table tableEssentialLogs">
+      <thead>
+        <tr>
+          <th>Quando</th>
+          <th>Attività</th>
+          <th>Origine</th>
+          <th>Dettagli</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!events || events.length === 0) { %>
+          <tr><td colspan="4" class="muted">Nessun evento disponibile.</td></tr>
+        <% } %>
+        <% (events || []).forEach((event, idx) => {
+          const dt = new Date(event.createdAt);
+          const date = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleDateString("it-IT");
+          const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+          const details = event.details || "-";
+          const detailsPreview = details.length > 80 ? `${details.slice(0, 80)}…` : details;
+          const sourceSummary = [event.sourceIp, event.sourceCity || "unknown"].filter(Boolean).join(" · ");
+          const fullDetails = [
+            `Data: ${date} ${time}`,
+            `Attività: ${event.eventType || "-"}`,
+            `IP sorgente: ${event.sourceIp || "unknown"}`,
+            `Browser: ${event.browserType || "unknown"}`,
+            `Macchina: ${event.sourceMachine || "unknown"}`,
+            `Città: ${event.sourceCity || "unknown"}`,
+            "",
+            "Dettagli:",
+            details
+          ].join("\n");
+        %>
+          <tr>
+            <td>
+              <div class="cell2">
+                <span class="cellTop"><%= date %></span>
+                <span class="cellSub muted"><%= time %></span>
+              </div>
+            </td>
+            <td><%= event.eventType %></td>
+            <td><%= sourceSummary %></td>
+            <td>
+              <div class="logDetailsCell">
+                <span class="logDetailsPreview"><%= detailsPreview %></span>
+                <% if (details !== "-") { %>
+                  <button
+                    type="button"
+                    class="button secondary logDetailsBtn"
+                    data-log-details="<%= fullDetails %>">
+                    Apri
+                  </button>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <% const prevPage = page > 1 ? page - 1 : null; %>
+    <% const nextPage = page < totalPages ? page + 1 : null; %>
+
+    <% if (prevPage) { %>
+      <a class="button secondary" href="/registro?page=<%= prevPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>">← Precedente</a>
+    <% } %>
+
+    <span class="muted">Pagina <%= page %> di <%= totalPages %></span>
+
+    <% if (nextPage) { %>
+      <a class="button secondary" href="/registro?page=<%= nextPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>">Successiva →</a>
+    <% } %>
+  </div>
+</section>
+
+<div class="logModal" id="logModal" hidden aria-hidden="true">
+  <div class="logModalBackdrop" data-log-close="true"></div>
+  <div class="logModalDialog" role="dialog" aria-modal="true" aria-labelledby="logModalTitle">
+    <div class="logModalHeader">
+      <h3 id="logModalTitle">Dettagli evento</h3>
+      <button type="button" class="iconBtn" id="logModalClose" aria-label="Chiudi">✖</button>
+    </div>
+    <pre class="logModalBody" id="logModalBody"></pre>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById("logModal");
+    const modalBody = document.getElementById("logModalBody");
+    const closeBtn = document.getElementById("logModalClose");
+    if (!modal || !modalBody || !closeBtn) return;
+
+    function closeModal() {
+      modal.hidden = true;
+      modalBody.textContent = "";
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function openModal(text) {
+      modalBody.textContent = text;
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    document.querySelectorAll("[data-log-details]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        openModal(btn.getAttribute("data-log-details") || "-");
+      });
+    });
+
+    closeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeModal();
+    });
+
+    modal.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target && target.closest("[data-log-close='true']")) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+</script>
+
+<%- include("../partials/footer") %>
