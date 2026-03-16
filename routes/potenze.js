@@ -267,6 +267,18 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
 
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(rows);
+
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].s = { 
+          font: { bold: true },
+          alignment: { horizontal: "center" } };
+      }
+    }
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
 
     const fileBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
