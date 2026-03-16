@@ -55,10 +55,17 @@
     <div>
       <h1>Potenze</h1>
       <p class="muted">Su smartphone la lista è mostrata come card verticali (una per giocatore).</p>
+      <p><strong>Player registrati: <%= playerCount %></strong></p>
+      <p class="muted">Ruolo attuale: <b><%= isAdmin ? "Admin" : "Standard" %></b></p>
     </div>
 
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← Dashboard</a>
+      <% if (isAdmin) { %>
+        <a class="button secondary" href="/potenze/export">⬇️ Export Excel</a>
+      <% } else { %>
+        <span class="muted" title="Effettua login con PIN admin per abilitare l'export.">Export Excel disponibile solo per Admin</span>
+      <% } %>
       <a class="button" href="/potenze/new">+ Nuovo</a>
     </div>
   </div>

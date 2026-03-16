@@ -1,4 +1,5 @@
 const express = require("express");
+const XLSX = require("xlsx");
 const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
 const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
@@ -114,10 +115,13 @@ router.get("/", requireAuth, async (req, res) => {
       { $sort: { ...sortStage, ...secondary } }
     ]);
 
+    const playerCount = await Player.countDocuments();
+
     return res.render("potenze/index", {
       user: req.user,
       isAdmin: isAdmin(req.user),
       players,
+      playerCount,
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: null,
@@ -132,6 +136,7 @@ router.get("/", requireAuth, async (req, res) => {
       user: req.user,
       isAdmin: isAdmin(req.user),
       players: [],
+      playerCount: 0,
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: "Errore interno nel caricamento della lista.",
@@ -145,9 +150,11 @@ router.get("/", requireAuth, async (req, res) => {
 
 // NEW (FORM)
 router.get("/new", requireAuth, async (req, res) => {
+  const playerCount = await Player.countDocuments();
   return res.render("potenze/new", {
     user: req.user,
     isAdmin: isAdmin(req.user),
+    playerCount,
     types: TYPE_OPTIONS,
     roles: ROLE_OPTIONS,
     error: null,
@@ -171,11 +178,13 @@ router.get("/new", requireAuth, async (req, res) => {
 // NEW (CREATE)
 router.post("/new", requireAuth, async (req, res) => {
   try {
+    const playerCount = await Player.countDocuments();
     const nickCheck = validateNickname(req.body.nickname);
     if (!nickCheck.ok) {
       return res.render("potenze/new", {
         user: req.user,
         isAdmin: isAdmin(req.user),
+        playerCount,
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: nickCheck.msg,
@@ -189,6 +198,7 @@ router.post("/new", requireAuth, async (req, res) => {
       return res.render("potenze/new", {
         user: req.user,
         isAdmin: isAdmin(req.user),
+        playerCount,
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: "Nickname già presente (controllo non case-sensitive).",
@@ -220,15 +230,54 @@ router.post("/new", requireAuth, async (req, res) => {
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
+    const playerCount = await Player.countDocuments();
     return res.render("potenze/new", {
       user: req.user,
       isAdmin: isAdmin(req.user),
+      playerCount,
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: "Errore interno durante la creazione del giocatore.",
       message: null,
       form: { ...req.body }
     });
+  }
+});
+
+router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
+  try {
+    const players = await Player.find().sort({ nickname: 1 }).lean();
+
+    const rows = players.map((p) => ({
+      Nickname: p.nickname || "",
+      Ruolo: p.role || "",
+      "Power T1": p.powerT1 ?? "",
+      "Type T1": p.typeT1 || "",
+      "Power T2": p.powerT2 ?? "",
+      "Type T2": p.typeT2 || "",
+      "Power T3": p.powerT3 ?? "",
+      "Type T3": p.typeT3 || "",
+      "Power T4": p.powerT4 ?? "",
+      "Type T4": p.typeT4 || "",
+      Totale: (p.powerT1 || 0) + (p.powerT2 || 0) + (p.powerT3 || 0) + (p.powerT4 || 0),
+      Note: p.notes || "",
+      "Creato il": p.createdAt ? new Date(p.createdAt).toLocaleString("it-IT") : "",
+      "Aggiornato il": p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : ""
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
+
+    const fileBuffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="players-export-${timestamp}.xlsx"`);
+    return res.send(fileBuffer);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("500 - Errore durante l'export Excel");
   }
 });
 
