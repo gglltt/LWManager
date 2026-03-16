@@ -1,5 +1,5 @@
 const express = require("express");
-const XLSX = require("xlsx");
+const XLSX = require("xlsx-js-style");
 const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
 const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
