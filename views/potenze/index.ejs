@@ -64,7 +64,7 @@
       <% if (isAdmin) { %>
         <a class="button secondary" href="/potenze/export">⬇️ Export Excel</a>
       <% } else { %>
-        <span class="muted" title="Effettua login con PIN admin per abilitare l'export.">Export Excel disponibile solo per Admin</span>
+        <a class="button secondary" href="/potenze/export" disabled>⬇️ Export Excel</a>
       <% } %>
       <a class="button" href="/potenze/new">+ Nuovo</a>
     </div>
