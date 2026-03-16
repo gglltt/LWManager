@@ -141,6 +141,14 @@ h2{ margin:14px 0 8px 0; font-size:16px; }
 
 .button:active, button:active{ transform:translateY(1px); }
 
+.button.disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 /* ========================= */
 /* PAGE HEADER               */
 /* ========================= */
