@@ -1,0 +1,91 @@
+<%- include("../partials/header") %>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Nuova Spesa</h1>
+      <p class="muted">Compila i dati comuni una sola volta e scegli come inserire lo scontrino.</p>
+    </div>
+    <div class="pageHeaderActions">
+      <a class="button secondary" href="/dashboard">← Dashboard</a>
+    </div>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+  <% } %>
+  <% if (message) { %>
+    <div class="alert success"><%= message %></div>
+  <% } %>
+
+  <form method="POST" action="/spese/nuova" class="formGrid2">
+    <div>
+      <label for="commessaType">Tipologia commessa *</label>
+      <input id="commessaType" name="commessaType" type="text" required value="<%= form.commessaType %>" placeholder="Es. Cantiere, Ufficio..." />
+    </div>
+
+    <div>
+      <label for="expenseCode">Codice spesa *</label>
+      <input id="expenseCode" name="expenseCode" type="text" required value="<%= form.expenseCode %>" placeholder="Es. SPE-001" />
+    </div>
+
+    <div>
+      <label for="entryMode">Modalità inserimento</label>
+      <select id="entryMode" name="entryMode">
+        <option value="manual" <%= form.entryMode === 'manual' ? 'selected' : '' %>>Inserimento manuale</option>
+        <option value="scan" <%= form.entryMode === 'scan' ? 'selected' : '' %>>Scansione scontrino</option>
+        <option value="photo" <%= form.entryMode === 'photo' ? 'selected' : '' %>>Foto scontrino</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="expenseDate">Data spesa *</label>
+      <input id="expenseDate" name="expenseDate" type="date" required value="<%= form.expenseDate %>" />
+      <small class="muted">Usa il calendario. È supportato anche il formato italiano GG/MM/AAAA.</small>
+    </div>
+
+    <div>
+      <label for="amount">Importo</label>
+      <input id="amount" name="amount" type="number" step="0.01" min="0" value="<%= form.amount %>" />
+    </div>
+
+    <div>
+      <label for="note">Note</label>
+      <input id="note" name="note" type="text" value="<%= form.note %>" />
+    </div>
+
+    <div id="scanBox" class="modeBox" hidden>
+      <p class="muted">Carica una scansione dello scontrino.</p>
+      <input type="file" name="scanReceipt" accept="image/*,.pdf" />
+    </div>
+
+    <div id="photoBox" class="modeBox" hidden>
+      <p class="muted">Comando per scattare la foto dello scontrino:</p>
+      <label class="button secondary" for="receiptPhoto">📷 Scatta foto scontrino</label>
+      <input id="receiptPhoto" type="file" name="receiptPhoto" accept="image/*" capture="environment" />
+    </div>
+
+    <div>
+      <button type="submit">Salva spesa</button>
+    </div>
+  </form>
+</section>
+
+<script>
+  (function () {
+    const modeEl = document.getElementById("entryMode");
+    const scanBox = document.getElementById("scanBox");
+    const photoBox = document.getElementById("photoBox");
+
+    function syncMode() {
+      const mode = modeEl.value;
+      scanBox.hidden = mode !== "scan";
+      photoBox.hidden = mode !== "photo";
+    }
+
+    modeEl.addEventListener("change", syncMode);
+    syncMode();
+  })();
+</script>
+
+<%- include("../partials/footer") %>
