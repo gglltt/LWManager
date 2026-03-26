@@ -168,7 +168,13 @@
 
           <div class="notesHint muted">
             <% if (p.notes && String(p.notes).trim().length > 0) { %>
-              📝 <%= t("notes_short") %>
+              <button
+                type="button"
+                class="iconBtn notesOpenBtn"
+                data-player-notes="<%= String(p.notes).trim() %>"
+                data-player-nickname="<%= p.nickname %>">
+                📝 <%= t("notes_short") %>
+              </button>
             <% } else { %>
               &nbsp;
             <% } %>
@@ -283,5 +289,64 @@
     </p>
   <% } %>
 </section>
+
+<div class="logModal" id="playerNotesModal" hidden aria-hidden="true">
+  <div class="logModalBackdrop" data-player-notes-close="true"></div>
+  <div class="logModalDialog" role="dialog" aria-modal="true" aria-labelledby="playerNotesModalTitle">
+    <div class="logModalHeader">
+      <h3 id="playerNotesModalTitle"><%= t("notes_details") %></h3>
+      <button type="button" class="iconBtn" id="playerNotesModalClose" aria-label="<%= t('close') %>">✖</button>
+    </div>
+    <pre class="logModalBody" id="playerNotesModalBody"></pre>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const modal = document.getElementById("playerNotesModal");
+    const modalBody = document.getElementById("playerNotesModalBody");
+    const closeBtn = document.getElementById("playerNotesModalClose");
+    if (!modal || !modalBody || !closeBtn) return;
+
+    function closeModal() {
+      modal.hidden = true;
+      modalBody.textContent = "";
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function openModal(text) {
+      modalBody.textContent = text;
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    document.querySelectorAll("[data-player-notes]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const nickname = btn.getAttribute("data-player-nickname") || "-";
+        const notes = btn.getAttribute("data-player-notes") || "-";
+        openModal(`${nickname}\n\n${notes}`);
+      });
+    });
+
+    closeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeModal();
+    });
+
+    modal.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target && target.closest("[data-player-notes-close='true']")) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+</script>
 
 <%- include("../partials/footer") %>
