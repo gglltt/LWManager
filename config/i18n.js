@@ -32,13 +32,13 @@ const TEAM_TYPE_TRANSLATIONS = {
   },
   en: {
     Carri: "Tank",
-    Aerei: "air",
+    Aerei: "Air",
     Missili: "Missile",
     Misto: "Mixed"
   },
   fr: {
-    Carri: "Chars",
-    Aerei: "Aérien",
+    Carri: "Tank",
+    Aerei: "Avion",
     Missili: "Missile",
     Misto: "Mixte"
   },
