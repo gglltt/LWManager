@@ -37,16 +37,28 @@
     return currentDir === "asc" ? " ▲" : " ▼";
   }
 
+  function pseudoBold(text) {
+    const src = String(text || "");
+    const bolded = Array.from(src).map((ch) => {
+      const code = ch.codePointAt(0);
+      if (code >= 65 && code <= 90) return String.fromCodePoint(0x1D5D4 + (code - 65)); // A-Z
+      if (code >= 97 && code <= 122) return String.fromCodePoint(0x1D5EE + (code - 97)); // a-z
+      if (code >= 48 && code <= 57) return String.fromCodePoint(0x1D7EC + (code - 48)); // 0-9
+      return ch;
+    });
+    return bolded.join("");
+  }
+
   function tooltipText(p) {
     const parts = [];
     const originalNotes = p.notes && String(p.notes).trim().length > 0 ? String(p.notes).trim() : "";
     if (originalNotes) {
-      parts.push(`${t("notes_optional")}: ${originalNotes}`);
+      parts.push(`${pseudoBold(t("notes_optional_tp"))}: ${originalNotes}`);
       if (p.autoTranslatedNote && String(p.autoTranslatedNote).trim().length > 0) {
-        parts.push(`${t("translation_prefix")} (${t("translation_auto_suffix")}): ${String(p.autoTranslatedNote).trim()}`);
+        parts.push(`${pseudoBold(`${t("translation_prefix")} (${t("translation_auto_suffix")})`)}: ${String(p.autoTranslatedNote).trim()}`);
       }
     }
-    parts.push(`${t("updated_at")}: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString(localeTag) : "-"}`);
+    parts.push(`${pseudoBold(t("updated_at"))}: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString(localeTag) : "-"}`);
     return parts.join("\n");
   }
 
