@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { TEAM_TYPE_OPTIONS } = require("../config/i18n");
 
-const TYPE_ENUM = ["Carri", "Aerei", "Missili", "Misto"];
+const TYPE_ENUM = TEAM_TYPE_OPTIONS;
 const ROLE_ENUM = ["R1", "R2", "R3", "R4", "R5"];
 
 const decimalField = {

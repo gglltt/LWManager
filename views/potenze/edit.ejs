@@ -51,7 +51,7 @@
         <select id="typeT1" name="typeT1">
           <option value="" <%= !player.typeT1 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= player.typeT1 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= player.typeT1 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -66,7 +66,7 @@
         <select id="typeT2" name="typeT2">
           <option value="" <%= !player.typeT2 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= player.typeT2 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= player.typeT2 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -81,7 +81,7 @@
         <select id="typeT3" name="typeT3">
           <option value="" <%= !player.typeT3 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= player.typeT3 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= player.typeT3 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -96,7 +96,7 @@
         <select id="typeT4" name="typeT4">
           <option value="" <%= !player.typeT4 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= player.typeT4 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= player.typeT4 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
