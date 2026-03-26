@@ -2,11 +2,12 @@ const express = require("express");
 const XLSX = require("xlsx");
 const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
+const { TEAM_TYPE_OPTIONS } = require("../config/i18n");
 const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
 
 const router = express.Router();
 
-const TYPE_OPTIONS = ["Carri", "Aerei", "Missili", "Misto"];
+const TYPE_OPTIONS = TEAM_TYPE_OPTIONS;
 const ROLE_OPTIONS = ["R1", "R2", "R3", "R4", "R5"];
 
 const SORT_FIELDS = ["nickname", "role", "powerT1", "typeT1", "powerT2", "typeT2", "powerT3", "typeT3", "powerT4", "typeT4", "total", "updatedAt"];
@@ -71,6 +72,118 @@ function escapeRegex(v) {
   return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function addAutoTranslatedNotes(players, targetLang) {
+  if (!Array.isArray(players) || players.length === 0) return players;
+
+  const cache = new Map();
+  const translatedPlayers = await Promise.all(
+    players.map(async (player) => {
+      const noteText = String(player?.notes ?? "").trim();
+      if (!noteText) return player;
+
+      if (!cache.has(noteText)) {
+        cache.set(noteText, translateTextAuto(noteText, targetLang));
+      }
+
+      try {
+        const translated = await cache.get(noteText);
+        if (!translated?.ok || translated.sameLanguage || !translated.translatedText) return player;
+        return {
+          ...player,
+          autoTranslatedNote: translated.translatedText,
+          autoTranslatedSourceLang: translated.sourceLang || null
+        };
+      } catch (err) {
+        return player;
+      }
+    })
+  );
+
+  return translatedPlayers;
+}
+
+async function translateTextAuto(text, targetLang) {
+  const cleanText = String(text ?? "").trim();
+  const cleanTarget = String(targetLang ?? "").trim().toLowerCase();
+  if (!cleanText || !["it", "en", "fr", "es"].includes(cleanTarget)) {
+    return { ok: false, errorCode: "invalid_input" };
+  }
+
+  async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 7000) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      if (!response.ok) return null;
+      return await response.json();
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  const providers = [
+    {
+      name: "google_public",
+      run: async () => {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(cleanTarget)}&dt=t&q=${encodeURIComponent(cleanText)}`;
+        const data = await fetchJsonWithTimeout(url, { method: "GET" });
+        if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
+
+        const translatedText = data[0].map((part) => String(part?.[0] ?? "")).join("").trim();
+        const sourceLang = String(data?.[2] ?? "").trim().toLowerCase();
+        if (!translatedText) return null;
+        return { translatedText, sourceLang: sourceLang || null };
+      }
+    },
+    {
+      name: "mymemory",
+      run: async () => {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=auto|${encodeURIComponent(cleanTarget)}`;
+        const data = await fetchJsonWithTimeout(url, { method: "GET" });
+        const translatedText = String(data?.responseData?.translatedText ?? "").trim();
+        const sourceLang = String(data?.responseData?.match ?? "").trim(); // MyMemory does not expose source lang reliably
+        if (!translatedText) return null;
+        return { translatedText, sourceLang: sourceLang && sourceLang.length === 2 ? sourceLang.toLowerCase() : null };
+      }
+    },
+    {
+      name: "libretranslate",
+      run: async () => {
+        const data = await fetchJsonWithTimeout("https://translate.argosopentech.com/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            q: cleanText,
+            source: "auto",
+            target: cleanTarget,
+            format: "text"
+          })
+        });
+        const translatedText = String(data?.translatedText ?? "").trim();
+        const sourceLang = String(data?.detectedLanguage?.language ?? "").trim().toLowerCase();
+        if (!translatedText) return null;
+        return { translatedText, sourceLang: sourceLang || null };
+      }
+    }
+  ];
+
+  for (const provider of providers) {
+    try {
+      const translated = await provider.run();
+      if (!translated?.translatedText) continue;
+      const detectedLanguage = String(translated.sourceLang || "").toLowerCase();
+      if (detectedLanguage && detectedLanguage === cleanTarget) {
+        return { ok: true, translatedText: cleanText, sourceLang: detectedLanguage, sameLanguage: true };
+      }
+      return { ok: true, translatedText: translated.translatedText, sourceLang: detectedLanguage || null, sameLanguage: false };
+    } catch (err) {
+      // try next provider
+    }
+  }
+
+  return { ok: false, errorCode: "provider_unavailable" };
+}
+
 async function existsNicknameInsensitive(nickname, excludeId = null) {
   const query = {
     nickname: { $regex: `^${escapeRegex(nickname)}$`, $options: "i" }
@@ -110,11 +223,12 @@ router.get("/", requireAuth, async (req, res) => {
     const q = String(req.query.q || "").trim();
     const search = q ? { nickname: { $regex: escapeRegex(q), $options: "i" } } : {};
 
-    const players = await Player.aggregate([
+    let players = await Player.aggregate([
       { $match: search },
       { $addFields: { total: totalExpr } },
       { $sort: { ...sortStage, ...secondary } }
     ]);
+    players = await addAutoTranslatedNotes(players, res.locals.currentLang || "it");
 
     const playerCount = await Player.countDocuments();
 
@@ -281,6 +395,42 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_excel_export")}`);
+  }
+});
+
+router.post("/translate-note", requireAuth, async (req, res) => {
+  try {
+    const t = res.locals.t || ((k) => k);
+    const text = sanitizeText(req.body?.text, 2000);
+    const targetLang = String(req.body?.targetLang || res.locals.currentLang || "it").toLowerCase();
+
+    if (!text) {
+      return res.status(400).json({ ok: false, error: t("translation_error") });
+    }
+
+    const translated = await translateTextAuto(text, targetLang);
+    if (!translated.ok) {
+      return res.status(503).json({ ok: false, error: t("translation_error") });
+    }
+
+    if (translated.sameLanguage) {
+      return res.json({
+        ok: true,
+        translatedText: text,
+        sourceLang: translated.sourceLang || null,
+        sameLanguage: true,
+        message: t("translation_same_language")
+      });
+    }
+
+    return res.json({
+      ok: true,
+      translatedText: translated.translatedText,
+      sourceLang: translated.sourceLang || null,
+      sameLanguage: false
+    });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: (res.locals.t || ((k) => k))("translation_error") });
   }
 });
 

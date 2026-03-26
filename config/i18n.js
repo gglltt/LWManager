@@ -21,6 +21,35 @@ const LOCALE_BY_LANG = {
   es: "es-ES"
 };
 
+const TEAM_TYPE_OPTIONS = ["Carri", "Aerei", "Missili", "Misto"];
+
+const TEAM_TYPE_TRANSLATIONS = {
+  it: {
+    Carri: "Carri",
+    Aerei: "Aerei",
+    Missili: "Missili",
+    Misto: "Misto"
+  },
+  en: {
+    Carri: "Tank",
+    Aerei: "air",
+    Missili: "Missile",
+    Misto: "Mixed"
+  },
+  fr: {
+    Carri: "Chars",
+    Aerei: "Aérien",
+    Missili: "Missile",
+    Misto: "Mixte"
+  },
+  es: {
+    Carri: "Tanques",
+    Aerei: "Aéreo",
+    Missili: "Misil",
+    Misto: "Mixto"
+  }
+};
+
 const translations = {
   it: {
     nav_dashboard: "Dashboard",
@@ -69,6 +98,12 @@ const translations = {
     filter: "Filtra",
     open: "Apri",
     close: "Chiudi",
+    translate_note: "Traduci nota",
+    translating_note: "Traduzione in corso...",
+    translation_error: "Traduzione non disponibile al momento.",
+    translation_same_language: "Nota già nella lingua selezionata.",
+    translation_prefix: "Traduzione",
+    translation_auto_suffix: "tradotta automaticamente",
     unknown: "sconosciuto",
     powers_title: "Potenze",
     powers_mobile_desc: "Su smartphone la lista è mostrata come card verticali (una per giocatore).",
@@ -197,6 +232,12 @@ const translations = {
     filter: "Filter",
     open: "Open",
     close: "Close",
+    translate_note: "Translate note",
+    translating_note: "Translating...",
+    translation_error: "Translation is currently unavailable.",
+    translation_same_language: "Note is already in the selected language.",
+    translation_prefix: "Translation",
+    translation_auto_suffix: "automatically translated",
     unknown: "unknown",
     powers_title: "Powers",
     powers_mobile_desc: "On smartphones, the list is shown as vertical cards (one per player).",
@@ -325,6 +366,12 @@ const translations = {
     filter: "Filtrer",
     open: "Ouvrir",
     close: "Fermer",
+    translate_note: "Traduire la note",
+    translating_note: "Traduction en cours...",
+    translation_error: "La traduction est indisponible pour le moment.",
+    translation_same_language: "La note est déjà dans la langue sélectionnée.",
+    translation_prefix: "Traduction",
+    translation_auto_suffix: "traduite automatiquement",
     unknown: "inconnu",
     powers_title: "Puissances",
     powers_mobile_desc: "Sur smartphone, la liste est affichée en cartes verticales (une par joueur).",
@@ -453,6 +500,12 @@ const translations = {
     filter: "Filtrar",
     open: "Abrir",
     close: "Cerrar",
+    translate_note: "Traducir nota",
+    translating_note: "Traduciendo...",
+    translation_error: "La traducción no está disponible en este momento.",
+    translation_same_language: "La nota ya está en el idioma seleccionado.",
+    translation_prefix: "Traducción",
+    translation_auto_suffix: "traducida automáticamente",
     unknown: "desconocido",
     powers_title: "Potencias",
     powers_mobile_desc: "En smartphone la lista se muestra como tarjetas verticales (una por jugador).",
@@ -545,11 +598,25 @@ function getTranslator(lang) {
   return (key) => translations[resolved]?.[key] || translations.it?.[key] || key;
 }
 
+
+function translateTeamType(type, lang) {
+  const normalizedType = String(type ?? "").trim();
+  if (!normalizedType) return "";
+
+  const resolved = resolveLang(lang);
+  return TEAM_TYPE_TRANSLATIONS[resolved]?.[normalizedType]
+    || TEAM_TYPE_TRANSLATIONS.it?.[normalizedType]
+    || normalizedType;
+}
+
 module.exports = {
   SUPPORTED_LANGS,
   FLAG_BY_LANG,
   NAME_BY_LANG,
   LOCALE_BY_LANG,
+  TEAM_TYPE_OPTIONS,
+  TEAM_TYPE_TRANSLATIONS,
   resolveLang,
-  getTranslator
+  getTranslator,
+  translateTeamType
 };

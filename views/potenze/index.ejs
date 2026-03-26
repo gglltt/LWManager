@@ -39,13 +39,19 @@
 
   function tooltipText(p) {
     const parts = [];
-    if (p.notes && String(p.notes).trim().length > 0) parts.push(`${t("notes_optional")}: ${String(p.notes).trim()}`);
+    const originalNotes = p.notes && String(p.notes).trim().length > 0 ? String(p.notes).trim() : "";
+    if (originalNotes) {
+      parts.push(`${t("notes_optional")}: ${originalNotes}`);
+      if (p.autoTranslatedNote && String(p.autoTranslatedNote).trim().length > 0) {
+        parts.push(`${t("translation_prefix")} (${t("translation_auto_suffix")}): ${String(p.autoTranslatedNote).trim()}`);
+      }
+    }
     parts.push(`${t("updated_at")}: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString(localeTag) : "-"}`);
-    return parts.join(" | ");
+    return parts.join("\n");
   }
 
   function labelType(tLabel, tType) {
-    const type = tType && String(tType).trim().length > 0 ? String(tType).trim() : "-";
+    const type = tType && String(tType).trim().length > 0 ? translateTeamType(String(tType).trim()) : "-";
     return `${tLabel}:${type}`;
   }
 %>
@@ -233,28 +239,28 @@
             <td class="colTier">
               <div class="cell2">
                 <div class="cellTop"><%= fmt2(p.powerT1) %></div>
-                <div class="cellSub muted"><%= p.typeT1 || "-" %></div>
+                <div class="cellSub muted"><%= p.typeT1 ? translateTeamType(p.typeT1) : "-" %></div>
               </div>
             </td>
 
             <td class="colTier">
               <div class="cell2">
                 <div class="cellTop"><%= fmt2(p.powerT2) %></div>
-                <div class="cellSub muted"><%= p.typeT2 || "-" %></div>
+                <div class="cellSub muted"><%= p.typeT2 ? translateTeamType(p.typeT2) : "-" %></div>
               </div>
             </td>
 
             <td class="colTier">
               <div class="cell2">
                 <div class="cellTop"><%= fmt2(p.powerT3) %></div>
-                <div class="cellSub muted"><%= p.typeT3 || "-" %></div>
+                <div class="cellSub muted"><%= p.typeT3 ? translateTeamType(p.typeT3) : "-" %></div>
               </div>
             </td>
 
             <td class="colTier">
               <div class="cell2">
                 <div class="cellTop"><%= fmt2(p.powerT4) %></div>
-                <div class="cellSub muted"><%= p.typeT4 || "-" %></div>
+                <div class="cellSub muted"><%= p.typeT4 ? translateTeamType(p.typeT4) : "-" %></div>
               </div>
             </td>
 
@@ -295,6 +301,7 @@
   <div class="logModalDialog" role="dialog" aria-modal="true" aria-labelledby="playerNotesModalTitle">
     <div class="logModalHeader">
       <h3 id="playerNotesModalTitle"><%= t("notes_details") %></h3>
+      <button type="button" class="iconBtn" id="playerNotesTranslateBtn" aria-label="<%= t('translate_note') %>" title="<%= t('translate_note') %>">🌐</button>
       <button type="button" class="iconBtn" id="playerNotesModalClose" aria-label="<%= t('close') %>">✖</button>
     </div>
     <pre class="logModalBody" id="playerNotesModalBody"></pre>
@@ -306,18 +313,41 @@
     const modal = document.getElementById("playerNotesModal");
     const modalBody = document.getElementById("playerNotesModalBody");
     const closeBtn = document.getElementById("playerNotesModalClose");
-    if (!modal || !modalBody || !closeBtn) return;
+    const translateBtn = document.getElementById("playerNotesTranslateBtn");
+    const targetLang = "<%= currentLang %>";
+    const translationPrefix = "<%= t('translation_prefix') %>";
+    const translatingLabel = "<%= t('translating_note') %>";
+    const translationError = "<%= t('translation_error') %>";
+    const sameLanguageMsg = "<%= t('translation_same_language') %>";
+    if (!modal || !modalBody || !closeBtn || !translateBtn) return;
+
+    let originalText = "";
+    let translatedText = "";
+    let sourceLang = "";
 
     function closeModal() {
       modal.hidden = true;
       modalBody.textContent = "";
       modal.setAttribute("aria-hidden", "true");
+      translateBtn.disabled = false;
+      originalText = "";
+      translatedText = "";
+      sourceLang = "";
     }
 
     function openModal(text) {
-      modalBody.textContent = text;
+      originalText = String(text || "").trim();
+      translatedText = "";
+      sourceLang = "";
+      modalBody.textContent = originalText;
       modal.hidden = false;
       modal.setAttribute("aria-hidden", "false");
+    }
+
+    function buildBodyText() {
+      if (!translatedText) return originalText;
+      const langInfo = sourceLang ? `${sourceLang} → ${targetLang}` : targetLang;
+      return `${originalText}\n\n────────\n${translationPrefix} (${langInfo}):\n${translatedText}`;
     }
 
     document.querySelectorAll("[data-player-notes]").forEach((btn) => {
@@ -344,6 +374,39 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !modal.hidden) {
         closeModal();
+      }
+    });
+
+    translateBtn.addEventListener("click", async () => {
+      if (!originalText) return;
+      translateBtn.disabled = true;
+      modalBody.textContent = `${buildBodyText()}\n\n${translatingLabel}`;
+
+      try {
+        const resp = await fetch("/potenze/translate-note", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: originalText, targetLang })
+        });
+        const data = await resp.json();
+
+        if (!resp.ok || !data?.ok) {
+          modalBody.textContent = `${buildBodyText()}\n\n${translationError}`;
+          return;
+        }
+
+        if (data.sameLanguage) {
+          modalBody.textContent = `${buildBodyText()}\n\n${sameLanguageMsg}`;
+          return;
+        }
+
+        translatedText = String(data.translatedText || "").trim();
+        sourceLang = String(data.sourceLang || "").trim().toLowerCase();
+        modalBody.textContent = buildBodyText();
+      } catch (err) {
+        modalBody.textContent = `${buildBodyText()}\n\n${translationError}`;
+      } finally {
+        translateBtn.disabled = false;
       }
     });
   })();
