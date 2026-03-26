@@ -45,10 +45,10 @@ function normalizeRole(v) {
   return ROLE_OPTIONS.includes(s) ? s : null;
 }
 
-function validateNickname(nickname) {
+function validateNickname(nickname, t) {
   const n = String(nickname ?? "").trim();
-  if (n.length < 2) return { ok: false, msg: "Nickname troppo corto (min 2 caratteri)." };
-  if (n.length > 40) return { ok: false, msg: "Nickname troppo lungo (max 40 caratteri)." };
+  if (n.length < 2) return { ok: false, msg: t("err_nickname_short") };
+  if (n.length > 40) return { ok: false, msg: t("err_nickname_long") };
   return { ok: true, value: n };
 }
 
@@ -87,6 +87,7 @@ async function existsNicknameInsensitive(nickname, excludeId = null) {
 // LIST + SORT
 router.get("/", requireAuth, async (req, res) => {
   try {
+    const t = res.locals.t;
     const { sort, dir } = normalizeSortParams(req);
 
     // compute total in DB
@@ -132,6 +133,7 @@ router.get("/", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    const t = res.locals.t || ((k) => k);
     return res.render("potenze/index", {
       user: req.user,
       isAdmin: isAdmin(req.user),
@@ -139,7 +141,7 @@ router.get("/", requireAuth, async (req, res) => {
       playerCount: 0,
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
-      error: "Errore interno nel caricamento della lista.",
+      error: t("err_internal_loading_list"),
       message: null,
       sort: "powerT1",
       dir: "desc",
@@ -178,8 +180,9 @@ router.get("/new", requireAuth, async (req, res) => {
 // NEW (CREATE)
 router.post("/new", requireAuth, async (req, res) => {
   try {
+    const t = res.locals.t;
     const playerCount = await Player.countDocuments();
-    const nickCheck = validateNickname(req.body.nickname);
+    const nickCheck = validateNickname(req.body.nickname, t);
     if (!nickCheck.ok) {
       return res.render("potenze/new", {
         user: req.user,
@@ -201,7 +204,7 @@ router.post("/new", requireAuth, async (req, res) => {
         playerCount,
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
-        error: "Nickname già presente (controllo non case-sensitive).",
+        error: t("err_nickname_exists"),
         message: null,
         form: { ...req.body }
       });
@@ -237,7 +240,7 @@ router.post("/new", requireAuth, async (req, res) => {
       playerCount,
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
-      error: "Errore interno durante la creazione del giocatore.",
+      error: (res.locals.t || ((k) => k))("err_internal_create_player"),
       message: null,
       form: { ...req.body }
     });
@@ -250,7 +253,7 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
 
     const rows = players.map((p) => ({
       Nickname: p.nickname || "",
-      Ruolo: p.role || "",
+      Role: p.role || "",
       "Power T1": p.powerT1 ?? "",
       "Type T1": p.typeT1 || "",
       "Power T2": p.powerT2 ?? "",
@@ -259,10 +262,10 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
       "Type T3": p.typeT3 || "",
       "Power T4": p.powerT4 ?? "",
       "Type T4": p.typeT4 || "",
-      Totale: (p.powerT1 || 0) + (p.powerT2 || 0) + (p.powerT3 || 0) + (p.powerT4 || 0),
+      Total: (p.powerT1 || 0) + (p.powerT2 || 0) + (p.powerT3 || 0) + (p.powerT4 || 0),
       Note: p.notes || "",
-      "Creato il": p.createdAt ? new Date(p.createdAt).toLocaleString("it-IT") : "",
-      "Aggiornato il": p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : ""
+      "Created At": p.createdAt ? new Date(p.createdAt).toLocaleString(res.locals.localeTag || "it-IT") : "",
+      "Updated At": p.updatedAt ? new Date(p.updatedAt).toLocaleString(res.locals.localeTag || "it-IT") : ""
     }));
 
     const workbook = XLSX.utils.book_new();
@@ -277,7 +280,7 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
     return res.send(fileBuffer);
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore durante l'export Excel");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_excel_export")}`);
   }
 });
 
@@ -285,7 +288,7 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
 router.get("/:id/edit", requireAuth, async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
-    if (!player) return res.status(404).send("404 - Giocatore non trovato");
+    if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
 
     return res.render("potenze/edit", {
       user: req.user,
@@ -298,7 +301,7 @@ router.get("/:id/edit", requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore interno");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
   }
 });
 
@@ -306,9 +309,9 @@ router.get("/:id/edit", requireAuth, async (req, res) => {
 router.post("/:id/edit", requireAuth, async (req, res) => {
   try {
     const player = await Player.findById(req.params.id);
-    if (!player) return res.status(404).send("404 - Giocatore non trovato");
+    if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
 
-    const nickCheck = validateNickname(req.body.nickname);
+    const nickCheck = validateNickname(req.body.nickname, res.locals.t || ((k) => k));
     if (!nickCheck.ok) {
       const fake = { ...player.toObject(), ...req.body };
       return res.render("potenze/edit", {
@@ -330,7 +333,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
         isAdmin: isAdmin(req.user),
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
-        error: "Nickname già presente (controllo non case-sensitive).",
+        error: (res.locals.t || ((k) => k))("err_nickname_exists"),
         message: null,
         player: fake
       });
@@ -359,7 +362,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore interno");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
   }
 });
 
@@ -374,7 +377,7 @@ router.post("/:id/delete", requireAuth, requireLevel(5), async (req, res) => {
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore interno");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
   }
 });
 

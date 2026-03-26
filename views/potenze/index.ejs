@@ -5,15 +5,15 @@
     if (v === null || v === undefined || v === "") return "-";
     const n = Number(v);
     if (Number.isNaN(n)) return "-";
-    return n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return n.toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function fmtDate(d) {
     if (!d) return { dateStr: "-", timeStr: "-" };
     const dt = new Date(d);
     if (Number.isNaN(dt.getTime())) return { dateStr: "-", timeStr: "-" };
-    const dateStr = dt.toLocaleDateString("it-IT");
-    const timeStr = dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    const dateStr = dt.toLocaleDateString(localeTag);
+    const timeStr = dt.toLocaleTimeString(localeTag, { hour: "2-digit", minute: "2-digit" });
     return { dateStr, timeStr };
   }
 
@@ -39,8 +39,8 @@
 
   function tooltipText(p) {
     const parts = [];
-    if (p.notes && String(p.notes).trim().length > 0) parts.push(`Note: ${String(p.notes).trim()}`);
-    parts.push(`Aggiornato: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString("it-IT") : "-"}`);
+    if (p.notes && String(p.notes).trim().length > 0) parts.push(`${t("notes_optional")}: ${String(p.notes).trim()}`);
+    parts.push(`${t("updated_at")}: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString(localeTag) : "-"}`);
     return parts.join(" | ");
   }
 
@@ -53,20 +53,20 @@
 <section class="card cardWide">
   <div class="pageHeader">
     <div>
-      <h1>Potenze</h1>
-      <p class="muted">Su smartphone la lista è mostrata come card verticali (una per giocatore).</p>
-      <p><strong>Player registrati: <%= playerCount %></strong></p>
-      <p class="muted">Ruolo attuale: <b><%= isAdmin ? "Admin" : "Standard" %></b></p>
+      <h1><%= t("powers_title") %></h1>
+      <p class="muted"><%= t("powers_mobile_desc") %></p>
+      <p><strong><%= t("players_registered") %>: <%= playerCount %></strong></p>
+      <p class="muted"><%= t("current_role") %>: <b><%= isAdmin ? t("admin") : t("standard") %></b></p>
     </div>
 
     <div class="pageHeaderActions">
-      <a class="button secondary" href="/dashboard">← Dashboard</a>
+      <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
       <% if (isAdmin) { %>
         <a class="button secondary" href="/potenze/export">⬇️ Export Excel</a>
       <% } else { %>
-        <span class="muted" title="Effettua login con PIN admin per abilitare l'export.">Export Excel disponibile solo per Admin</span>
+        <span class="muted" title="<%= t('export_requires_admin_pin') %>"><%= t("export_admin_only") %></span>
       <% } %>
-      <a class="button" href="/potenze/new">+ Nuovo</a>
+      <a class="button" href="/potenze/new"><%= t("new_player_button") %></a>
     </div>
   </div>
 
@@ -85,18 +85,18 @@
       type="text"
       name="q"
       value="<%= q || "" %>"
-      placeholder="Filtro nickname (es. GGL)"
+      placeholder="<%= t('nickname_filter_placeholder') %>"
       class="filterInput"
     />
-    <button type="submit" class="button">Ricerca</button>
+    <button type="submit" class="button"><%= t("search") %></button>
     <% if (q && String(q).trim().length > 0) { %>
-      <a class="button secondary" href="/potenze?sort=<%= encodeURIComponent(sort) %>&dir=<%= encodeURIComponent(dir) %>" title="Rimuovi filtro">✕</a>
+      <a class="button secondary" href="/potenze?sort=<%= encodeURIComponent(sort) %>&dir=<%= encodeURIComponent(dir) %>" title="<%= t('remove_filter') %>">✕</a>
     <% } %>
   </form>
 
   <!-- MOBILE: quick sort bar -->
   <div class="sortBar">
-    <span class="muted">Ordina:</span>
+    <span class="muted"><%= t("sort_by") %>:</span>
     <a class="sortPill" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a>
     <a class="sortPill" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a>
     <a class="sortPill" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a>
@@ -106,7 +106,7 @@
   <!-- MOBILE: cards -->
   <div class="playerCards">
     <% if (!players || players.length === 0) { %>
-      <div class="muted">Nessun giocatore inserito.</div>
+      <div class="muted"><%= t("no_players") %></div>
     <% } %>
 
     <% (players || []).forEach(p => { 
@@ -125,10 +125,10 @@
           </div>
 
           <div class="playerActions">
-            <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+            <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
             <% if (isAdmin) { %>
-              <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
-                <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+              <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
+                <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
               </form>
             <% } %>
           </div>
@@ -168,7 +168,7 @@
 
           <div class="notesHint muted">
             <% if (p.notes && String(p.notes).trim().length > 0) { %>
-              📝 note
+              📝 <%= t("notes_short") %>
             <% } else { %>
               &nbsp;
             <% } %>
@@ -194,14 +194,14 @@
           <th class="colTotal"><a class="thLink" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a></th>
           <th class="colDate"><a class="thLink" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a></th>
 
-          <th class="colActions">Az</th>
+          <th class="colActions"><%= t("actions_short") %></th>
         </tr>
       </thead>
 
       <tbody>
         <% if (!players || players.length === 0) { %>
           <tr>
-            <td colspan="9" class="muted">Nessun giocatore inserito.</td>
+            <td colspan="9" class="muted"><%= t("no_players") %></td>
           </tr>
         <% } %>
 
@@ -214,7 +214,7 @@
                 <div class="cellTop"><b><%= p.nickname %></b></div>
                 <div class="cellSub muted">
                   <% if (p.notes && String(p.notes).trim().length > 0) { %>
-                    📝 note
+                    📝 <%= t("notes_short") %>
                   <% } else { %>
                     &nbsp;
                   <% } %>
@@ -263,10 +263,10 @@
 
             <td class="colActions">
               <div class="actionIcons">
-                <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="Modifica">✏️</a>
+                <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
                 <% if (isAdmin) { %>
-                  <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('Confermi la cancellazione di <%= p.nickname %>?');">
-                    <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+                  <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
+                    <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
                   </form>
                 <% } %>
               </div>
@@ -279,7 +279,7 @@
 
   <% if (!isAdmin) { %>
     <p class="muted" style="margin-top: 12px;">
-      Modalità standard: puoi creare e modificare i giocatori, ma non puoi cancellarli.
+      <%= t("standard_mode_hint") %>
     </p>
   <% } %>
 </section>

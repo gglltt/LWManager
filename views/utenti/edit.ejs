@@ -3,11 +3,11 @@
 <section class="card">
   <div class="pageHeader">
     <div>
-      <h1>Modifica Utente</h1>
-      <p class="muted">Email non modificabile.</p>
+      <h1><%= t("edit_user") %></h1>
+      <p class="muted"><%= t("email_not_editable") %></p>
     </div>
     <div class="pageHeaderActions">
-      <a class="button secondary" href="/utenti">← Utenti</a>
+      <a class="button secondary" href="/utenti">← <%= t("users") %></a>
     </div>
   </div>
 
@@ -20,20 +20,20 @@
   <% } %>
 
   <form method="POST" action="/utenti/<%= target._id %>/edit" class="form">
-    <label>Email (non modificabile)</label>
+    <label><%= t("email_not_editable_long") %></label>
     <input type="text" value="<%= target.email %>" disabled />
 
     <label>Nickname</label>
     <input type="text" name="nickname" required minlength="2" maxlength="40" value="<%= target.nickname || '' %>" />
 
-    <label>Livello (1–5)</label>
+    <label><%= t("level_label") %></label>
     <select name="authLevel" required>
       <% for (let i = 1; i <= 5; i++) { %>
         <option value="<%= i %>" <%= (Number(target.authLevel) === i ? 'selected' : '') %>><%= i %></option>
       <% } %>
     </select>
 
-    <button type="submit">Salva</button>
+    <button type="submit"><%= t("save") %></button>
   </form>
 </section>
 
