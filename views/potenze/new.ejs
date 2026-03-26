@@ -52,7 +52,7 @@
         <select id="typeT1" name="typeT1">
           <option value="" <%= !form.typeT1 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= form.typeT1 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= form.typeT1 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -67,7 +67,7 @@
         <select id="typeT2" name="typeT2">
           <option value="" <%= !form.typeT2 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= form.typeT2 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= form.typeT2 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -82,7 +82,7 @@
         <select id="typeT3" name="typeT3">
           <option value="" <%= !form.typeT3 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= form.typeT3 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= form.typeT3 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>
@@ -97,7 +97,7 @@
         <select id="typeT4" name="typeT4">
           <option value="" <%= !form.typeT4 ? 'selected' : '' %>>—</option>
           <% types.forEach(t => { %>
-            <option value="<%= t %>" <%= form.typeT4 === t ? 'selected' : '' %>><%= t %></option>
+            <option value="<%= t %>" <%= form.typeT4 === t ? 'selected' : '' %>><%= translateTeamType(t) %></option>
           <% }) %>
         </select>
       </div>

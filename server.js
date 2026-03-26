@@ -17,7 +17,8 @@ const {
   NAME_BY_LANG,
   LOCALE_BY_LANG,
   resolveLang,
-  getTranslator
+  getTranslator,
+  translateTeamType
 } = require("./config/i18n");
 
 const app = express();
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
   }));
   res.locals.currentUrl = req.originalUrl || "/";
   res.locals.t = getTranslator(currentLang);
+  res.locals.translateTeamType = (type) => translateTeamType(type, currentLang);
   next();
 });
 
