@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it">
+<html lang="<%= currentLang || 'it' %>">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,13 +10,33 @@
   <header class="topbar">
     <div class="container topbar__inner">
       <div class="brand">LWManager</div>
-      <nav class="nav">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/potenze">Potenze</a>
-        <a href="/registro">Registro</a>
-        <a href="/auth/login">Login</a>
-        <a href="/logout">Logout</a>
-      </nav>
+      <div class="topbarRight">
+        <nav class="nav">
+          <a href="/dashboard"><%= t('nav_dashboard') %></a>
+          <a href="/potenze"><%= t('nav_powers') %></a>
+          <a href="/registro"><%= t('nav_logs') %></a>
+          <a href="/auth/login"><%= t('nav_login') %></a>
+          <a href="/logout"><%= t('nav_logout') %></a>
+        </nav>
+
+        <details class="langPicker">
+          <summary class="langPicker__summary" aria-label="<%= t('lang_selector') %>">
+            <span class="langPicker__flag"><%= currentFlag %></span>
+          </summary>
+          <div class="langPicker__menu">
+            <% (availableLanguages || []).forEach(item => { %>
+              <% if (!item.active) { %>
+                <a
+                  class="langPicker__item"
+                  href="/set-language?lang=<%= encodeURIComponent(item.code) %>&returnTo=<%= encodeURIComponent(currentUrl || '/') %>">
+                  <span><%= item.flag %></span>
+                  <span><%= item.name %></span>
+                </a>
+              <% } %>
+            <% }) %>
+          </div>
+        </details>
+      </div>
     </div>
   </header>
   <main class="container">

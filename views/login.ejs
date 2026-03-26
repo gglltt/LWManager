@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1>Accesso con PIN</h1>
+  <h1><%= t('login_title') %></h1>
 
   <% if (message) { %>
     <div class="alert success"><%= message %></div>
@@ -12,32 +12,26 @@
   <% } %>
 
   <form method="POST" action="/auth/login" class="form">
-    <label>PIN (6 cifre)</label>
+    <label><%= t('login_pin_label') %></label>
     <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="••••••" />
 
-    <button type="submit">Accedi</button>
+    <button type="submit"><%= t('login_button') %></button>
   </form>
 
   <p class="muted">
-    Usa il PIN standard per accesso base o il PIN amministratore per funzioni avanzate.
+    <%= t('login_desc') %>
   </p>
 
   <div class="card" style="margin-top: 12px;">
-    <h2 style="margin-top: 0;">Primo accesso / First access</h2>
+    <h2 style="margin-top: 0;"><%= t('login_first_access') %></h2>
     <p class="muted" style="margin-bottom: 8px;">
-      <strong>IT:</strong> PIN standard: <code>111111</code>
+      <%= t('login_standard_pin') %>: <code>111111</code>
     </p>
     <ol style="margin-top: 0;">
-      <li><strong>IT:</strong> Accedi con PIN (admin se devi esportare in Excel).</li>
-      <li><strong>IT:</strong> Vai su <em>Potenze</em> dalla Dashboard.</li>
-      <li><strong>IT:</strong> Clicca <em>+ Nuovo</em> e inserisci Nickname, Ruolo, valori T1-T4 e Tipo T1-T4.</li>
-      <li><strong>IT:</strong> Salva e ripeti per ogni squadra/giocatore; poi verifica il totale nella lista.</li>
-    </ol>
-    <ol style="margin-top: 8px;">
-      <li><strong>EN:</strong> Log in with your PIN (admin PIN is needed for Excel export).</li>
-      <li><strong>EN:</strong> Open <em>Potenze</em> from the Dashboard.</li>
-      <li><strong>EN:</strong> Click <em>+ Nuovo</em> and enter Nickname, Role, T1-T4 values, and T1-T4 Type.</li>
-      <li><strong>EN:</strong> Save and repeat for each team/player, then check the total in the list.</li>
+      <li><%= t('login_step_1') %></li>
+      <li><%= t('login_step_2') %></li>
+      <li><%= t('login_step_3') %></li>
+      <li><%= t('login_step_4') %></li>
     </ol>
   </div>
 </section>

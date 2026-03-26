@@ -11,6 +11,14 @@ const potenzeRoutes = require("./routes/potenze");
 const registroRoutes = require("./routes/registro");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
+const {
+  SUPPORTED_LANGS,
+  FLAG_BY_LANG,
+  NAME_BY_LANG,
+  LOCALE_BY_LANG,
+  resolveLang,
+  getTranslator
+} = require("./config/i18n");
 
 const app = express();
 
@@ -32,6 +40,38 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  const qLang = typeof req.query?.lang === "string" ? req.query.lang.toLowerCase() : "";
+  const cookieLang = typeof req.cookies?.lw_lang === "string" ? req.cookies.lw_lang.toLowerCase() : "";
+  const currentLang = resolveLang(qLang || cookieLang || "it");
+
+  if (cookieLang !== currentLang) {
+    res.cookie("lw_lang", currentLang, { maxAge: 365 * 24 * 60 * 60 * 1000, sameSite: "lax" });
+  }
+
+  res.locals.currentLang = currentLang;
+  res.locals.currentFlag = FLAG_BY_LANG[currentLang];
+  res.locals.localeTag = LOCALE_BY_LANG[currentLang] || "it-IT";
+  res.locals.availableLanguages = SUPPORTED_LANGS.map((code) => ({
+    code,
+    name: NAME_BY_LANG[code],
+    flag: FLAG_BY_LANG[code],
+    active: code === currentLang
+  }));
+  res.locals.currentUrl = req.originalUrl || "/";
+  res.locals.t = getTranslator(currentLang);
+  next();
+});
+
+app.get("/set-language", (req, res) => {
+  const lang = resolveLang(typeof req.query.lang === "string" ? req.query.lang.toLowerCase() : "it");
+  const returnToRaw = typeof req.query.returnTo === "string" ? req.query.returnTo : "/auth/login";
+  const returnTo = returnToRaw.startsWith("/") ? returnToRaw : "/auth/login";
+
+  res.cookie("lw_lang", lang, { maxAge: 365 * 24 * 60 * 60 * 1000, sameSite: "lax" });
+  return res.redirect(returnTo);
+});
 
 // Rate limit
 const authLimiter = rateLimit({

@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1>Reimposta Password</h1>
+  <h1><%= t('reset_title') %></h1>
 
   <% if (message) { %>
     <div class="alert success"><%= message %></div>
@@ -12,16 +12,16 @@
   <% } %>
 
   <form method="POST" action="/auth/reset/<%= token %>" class="form">
-    <label>Nuova password (min 8 caratteri)</label>
+    <label><%= t('new_password_min8') %></label>
     <input type="password" name="password" required minlength="8" placeholder="********" />
 
-    <label>Conferma password</label>
+    <label><%= t('confirm_password') %></label>
     <input type="password" name="confirm" required minlength="8" placeholder="********" />
 
-    <button type="submit">Aggiorna password</button>
+    <button type="submit"><%= t('update_password') %></button>
   </form>
 
-  <p class="muted"><a href="/auth/login">Torna al login</a></p>
+  <p class="muted"><a href="/auth/login"><%= t('back_to_login') %></a></p>
 </section>
 
 <%- include("partials/footer") %>
