@@ -38,6 +38,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    const t = res.locals.t || ((k) => k);
     return res.render("registro/index", {
       user: req.user,
       events: [],
@@ -46,7 +47,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       page: 1,
       totalPages: 1,
       total: 0,
-      error: "Errore nel caricamento del registro eventi."
+      error: t("err_load_event_log")
     });
   }
 });

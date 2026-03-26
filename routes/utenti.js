@@ -8,19 +8,19 @@ function isAdmin(user) {
   return user && user.authLevel >= 5;
 }
 
-function validateNickname(nickname) {
+function validateNickname(nickname, t) {
   const n = String(nickname ?? "").trim();
-  if (n.length < 2) return { ok: false, msg: "Nickname troppo corto (min 2 caratteri)." };
-  if (n.length > 40) return { ok: false, msg: "Nickname troppo lungo (max 40 caratteri)." };
+  if (n.length < 2) return { ok: false, msg: t("err_nickname_short") };
+  if (n.length > 40) return { ok: false, msg: t("err_nickname_long") };
   return { ok: true, value: n };
 }
 
-function validateAuthLevel(level) {
+function validateAuthLevel(level, t) {
   const s = String(level ?? "").trim();
-  if (!s) return { ok: false, msg: "Livello non valido." };
+  if (!s) return { ok: false, msg: t("err_invalid_level") };
   const n = Number(s);
-  if (!Number.isInteger(n)) return { ok: false, msg: "Livello deve essere un numero intero." };
-  if (n < 1 || n > 5) return { ok: false, msg: "Livello deve essere tra 1 e 5." };
+  if (!Number.isInteger(n)) return { ok: false, msg: t("err_level_integer") };
+  if (n < 1 || n > 5) return { ok: false, msg: t("err_level_range") };
   return { ok: true, value: n };
 }
 
@@ -43,7 +43,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore interno");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
   }
 });
 
@@ -51,7 +51,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
 router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const target = await User.findById(req.params.id).select("_id email nickname authLevel verified");
-    if (!target) return res.status(404).send("404 - Utente non trovato");
+    if (!target) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_user_not_found")}`);
 
     return res.render("utenti/edit", {
       user: req.user,
@@ -62,7 +62,7 @@ router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send("500 - Errore interno");
+    return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
   }
 });
 
@@ -70,10 +70,11 @@ router.get("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
 router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
-    if (!target) return res.status(404).send("404 - Utente non trovato");
+    if (!target) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_user_not_found")}`);
 
     // Email NON modificabile: ignoriamo qualsiasi valore arrivato
-    const nickCheck = validateNickname(req.body.nickname);
+    const t = res.locals.t || ((k) => k);
+    const nickCheck = validateNickname(req.body.nickname, t);
     if (!nickCheck.ok) {
       const fake = {
         _id: target._id,
@@ -91,7 +92,7 @@ router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
       });
     }
 
-    const lvlCheck = validateAuthLevel(req.body.authLevel);
+    const lvlCheck = validateAuthLevel(req.body.authLevel, t);
     if (!lvlCheck.ok) {
       const fake = {
         _id: target._id,
@@ -114,10 +115,10 @@ router.post("/:id/edit", requireAuth, requireLevel(5), async (req, res) => {
 
     await target.save();
 
-    return res.redirect("/utenti?msg=" + encodeURIComponent("Utente aggiornato correttamente."));
+    return res.redirect("/utenti?msg=" + encodeURIComponent(t("msg_user_updated")));
   } catch (err) {
     console.error(err);
-    return res.redirect("/utenti?err=" + encodeURIComponent("Errore interno durante l'aggiornamento."));
+    return res.redirect("/utenti?err=" + encodeURIComponent((res.locals.t || ((k) => k))("err_internal_update")));
   }
 });
 
@@ -127,20 +128,20 @@ router.post("/:id/delete", requireAuth, requireLevel(5), async (req, res) => {
     // non si può cancellare se stessi
     const selfId = String(req.user?._id || req.user?.id || "");
     if (String(req.params.id) === selfId) {
-      return res.redirect("/utenti?err=" + encodeURIComponent("Non puoi cancellare il tuo utente."));
+      return res.redirect("/utenti?err=" + encodeURIComponent((res.locals.t || ((k) => k))("err_cannot_delete_self")));
     }
 
     const target = await User.findById(req.params.id).select("_id email");
     if (!target) {
-      return res.redirect("/utenti?err=" + encodeURIComponent("Utente non trovato."));
+      return res.redirect("/utenti?err=" + encodeURIComponent((res.locals.t || ((k) => k))("err_user_not_found")));
     }
 
     await User.deleteOne({ _id: req.params.id });
 
-    return res.redirect("/utenti?msg=" + encodeURIComponent("Utente eliminato: " + target.email));
+    return res.redirect("/utenti?msg=" + encodeURIComponent(`${(res.locals.t || ((k) => k))("msg_user_deleted")}: ${target.email}`));
   } catch (err) {
     console.error(err);
-    return res.redirect("/utenti?err=" + encodeURIComponent("Errore interno durante la cancellazione."));
+    return res.redirect("/utenti?err=" + encodeURIComponent((res.locals.t || ((k) => k))("err_internal_delete")));
   }
 });
 

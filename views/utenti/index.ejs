@@ -5,18 +5,18 @@
     if (!d) return "-";
     const dt = new Date(d);
     if (Number.isNaN(dt.getTime())) return "-";
-    return dt.toLocaleString("it-IT");
+    return dt.toLocaleString(localeTag);
   }
 %>
 
 <section class="card cardWide">
   <div class="pageHeader">
     <div>
-      <h1>Gestione Utenti</h1>
-      <p class="muted">Solo admin (livello 5). Email non modificabile. Non puoi cancellare te stesso.</p>
+      <h1><%= t("users_management") %></h1>
+      <p class="muted"><%= t("users_admin_note") %></p>
     </div>
     <div class="pageHeaderActions">
-      <a class="button secondary" href="/dashboard">← Dashboard</a>
+      <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
     </div>
   </div>
 
@@ -34,15 +34,15 @@
         <tr>
           <th class="colUEmail">Email</th>
           <th class="colUNick">Nickname</th>
-          <th class="colULevel">Liv</th>
-          <th class="colUVer">Ver</th>
-          <th class="colUDate">Agg.</th>
-          <th class="colActions">Az</th>
+          <th class="colULevel"><%= t("level_short") %></th>
+          <th class="colUVer"><%= t("verified_short") %></th>
+          <th class="colUDate"><%= t("updated_short") %></th>
+          <th class="colActions"><%= t("actions_short") %></th>
         </tr>
       </thead>
       <tbody>
         <% if (!users || users.length === 0) { %>
-          <tr><td colspan="6" class="muted">Nessun utente.</td></tr>
+          <tr><td colspan="6" class="muted"><%= t("no_users") %></td></tr>
         <% } %>
 
         <% users.forEach(u => { %>
@@ -54,16 +54,16 @@
             <td class="colUDate" title="<%= fmtDate(u.updatedAt) %>"><%= fmtDate(u.updatedAt) %></td>
             <td class="colActions">
               <div class="actionIcons">
-                <a class="iconBtn" href="/utenti/<%= u._id %>/edit" title="Modifica">✏️</a>
+                <a class="iconBtn" href="/utenti/<%= u._id %>/edit" title="<%= t('edit') %>">✏️</a>
 
                 <% const selfId = String(user?._id || user?.id || ""); %>
                 <% if (String(u._id) !== selfId) { %>
                   <form method="POST" action="/utenti/<%= u._id %>/delete" class="inlineForm"
-                        onsubmit="return confirm('Confermi la cancellazione di <%= u.email %>?');">
-                    <button class="iconBtn danger" type="submit" title="Elimina">🗑️</button>
+                        onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= u.email %>?');">
+                    <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
                   </form>
                 <% } else { %>
-                  <span class="muted" title="Non puoi cancellare te stesso">—</span>
+                  <span class="muted" title="<%= t('cannot_delete_self') %>">—</span>
                 <% } %>
               </div>
             </td>

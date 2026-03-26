@@ -3,13 +3,13 @@
 <section class="card cardWide">
   <div class="pageHeader">
     <div>
-      <h1>Nuovo giocatore</h1>
-      <p class="muted">Inserimento consentito in modalità standard e amministratore.</p>
-      <p class="muted">Player già registrati: <b><%= playerCount %></b></p>
+      <h1><%= t("new_player") %></h1>
+      <p class="muted"><%= t("new_player_intro") %></p>
+      <p class="muted"><%= t("players_registered") %>: <b><%= playerCount %></b></p>
     </div>
 
     <div class="pageHeaderActions">
-      <a class="button secondary" href="/potenze">← Potenze</a>
+      <a class="button secondary" href="/potenze">← <%= t("powers_title") %></a>
     </div>
   </div>
 
@@ -24,12 +24,12 @@
   <form class="form" method="POST" action="/potenze/new">
     <div class="formGrid2">
       <div class="field">
-        <label for="nickname">Nickname (obbligatorio)</label>
+        <label for="nickname"><%= t("nickname_required") %></label>
         <input id="nickname" name="nickname" type="text" required value="<%= form.nickname || '' %>" placeholder="Nickname..." />
       </div>
 
       <div class="field">
-        <label for="role">Ruolo (opzionale)</label>
+        <label for="role"><%= t("role_optional") %></label>
         <select id="role" name="role">
           <option value="" <%= !form.role ? 'selected' : '' %>>—</option>
           <% roles.forEach(r => { %>
@@ -43,7 +43,7 @@
 
     <div class="formGrid2">
       <div class="field">
-        <label for="powerT1">Power T1 (2 decimali)</label>
+        <label for="powerT1">Power T1 (<%= t("power_decimals") %>)</label>
         <input id="powerT1" name="powerT1" type="text" inputmode="decimal" value="<%= (form.powerT1 ?? '') %>" placeholder="0,00" />
       </div>
 
@@ -58,7 +58,7 @@
       </div>
 
       <div class="field">
-        <label for="powerT2">Power T2 (2 decimali)</label>
+        <label for="powerT2">Power T2 (<%= t("power_decimals") %>)</label>
         <input id="powerT2" name="powerT2" type="text" inputmode="decimal" value="<%= (form.powerT2 ?? '') %>" placeholder="0,00" />
       </div>
 
@@ -73,7 +73,7 @@
       </div>
 
       <div class="field">
-        <label for="powerT3">Power T3 (2 decimali)</label>
+        <label for="powerT3">Power T3 (<%= t("power_decimals") %>)</label>
         <input id="powerT3" name="powerT3" type="text" inputmode="decimal" value="<%= (form.powerT3 ?? '') %>" placeholder="0,00" />
       </div>
 
@@ -88,7 +88,7 @@
       </div>
 
       <div class="field">
-        <label for="powerT4">Power T4 (2 decimali)</label>
+        <label for="powerT4">Power T4 (<%= t("power_decimals") %>)</label>
         <input id="powerT4" name="powerT4" type="text" inputmode="decimal" value="<%= (form.powerT4 ?? '') %>" placeholder="0,00" />
       </div>
 
@@ -104,13 +104,13 @@
     </div>
 
     <div class="field">
-      <label for="notes">Note (opzionale)</label>
-      <textarea id="notes" name="notes" placeholder="Testo libero..."><%= form.notes || '' %></textarea>
+      <label for="notes"><%= t("notes_optional") %></label>
+      <textarea id="notes" name="notes" placeholder="<%= t('free_text') %>"><%= form.notes || '' %></textarea>
     </div>
 
     <div class="formActions">
-      <button type="submit">Salva</button>
-      <a class="button secondary" href="/potenze">Annulla</a>
+      <button type="submit"><%= t("save") %></button>
+      <a class="button secondary" href="/potenze"><%= t("cancel") %></a>
     </div>
   </form>
 </section>
