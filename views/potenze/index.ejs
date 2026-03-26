@@ -39,9 +39,15 @@
 
   function tooltipText(p) {
     const parts = [];
-    if (p.notes && String(p.notes).trim().length > 0) parts.push(`${t("notes_optional")}: ${String(p.notes).trim()}`);
+    const originalNotes = p.notes && String(p.notes).trim().length > 0 ? String(p.notes).trim() : "";
+    if (originalNotes) {
+      parts.push(`${t("notes_optional")}: ${originalNotes}`);
+      if (p.autoTranslatedNote && String(p.autoTranslatedNote).trim().length > 0) {
+        parts.push(`${t("translation_prefix")} (${t("translation_auto_suffix")}): ${String(p.autoTranslatedNote).trim()}`);
+      }
+    }
     parts.push(`${t("updated_at")}: ${p.updatedAt ? new Date(p.updatedAt).toLocaleString(localeTag) : "-"}`);
-    return parts.join(" | ");
+    return parts.join("\n");
   }
 
   function labelType(tLabel, tType) {

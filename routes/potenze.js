@@ -72,6 +72,36 @@ function escapeRegex(v) {
   return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+async function addAutoTranslatedNotes(players, targetLang) {
+  if (!Array.isArray(players) || players.length === 0) return players;
+
+  const cache = new Map();
+  const translatedPlayers = await Promise.all(
+    players.map(async (player) => {
+      const noteText = String(player?.notes ?? "").trim();
+      if (!noteText) return player;
+
+      if (!cache.has(noteText)) {
+        cache.set(noteText, translateTextAuto(noteText, targetLang));
+      }
+
+      try {
+        const translated = await cache.get(noteText);
+        if (!translated?.ok || translated.sameLanguage || !translated.translatedText) return player;
+        return {
+          ...player,
+          autoTranslatedNote: translated.translatedText,
+          autoTranslatedSourceLang: translated.sourceLang || null
+        };
+      } catch (err) {
+        return player;
+      }
+    })
+  );
+
+  return translatedPlayers;
+}
+
 async function translateTextAuto(text, targetLang) {
   const cleanText = String(text ?? "").trim();
   const cleanTarget = String(targetLang ?? "").trim().toLowerCase();
@@ -193,11 +223,12 @@ router.get("/", requireAuth, async (req, res) => {
     const q = String(req.query.q || "").trim();
     const search = q ? { nickname: { $regex: escapeRegex(q), $options: "i" } } : {};
 
-    const players = await Player.aggregate([
+    let players = await Player.aggregate([
       { $match: search },
       { $addFields: { total: totalExpr } },
       { $sort: { ...sortStage, ...secondary } }
     ]);
+    players = await addAutoTranslatedNotes(players, res.locals.currentLang || "it");
 
     const playerCount = await Player.countDocuments();
 
