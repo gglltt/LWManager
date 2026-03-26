@@ -1,38 +1,38 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1>Dashboard Biss</h1>
+  <h1><%= t('dashboard_title') %></h1>
 
   <div class="kv">
-    <div><b>Modalità accesso:</b> <%= user && user.authLevel >= 5 ? "Amministratore" : "Standard" %></div>
+    <div><b><%= t('access_mode') %>:</b> <%= user && user.authLevel >= 5 ? t('admin') : t('standard') %></div>
   </div>
 
   <hr class="divider" />
 
-  <h2 class="sectionTitle">Menu</h2>
+  <h2 class="sectionTitle"><%= t('menu') %></h2>
 
   <div class="menuGrid">
-    <a class="menuCard" href="/potenze" title="Gestione Potenze">
+    <a class="menuCard" href="/potenze" title="<%= t('nav_powers') %>">
       <div class="menuIcon">⚡</div>
       <div class="menuText">
-        <div class="menuTitle">Potenze</div>
-        <div class="menuDesc">Lista giocatori, potenze e tipi (T1–T4)</div>
+        <div class="menuTitle"><%= t('nav_powers') %></div>
+        <div class="menuDesc"><%= t('powers_desc') %></div>
       </div>
     </a>
 
     <% if (user && user.authLevel >= 5) { %>
-      <a class="menuCard" href="/registro" title="Registro Eventi">
+      <a class="menuCard" href="/registro" title="<%= t('nav_logs') %>">
         <div class="menuIcon">📘</div>
         <div class="menuText">
-          <div class="menuTitle">Registro</div>
-          <div class="menuDesc">Log attività (login e operazioni sui player)</div>
+          <div class="menuTitle"><%= t('nav_logs') %></div>
+          <div class="menuDesc"><%= t('logs_desc') %></div>
         </div>
       </a>
     <% } %>
   </div>
 
   <div style="margin-top: 16px;">
-    <a class="button" href="/logout">Logout</a>
+    <a class="button" href="/logout"><%= t('nav_logout') %></a>
   </div>
 </section>
 

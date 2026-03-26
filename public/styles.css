@@ -66,6 +66,58 @@ body{
 
 .nav a:hover{ color:var(--text); }
 
+.topbarRight{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.langPicker{
+  position:relative;
+}
+
+.langPicker__summary{
+  list-style:none;
+  cursor:pointer;
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:12px;
+  padding:6px 10px;
+  line-height:1;
+}
+
+.langPicker__summary::-webkit-details-marker{ display:none; }
+
+.langPicker__flag{ font-size:18px; }
+
+.langPicker__menu{
+  position:absolute;
+  right:0;
+  top:calc(100% + 8px);
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(18,26,42,.98);
+  border-radius:12px;
+  min-width:150px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.langPicker__item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  color:var(--text);
+  padding:8px 10px;
+  font-size:14px;
+}
+
+.langPicker__item:hover{
+  background:rgba(58,103,255,.15);
+}
+
+
 /* ========================= */
 /* CARD + TYPO               */
 /* ========================= */

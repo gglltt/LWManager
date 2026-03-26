@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1>Password dimenticata</h1>
+  <h1><%= t('forgot_title') %></h1>
 
   <% if (message) { %>
     <div class="alert success"><%= message %></div>
@@ -13,11 +13,11 @@
 
   <form method="POST" action="/auth/forgot" class="form">
     <label>Email</label>
-    <input type="email" name="email" required placeholder="nome@dominio.it" />
-    <button type="submit">Invia link reset</button>
+    <input type="email" name="email" required placeholder="name@domain.com" />
+    <button type="submit"><%= t('send_reset_link') %></button>
   </form>
 
-  <p class="muted"><a href="/auth/login">Torna al login</a></p>
+  <p class="muted"><a href="/auth/login"><%= t('back_to_login') %></a></p>
 </section>
 
 <%- include("partials/footer") %>
