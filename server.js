@@ -52,6 +52,7 @@ app.use((req, res, next) => {
   }
 
   res.locals.currentLang = currentLang;
+  res.locals.isRTL = currentLang === "ar";
   res.locals.currentFlag = FLAG_BY_LANG[currentLang];
   res.locals.localeTag = LOCALE_BY_LANG[currentLang] || "it-IT";
   res.locals.availableLanguages = SUPPORTED_LANGS.map((code) => ({

@@ -759,3 +759,56 @@ textarea:focus{
   font-size:13px;
   line-height:1.35;
 }
+
+/* ========================= */
+/* RTL (Arabic)             */
+/* ========================= */
+
+html[dir="rtl"] body{
+  direction:rtl;
+  text-align:right;
+}
+
+html[dir="rtl"] .topbar__inner{
+  flex-direction:row-reverse;
+}
+
+html[dir="rtl"] .topbarRight,
+html[dir="rtl"] .nav{
+  justify-content:flex-start;
+}
+
+html[dir="rtl"] .langPicker__menu{
+  right:auto;
+  left:0;
+}
+
+html[dir="rtl"] select{
+  background-position:
+    18px calc(50% - 3px),
+    24px calc(50% - 3px);
+  padding-right:12px;
+  padding-left:36px;
+}
+
+html[dir="rtl"] .table th,
+html[dir="rtl"] .table td,
+html[dir="rtl"] .logModalBody{
+  text-align:right;
+}
+
+html[dir="rtl"] .menuCard::before,
+html[dir="rtl"] .playerCard::before{
+  left:auto;
+  right:0;
+}
+
+html[dir="rtl"] .playerCardTop{
+  padding-left:0;
+  padding-right:6px;
+}
+
+html[dir="rtl"] .playerActions,
+html[dir="rtl"] .pagination{
+  justify-content:flex-start;
+}
