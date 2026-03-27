@@ -105,7 +105,7 @@ async function addAutoTranslatedNotes(players, targetLang) {
 async function translateTextAuto(text, targetLang) {
   const cleanText = String(text ?? "").trim();
   const cleanTarget = String(targetLang ?? "").trim().toLowerCase();
-  if (!cleanText || !["it", "en", "fr", "es"].includes(cleanTarget)) {
+  if (!cleanText || !["it", "en", "fr", "es", "de", "ar"].includes(cleanTarget)) {
     return { ok: false, errorCode: "invalid_input" };
   }
 
