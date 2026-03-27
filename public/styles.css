@@ -90,7 +90,11 @@ body{
 
 .langPicker__summary::-webkit-details-marker{ display:none; }
 
-.langPicker__flag{ font-size:18px; }
+.langPicker__flag,
+.langPicker__itemFlag{
+  font-size:18px;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
+}
 
 .langPicker__menu{
   position:absolute;
