@@ -97,6 +97,7 @@ const TEAM_TYPE_TRANSLATIONS = {
 
 const translations = {
   it: {
+    contact_us: "Contattaci",
     nav_dashboard: "Dashboard",
     nav_powers: "Potenze",
     nav_logs: "Registro",
@@ -109,7 +110,7 @@ const translations = {
     login_desc: "Usa il PIN standard per accesso base o il PIN amministratore per funzioni avanzate.",
     login_first_access: "Primo accesso",
     login_standard_pin: "PIN standard",
-    login_step_1: "Accedi con PIN (admin se devi esportare in Excel).",
+    login_step_1: "Accedi con PIN.",
     login_step_2: "Vai su Potenze dalla Dashboard.",
     login_step_3: "Clicca + Nuovo e inserisci Nickname, Ruolo, valori T1-T4 e Tipo T1-T4.",
     login_step_4: "Salva e ripeti per ogni squadra/giocatore; poi verifica il totale nella lista.",
@@ -232,6 +233,7 @@ const translations = {
     err_nickname_long: "Nickname troppo lungo (max 40 caratteri)."
   },
   en: {
+    contact_us: "Contact us",
     nav_dashboard: "Dashboard",
     nav_powers: "Powers",
     nav_logs: "Logs",
@@ -244,7 +246,7 @@ const translations = {
     login_desc: "Use the standard PIN for basic access or the admin PIN for advanced functions.",
     login_first_access: "First access",
     login_standard_pin: "Standard PIN",
-    login_step_1: "Log in with your PIN (admin PIN is needed for Excel export).",
+    login_step_1: "Log in with your PIN.",
     login_step_2: "Open Powers from the Dashboard.",
     login_step_3: "Click + New and enter Nickname, Role, T1-T4 values, and T1-T4 Type.",
     login_step_4: "Save and repeat for each team/player, then check the total in the list.",
@@ -367,6 +369,7 @@ const translations = {
     err_nickname_long: "Nickname too long (max 40 characters)."
   },
   fr: {
+    contact_us: "Contactez-nous",
     nav_dashboard: "Tableau de bord",
     nav_powers: "Puissances",
     nav_logs: "Registre",
@@ -379,7 +382,7 @@ const translations = {
     login_desc: "Utilisez le PIN standard pour l'accès de base ou le PIN administrateur pour les fonctions avancées.",
     login_first_access: "Premier accès",
     login_standard_pin: "PIN standard",
-    login_step_1: "Connectez-vous avec votre PIN (PIN admin requis pour l'export Excel).",
+    login_step_1: "Connectez-vous avec votre PIN.",
     login_step_2: "Ouvrez Puissances depuis le tableau de bord.",
     login_step_3: "Cliquez sur + Nouveau et saisissez le pseudo, le rôle, les valeurs T1-T4 et le type T1-T4.",
     login_step_4: "Enregistrez et répétez pour chaque équipe/joueur, puis vérifiez le total dans la liste.",
@@ -502,6 +505,7 @@ const translations = {
     err_nickname_long: "Pseudo trop long (max 40 caractères)."
   },
   es: {
+    contact_us: "Contáctanos",
     nav_dashboard: "Panel",
     nav_powers: "Potencias",
     nav_logs: "Registro",
@@ -514,7 +518,7 @@ const translations = {
     login_desc: "Usa el PIN estándar para acceso básico o el PIN de administrador para funciones avanzadas.",
     login_first_access: "Primer acceso",
     login_standard_pin: "PIN estándar",
-    login_step_1: "Inicia sesión con tu PIN (el PIN admin es necesario para exportar a Excel).",
+    login_step_1: "Inicia sesión con tu PIN.",
     login_step_2: "Abre Potencias desde el Panel.",
     login_step_3: "Haz clic en + Nuevo e introduce Nickname, Rol, valores T1-T4 y Tipo T1-T4.",
     login_step_4: "Guarda y repite para cada equipo/jugador; luego verifica el total en la lista.",
@@ -637,6 +641,7 @@ const translations = {
     err_nickname_long: "Nickname demasiado largo (máx 40 caracteres)."
   },
   de: {
+    contact_us: "Kontaktiere uns",
     nav_dashboard: "Dashboard",
     nav_powers: "Stärken",
     nav_logs: "Protokoll",
@@ -649,7 +654,7 @@ const translations = {
     login_desc: "Nutze den Standard-PIN für den Basiszugang oder den Admin-PIN für erweiterte Funktionen.",
     login_first_access: "Erster Zugriff",
     login_standard_pin: "Standard-PIN",
-    login_step_1: "Mit PIN anmelden (Admin-PIN ist für Excel-Export erforderlich).",
+    login_step_1: "Mit PIN anmelden.",
     login_step_2: "Öffne Stärken im Dashboard.",
     login_step_3: "Klicke auf + Neu und gib Nickname, Rolle, T1-T4-Werte und T1-T4-Typ ein.",
     login_step_4: "Speichern und für jedes Team/jeden Spieler wiederholen; dann die Gesamtzahl in der Liste prüfen.",
@@ -772,6 +777,7 @@ const translations = {
     err_nickname_long: "Nickname zu lang (max. 40 Zeichen)."
   },
   ar: {
+    contact_us: "اتصل بنا",
     nav_dashboard: "لوحة التحكم",
     nav_powers: "القوى",
     nav_logs: "السجل",
@@ -784,7 +790,7 @@ const translations = {
     login_desc: "استخدم PIN العادي للوصول الأساسي أو PIN المشرف للوظائف المتقدمة.",
     login_first_access: "الدخول الأول",
     login_standard_pin: "PIN العادي",
-    login_step_1: "سجّل الدخول باستخدام PIN (PIN المشرف مطلوب لتصدير Excel).",
+    login_step_1: "سجّل الدخول باستخدام PIN.",
     login_step_2: "افتح صفحة القوى من لوحة التحكم.",
     login_step_3: "اضغط + جديد وأدخل الاسم المستعار، الدور، قيم T1-T4 ونوع T1-T4.",
     login_step_4: "احفظ وكرر لكل فريق/لاعب، ثم تحقق من الإجمالي في القائمة.",
@@ -909,6 +915,7 @@ const translations = {
 };
 
 translations.pl = {
+  "contact_us": "Skontaktuj się z nami",
   "nav_dashboard": "Panel",
   "nav_powers": "Uprawnienie",
   "nav_logs": "Dzienniki",
@@ -921,7 +928,7 @@ translations.pl = {
   "login_desc": "Użyj standardowego kodu PIN, aby uzyskać dostęp podstawowy, lub kodu PIN administratora, aby uzyskać dostęp do zaawansowanych funkcji.",
   "login_first_access": "Pierwszy dostęp",
   "login_standard_pin": "Standardowy PIN",
-  "login_step_1": "Zaloguj się przy użyciu swojego PIN-u (do eksportu do Excela potrzebny jest PIN administratora).",
+  "login_step_1": "Zaloguj się przy użyciu swojego PIN-u.",
   "login_step_2": "Otwórz uprawnienia z pulpitu nawigacyjnego.",
   "login_step_3": "Kliknij + Nowy i wprowadź Pseudonim, Rola, Wartości T1-T4 i Typ T1-T4.",
   "login_step_4": "Zapisz i powtórz dla każdego zespołu/gracza, a następnie sprawdź sumę na liście.",
@@ -1045,6 +1052,7 @@ translations.pl = {
 };
 
 translations.sv = {
+  "contact_us": "Kontakta oss",
   "nav_dashboard": "Instrumentbräda",
   "nav_powers": "Befogenheter",
   "nav_logs": "Loggar",
@@ -1057,7 +1065,7 @@ translations.sv = {
   "login_desc": "Använd standard-PIN-koden för grundläggande åtkomst eller admin-PIN för avancerade funktioner.",
   "login_first_access": "Första tillträdet",
   "login_standard_pin": "Standard PIN",
-  "login_step_1": "Logga in med din PIN-kod (admin-PIN behövs för Excel-export).",
+  "login_step_1": "Logga in med din PIN-kod.",
   "login_step_2": "Öppna Powers från instrumentpanelen.",
   "login_step_3": "Klicka på + Ny och ange Smeknamn, Roll, T1-T4-värden och T1-T4-typ.",
   "login_step_4": "Spara och upprepa för varje lag/spelare, kontrollera sedan summan i listan.",
@@ -1181,6 +1189,7 @@ translations.sv = {
 };
 
 translations.da = {
+  "contact_us": "Kontakt os",
   "nav_dashboard": "Dashboard",
   "nav_powers": "Beføjelser",
   "nav_logs": "Logs",
@@ -1193,7 +1202,7 @@ translations.da = {
   "login_desc": "Brug standard-PIN-koden til grundlæggende adgang eller admin-PIN-koden til avancerede funktioner.",
   "login_first_access": "Første adgang",
   "login_standard_pin": "Standard PIN",
-  "login_step_1": "Log ind med din PIN-kode (admin PIN-kode er nødvendig for Excel-eksport).",
+  "login_step_1": "Log ind med din PIN-kode.",
   "login_step_2": "Åbn Powers fra Dashboard.",
   "login_step_3": "Klik på + Ny, og indtast kaldenavn, rolle, T1-T4-værdier og T1-T4-type.",
   "login_step_4": "Gem og gentag for hvert hold/spiller, og tjek derefter totalen på listen.",
