@@ -579,6 +579,45 @@
         .join("");
     }
 
+    function toIsoDayUTC(dateObj) {
+      const y = dateObj.getUTCFullYear();
+      const m = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dateObj.getUTCDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function buildLastDaysForChart(realRows, daysCount) {
+      const count = Number.isFinite(daysCount) ? Math.max(1, Math.floor(daysCount)) : 30;
+      const rowsByDay = new Map(
+        (realRows || [])
+          .filter((row) => row && row.date)
+          .map((row) => [String(row.date), row])
+      );
+
+      const now = new Date();
+      const startUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (count - 1), 0, 0, 0, 0));
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        const dayUTC = new Date(startUTC.getTime() + i * 24 * 60 * 60 * 1000);
+        const isoDay = toIsoDayUTC(dayUTC);
+        const realRow = rowsByDay.get(isoDay);
+        if (realRow) {
+          result.push(realRow);
+        } else {
+          result.push({
+            id: "-",
+            date: isoDay,
+            t1: 0,
+            t2: 0,
+            t3: 0,
+            t4: 0,
+            total: 0
+          });
+        }
+      }
+      return result;
+    }
+
     async function openPlayerHistory(playerId, playerName) {
       openHistoryModal();
       historyMeta.textContent = `${playerName} · <%= t("last_month") %>`;
@@ -592,9 +631,10 @@
         if (!resp.ok || !data?.ok) throw new Error("history_error");
 
         const rows = data.history || [];
+        const chartRows = buildLastDaysForChart(rows, Number(data.days || 30));
         if (!rows.length) {
           historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("no_history") %></td></tr>`;
-          drawHistoryChart([]);
+          drawHistoryChart(chartRows);
           return;
         }
 
@@ -623,7 +663,7 @@
           .map((row) => `<tr><td>${row.id}</td><td class="historyDateCell">${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td><td><b>${row.total}</b></td></tr>`)
           .join("");
 
-        drawHistoryChart(rows);
+        drawHistoryChart(chartRows);
       } catch (err) {
         historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("err_internal") %></td></tr>`;
       }
