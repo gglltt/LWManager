@@ -842,6 +842,19 @@ html[dir="rtl"] .pagination{
   background:rgba(9,12,20,.45);
 }
 
+
+.historyTableWrap .table th{
+  background:rgba(18,26,42,.96);
+}
+
+.historyTableWrap .table tbody tr:first-child td{
+  border-top:0;
+}
+
+.historyDateCell{
+  white-space:nowrap;
+}
+
 .historyLegend{
   display:flex;
   flex-wrap:wrap;

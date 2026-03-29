@@ -323,7 +323,7 @@
       <canvas id="playerHistoryCanvas" width="980" height="320"></canvas>
     </div>
     <div class="historyLegend" id="playerHistoryLegend"></div>
-    <div class="tableWrap">
+    <div class="tableWrap historyTableWrap">
       <table class="table tableCompact">
         <thead>
           <tr>
@@ -490,7 +490,7 @@
       const ctx = historyCanvas.getContext("2d");
       const w = historyCanvas.width;
       const h = historyCanvas.height;
-      const pad = { l: 56, r: 20, t: 16, b: 34 };
+      const pad = { l: 56, r: 20, t: 16, b: 74 };
       const chartW = w - pad.l - pad.r;
       const chartH = h - pad.t - pad.b;
 
@@ -525,12 +525,34 @@
 
       const xForIndex = (i) => pad.l + (points.length === 1 ? chartW / 2 : (chartW * i) / (points.length - 1));
       const yForValue = (v) => pad.t + chartH - ((v - minY) / (maxY - minY)) * chartH;
+      const hasRealEntry = (point) => {
+        const rawId = String(point?.id ?? "").trim();
+        return rawId && rawId !== "-";
+      };
+
+      points.forEach((point, i) => {
+        if (!hasRealEntry(point)) return;
+        const x = xForIndex(i);
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = "rgba(184,107,255,.4)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, pad.t);
+        ctx.lineTo(x, pad.t + chartH);
+        ctx.stroke();
+        ctx.restore();
+      });
 
       points.forEach((p, i) => {
         const x = xForIndex(i);
-        ctx.fillStyle = "#a9b6d3";
+        ctx.save();
+        ctx.translate(x, h - 6);
+        ctx.rotate(-Math.PI / 3);
+        ctx.fillStyle = hasRealEntry(p) ? "#d4dcf0" : "#a9b6d3";
         ctx.font = "10px sans-serif";
-        ctx.fillText(p.date.slice(5), x - 14, h - 10);
+        ctx.fillText(p.date.slice(5), 0, 0);
+        ctx.restore();
       });
 
       seriesConfig.forEach((serie) => {
@@ -575,8 +597,29 @@
           return;
         }
 
-        historyTableBody.innerHTML = rows
-          .map((row) => `<tr><td>${row.id}</td><td>${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td><td><b>${row.total}</b></td></tr>`)
+        const displayRows = rows.map((row, index) => {
+          const prev = index > 0 ? rows[index - 1] : null;
+          const showValue = (value, prevValue) => {
+            const numericValue = Number(value || 0);
+            const numericPrev = Number(prevValue || 0);
+            if (!Number.isFinite(numericValue) || numericValue === 0) return "";
+            if (prev && numericValue === numericPrev) return "";
+            return numericValue;
+          };
+
+          return {
+            id: row.id,
+            date: row.date,
+            t1: showValue(row.t1, prev?.t1),
+            t2: showValue(row.t2, prev?.t2),
+            t3: showValue(row.t3, prev?.t3),
+            t4: showValue(row.t4, prev?.t4),
+            total: showValue(row.total, prev?.total)
+          };
+        });
+
+        historyTableBody.innerHTML = displayRows
+          .map((row) => `<tr><td>${row.id}</td><td class="historyDateCell">${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td><td><b>${row.total}</b></td></tr>`)
           .join("");
 
         drawHistoryChart(rows);
