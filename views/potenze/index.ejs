@@ -561,11 +561,12 @@
         ctx.strokeStyle = serie.color;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
+        const firstX = xForIndex(0);
+        ctx.moveTo(firstX, yForValue(0));
         points.forEach((point, i) => {
           const x = xForIndex(i);
           const y = yForValue(Number(point[serie.key] || 0));
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+          ctx.lineTo(x, y);
         });
         ctx.stroke();
       });
