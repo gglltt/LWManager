@@ -123,6 +123,17 @@ async function translateTextAuto(text, targetLang) {
     }
   }
 
+  function isProviderErrorText(value) {
+    const textValue = String(value ?? "").trim().toLowerCase();
+    if (!textValue) return true;
+    return (
+      textValue.includes("invalid source language") ||
+      textValue.includes("invalid target language") ||
+      textValue.includes("langpair=") ||
+      textValue.includes("example:")
+    );
+  }
+
   const providers = [
     {
       name: "google_public",
@@ -142,7 +153,9 @@ async function translateTextAuto(text, targetLang) {
       run: async () => {
         const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=auto|${encodeURIComponent(cleanTarget)}`;
         const data = await fetchJsonWithTimeout(url, { method: "GET" });
+        if (Number(data?.responseStatus) !== 200) return null;
         const translatedText = String(data?.responseData?.translatedText ?? "").trim();
+        if (isProviderErrorText(translatedText)) return null;
         const sourceLang = String(data?.responseData?.match ?? "").trim(); // MyMemory does not expose source lang reliably
         if (!translatedText) return null;
         return { translatedText, sourceLang: sourceLang && sourceLang.length === 2 ? sourceLang.toLowerCase() : null };
@@ -173,6 +186,7 @@ async function translateTextAuto(text, targetLang) {
     try {
       const translated = await provider.run();
       if (!translated?.translatedText) continue;
+      if (isProviderErrorText(translated.translatedText)) continue;
       const detectedLanguage = String(translated.sourceLang || "").toLowerCase();
       if (detectedLanguage && detectedLanguage === cleanTarget) {
         return { ok: true, translatedText: cleanText, sourceLang: detectedLanguage, sameLanguage: true };
