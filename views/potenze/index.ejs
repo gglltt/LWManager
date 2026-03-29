@@ -144,6 +144,7 @@
 
           <div class="playerActions">
             <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
+            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
             <% if (isAdmin) { %>
               <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
                 <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
@@ -288,6 +289,7 @@
             <td class="colActions">
               <div class="actionIcons">
                 <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
+            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
                 <% if (isAdmin) { %>
                   <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
                     <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
@@ -307,6 +309,40 @@
     </p>
   <% } %>
 </section>
+
+
+<div class="logModal" id="playerHistoryModal" hidden aria-hidden="true">
+  <div class="logModalBackdrop" data-player-history-close="true"></div>
+  <div class="logModalDialog logModalDialogWide" role="dialog" aria-modal="true" aria-labelledby="playerHistoryModalTitle">
+    <div class="logModalHeader">
+      <h3 id="playerHistoryModalTitle"><%= t("history_chart") %></h3>
+      <button type="button" class="iconBtn" id="playerHistoryModalClose" aria-label="<%= t('close') %>">✖</button>
+    </div>
+    <div class="historyMeta muted" id="playerHistoryMeta"></div>
+    <div class="historyChartWrap">
+      <canvas id="playerHistoryCanvas" width="980" height="320"></canvas>
+    </div>
+    <div class="historyLegend" id="playerHistoryLegend"></div>
+    <div class="tableWrap">
+      <table class="table tableCompact">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th><%= t("date") %></th>
+            <th>T1</th>
+            <th>T2</th>
+            <th>T3</th>
+            <th>T4</th>
+            <th><%= t("total_results") %></th>
+          </tr>
+        </thead>
+        <tbody id="playerHistoryTableBody">
+          <tr><td colspan="7" class="muted"><%= t("history_loading") %></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <div class="logModal" id="playerNotesModal" hidden aria-hidden="true">
   <div class="logModalBackdrop" data-player-notes-close="true"></div>
@@ -421,6 +457,163 @@
         translateBtn.disabled = false;
       }
     });
+
+    const historyModal = document.getElementById("playerHistoryModal");
+    const historyCloseBtn = document.getElementById("playerHistoryModalClose");
+    const historyMeta = document.getElementById("playerHistoryMeta");
+    const historyTableBody = document.getElementById("playerHistoryTableBody");
+    const historyCanvas = document.getElementById("playerHistoryCanvas");
+    const historyLegend = document.getElementById("playerHistoryLegend");
+
+    const seriesConfig = [
+      { key: "t1", label: "T1", color: "#3a67ff" },
+      { key: "t2", label: "T2", color: "#2bd576" },
+      { key: "t3", label: "T3", color: "#ffaf45" },
+      { key: "t4", label: "T4", color: "#ff5c7a" },
+      { key: "total", label: "TOT", color: "#b86bff" }
+    ];
+
+    function closeHistoryModal() {
+      if (!historyModal) return;
+      historyModal.hidden = true;
+      historyModal.setAttribute("aria-hidden", "true");
+    }
+
+    function openHistoryModal() {
+      if (!historyModal) return;
+      historyModal.hidden = false;
+      historyModal.setAttribute("aria-hidden", "false");
+    }
+
+    function drawHistoryChart(points) {
+      if (!historyCanvas) return;
+      const ctx = historyCanvas.getContext("2d");
+      const w = historyCanvas.width;
+      const h = historyCanvas.height;
+      const pad = { l: 56, r: 20, t: 16, b: 34 };
+      const chartW = w - pad.l - pad.r;
+      const chartH = h - pad.t - pad.b;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#0d1424";
+      ctx.fillRect(0, 0, w, h);
+
+      if (!points || points.length === 0) {
+        ctx.fillStyle = "#a9b6d3";
+        ctx.font = "14px sans-serif";
+        ctx.fillText("Nessun dato", 20, 26);
+        return;
+      }
+
+      const maxY = Math.max(1, ...points.map((p) => Math.max(p.t1, p.t2, p.t3, p.t4, p.total)));
+      const minY = 0;
+
+      ctx.strokeStyle = "rgba(169,182,211,.25)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const yy = pad.t + (chartH * i) / 5;
+        ctx.beginPath();
+        ctx.moveTo(pad.l, yy);
+        ctx.lineTo(w - pad.r, yy);
+        ctx.stroke();
+
+        const val = (maxY - ((maxY - minY) * i) / 5).toFixed(0);
+        ctx.fillStyle = "#a9b6d3";
+        ctx.font = "11px sans-serif";
+        ctx.fillText(val, 4, yy + 4);
+      }
+
+      const xForIndex = (i) => pad.l + (points.length === 1 ? chartW / 2 : (chartW * i) / (points.length - 1));
+      const yForValue = (v) => pad.t + chartH - ((v - minY) / (maxY - minY)) * chartH;
+
+      points.forEach((p, i) => {
+        const x = xForIndex(i);
+        ctx.fillStyle = "#a9b6d3";
+        ctx.font = "10px sans-serif";
+        ctx.fillText(p.date.slice(5), x - 14, h - 10);
+      });
+
+      seriesConfig.forEach((serie) => {
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = serie.color;
+        points.forEach((point, i) => {
+          const x = xForIndex(i);
+          const y = yForValue(Number(point[serie.key] || 0));
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      });
+    }
+
+    function renderLegend() {
+      if (!historyLegend) return;
+      historyLegend.innerHTML = seriesConfig
+        .map((serie) => `<span class="legendItem"><span class="legendDot" style="background:${serie.color}"></span>${serie.label}</span>`)
+        .join("");
+    }
+
+    async function openPlayerHistory(playerId, playerName) {
+      openHistoryModal();
+      historyMeta.textContent = `${playerName} · <%= t("last_month") %>`;
+      historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("history_loading") %></td></tr>`;
+      renderLegend();
+      drawHistoryChart([]);
+
+      try {
+        const resp = await fetch(`/potenze/${playerId}/history-data?days=30`);
+        const data = await resp.json();
+        if (!resp.ok || !data?.ok) throw new Error("history_error");
+
+        const rows = data.history || [];
+        if (!rows.length) {
+          historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("no_history") %></td></tr>`;
+          drawHistoryChart([]);
+          return;
+        }
+
+        historyTableBody.innerHTML = rows
+          .map((row) => `<tr><td>${row.id}</td><td>${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td><td><b>${row.total}</b></td></tr>`)
+          .join("");
+
+        drawHistoryChart(rows);
+      } catch (err) {
+        historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("err_internal") %></td></tr>`;
+      }
+    }
+
+    document.querySelectorAll(".playerHistoryOpenBtn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const playerId = btn.getAttribute("data-player-id");
+        const playerName = btn.getAttribute("data-player-name") || "-";
+        if (!playerId) return;
+        openPlayerHistory(playerId, playerName);
+      });
+    });
+
+    if (historyCloseBtn) {
+      historyCloseBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        closeHistoryModal();
+      });
+    }
+
+    if (historyModal) {
+      historyModal.addEventListener("click", (event) => {
+        const target = event.target;
+        if (target && target.closest("[data-player-history-close='true']")) {
+          closeHistoryModal();
+        }
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && historyModal && !historyModal.hidden) {
+        closeHistoryModal();
+      }
+    });
+
   })();
 </script>
 
