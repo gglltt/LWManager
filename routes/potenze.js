@@ -4,6 +4,8 @@ const Player = require("../models/player.js"); // p minuscola
 const { requireAuth, requireLevel } = require("../middleware/auth");
 const { TEAM_TYPE_OPTIONS } = require("../config/i18n");
 const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
+const PlayerPowerHistory = require("../models/playerPowerHistory");
+const { savePlayerPowerSnapshot } = require("../utils/playerPowerHistory");
 
 const router = express.Router();
 
@@ -343,6 +345,7 @@ router.post("/new", requireAuth, async (req, res) => {
       notes: sanitizeText(req.body.notes, 2000)
     });
 
+    await savePlayerPowerSnapshot(createdPlayer);
     await createEventLog(req, "nuovo_player", buildPlayerDetails(createdPlayer));
     return res.redirect("/potenze");
   } catch (err) {
@@ -507,12 +510,55 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
     player.notes = sanitizeText(req.body.notes, 2000);
 
     await player.save();
+    await savePlayerPowerSnapshot(player);
     await createEventLog(req, "modifica_player", buildPlayerDetails(player));
 
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
     return res.status(500).send(`500 - ${(res.locals.t || ((k) => k))("err_internal")}`);
+  }
+});
+
+
+router.get("/:id/history-data", requireAuth, async (req, res) => {
+  try {
+    const player = await Player.findById(req.params.id).select("nickname").lean();
+    if (!player) {
+      return res.status(404).json({ ok: false, error: (res.locals.t || ((k) => k))("err_player_not_found") });
+    }
+
+    const daysRaw = Number(req.query.days || 30);
+    const days = Number.isFinite(daysRaw) ? Math.min(Math.max(Math.floor(daysRaw), 1), 365) : 30;
+
+    const now = new Date();
+    const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (days - 1), 0, 0, 0, 0));
+
+    const records = await PlayerPowerHistory.find({
+      player: player.nickname,
+      snapshotDate: { $gte: from }
+    })
+      .sort({ snapshotDate: 1 })
+      .lean();
+
+    const history = records.map((r) => {
+      const total = Number(r.t1 || 0) + Number(r.t2 || 0) + Number(r.t3 || 0) + Number(r.t4 || 0);
+      return {
+        id: r.seqId,
+        player: r.player,
+        date: r.snapshotDay,
+        t1: Number(r.t1 || 0),
+        t2: Number(r.t2 || 0),
+        t3: Number(r.t3 || 0),
+        t4: Number(r.t4 || 0),
+        total: Math.round(total * 100) / 100
+      };
+    });
+
+    return res.json({ ok: true, player: player.nickname, days, history });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: (res.locals.t || ((k) => k))("err_internal") });
   }
 });
 
