@@ -1,6 +1,7 @@
 const express = require("express");
 const { requireAuth, requireLevel } = require("../middleware/auth");
 const { EventLog, EVENT_TYPES } = require("../models/eventLog");
+const { rebuildSnapshotsFromEventLog } = require("../utils/playerPowerHistory");
 
 const router = express.Router();
 const PAGE_SIZE = 50;
@@ -32,6 +33,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       events,
       eventTypes: EVENT_TYPES,
       selectedEventType: eventType,
+      trackingMessage: String(req.query.trackingMessage || "").trim(),
       page,
       totalPages,
       total
@@ -44,11 +46,24 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       events: [],
       eventTypes: EVENT_TYPES,
       selectedEventType: "",
+      trackingMessage: "",
       page: 1,
       totalPages: 1,
       total: 0,
       error: t("err_load_event_log")
     });
+  }
+});
+
+router.post("/tracking/rebuild", requireAuth, requireLevel(5), async (req, res) => {
+  try {
+    const stats = await rebuildSnapshotsFromEventLog();
+    const message = `Tracking aggiornato: eventi totali ${stats.totalEvents}, validi ${stats.processedEvents}, snapshot scritti ${stats.importedSnapshots}.`;
+    return res.redirect(`/registro?trackingMessage=${encodeURIComponent(message)}`);
+  } catch (err) {
+    console.error(err);
+    const t = res.locals.t || ((k) => k);
+    return res.redirect(`/registro?trackingMessage=${encodeURIComponent(t("err_internal"))}`);
   }
 });
 
