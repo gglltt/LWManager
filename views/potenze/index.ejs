@@ -505,7 +505,8 @@
         return;
       }
 
-      const maxY = Math.max(1, ...points.map((p) => Math.max(p.t1, p.t2, p.t3, p.t4, p.total)));
+      const numericValues = points.flatMap((p) => [p.t1, p.t2, p.t3, p.t4, p.total]).filter((v) => Number.isFinite(v));
+      const maxY = Math.max(1, ...(numericValues.length ? numericValues : [0]));
       const minY = 0;
 
       ctx.strokeStyle = "rgba(169,182,211,.25)";
@@ -561,12 +562,21 @@
         ctx.strokeStyle = serie.color;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
-        const firstX = xForIndex(0);
-        ctx.moveTo(firstX, yForValue(0));
+        let hasPath = false;
         points.forEach((point, i) => {
+          const rawValue = point[serie.key];
+          if (!Number.isFinite(rawValue)) {
+            hasPath = false;
+            return;
+          }
           const x = xForIndex(i);
-          const y = yForValue(Number(point[serie.key] || 0));
-          ctx.lineTo(x, y);
+          const y = yForValue(rawValue);
+          if (!hasPath) {
+            ctx.moveTo(x, y);
+            hasPath = true;
+          } else {
+            ctx.lineTo(x, y);
+          }
         });
         ctx.stroke();
       });
@@ -597,21 +607,44 @@
       const now = new Date();
       const startUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (count - 1), 0, 0, 0, 0));
       const result = [];
+      let lastKnown = null;
       for (let i = 0; i < count; i++) {
         const dayUTC = new Date(startUTC.getTime() + i * 24 * 60 * 60 * 1000);
         const isoDay = toIsoDayUTC(dayUTC);
         const realRow = rowsByDay.get(isoDay);
         if (realRow) {
-          result.push(realRow);
+          const normalized = {
+            id: realRow.id,
+            date: isoDay,
+            t1: Number(realRow.t1 || 0),
+            t2: Number(realRow.t2 || 0),
+            t3: Number(realRow.t3 || 0),
+            t4: Number(realRow.t4 || 0),
+            total: Number(realRow.total || 0)
+          };
+          result.push(normalized);
+          lastKnown = normalized;
         } else {
+          if (!lastKnown) {
+            result.push({
+              id: "-",
+              date: isoDay,
+              t1: null,
+              t2: null,
+              t3: null,
+              t4: null,
+              total: null
+            });
+            continue;
+          }
           result.push({
             id: "-",
             date: isoDay,
-            t1: 0,
-            t2: 0,
-            t3: 0,
-            t4: 0,
-            total: 0
+            t1: lastKnown.t1,
+            t2: lastKnown.t2,
+            t3: lastKnown.t3,
+            t4: lastKnown.t4,
+            total: lastKnown.total
           });
         }
       }
