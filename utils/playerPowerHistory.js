@@ -1,4 +1,5 @@
 const PlayerPowerHistory = require("../models/playerPowerHistory");
+const Counter = require("../models/counter");
 const { EventLog } = require("../models/eventLog");
 
 function toDayString(date) {
@@ -97,26 +98,47 @@ async function rebuildSnapshotsFromEventLog() {
     const day = toDayString(event.createdAt || new Date());
     const snapshotDate = dayStartUtc(day);
 
-    const updated = await PlayerPowerHistory.findOneAndUpdate(
-      {
-        player: parsed.nickname,
-        snapshotDay: day
-      },
-      {
-        $set: {
-          snapshotDate,
-          t1: parsed.t1,
-          t2: parsed.t2,
-          t3: parsed.t3,
-          t4: parsed.t4
-        }
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true
+    const query = {
+      player: parsed.nickname,
+      snapshotDay: day
+    };
+
+    const update = {
+      $set: {
+        snapshotDate,
+        t1: parsed.t1,
+        t2: parsed.t2,
+        t3: parsed.t3,
+        t4: parsed.t4
       }
-    );
+    };
+
+    let updated = await PlayerPowerHistory.findOneAndUpdate(query, update, {
+      new: true
+    });
+
+    if (!updated) {
+      const counter = await Counter.findOneAndUpdate(
+        { key: "player_power_history" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+
+      updated = await PlayerPowerHistory.findOneAndUpdate(
+        query,
+        {
+          ...update,
+          $setOnInsert: {
+            seqId: counter.seq
+          }
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true
+        }
+      );
+    }
 
     if (updated) importedSnapshots += 1;
   }
