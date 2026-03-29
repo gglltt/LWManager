@@ -112,13 +112,14 @@ async function rebuildSnapshotsFromEventLog() {
   let processedPlayers = 0;
   let importedSnapshots = 0;
 
-  // 1) Seed tracking with current player powers (at least one snapshot per player).
+  // 1) Seed tracking with current player powers (at least one snapshot per player),
+  // anchored to the player's last update day (not "today") to avoid fake recent entries.
   for (const player of players) {
     const nickname = String(player?.nickname || "").trim();
     if (!nickname) continue;
     processedPlayers += 1;
 
-    const day = toDayString(new Date());
+    const day = toDayString(player.updatedAt || new Date());
     const inserted = await upsertSnapshot(
       nickname,
       day,
