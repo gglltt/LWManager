@@ -97,32 +97,28 @@ async function rebuildSnapshotsFromEventLog() {
     const day = toDayString(event.createdAt || new Date());
     const snapshotDate = dayStartUtc(day);
 
-    const existing = await PlayerPowerHistory.findOne({
-      player: parsed.nickname,
-      snapshotDay: day
-    });
+    const updated = await PlayerPowerHistory.findOneAndUpdate(
+      {
+        player: parsed.nickname,
+        snapshotDay: day
+      },
+      {
+        $set: {
+          snapshotDate,
+          t1: parsed.t1,
+          t2: parsed.t2,
+          t3: parsed.t3,
+          t4: parsed.t4
+        }
+      },
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true
+      }
+    );
 
-    if (existing) {
-      existing.snapshotDate = snapshotDate;
-      existing.t1 = parsed.t1;
-      existing.t2 = parsed.t2;
-      existing.t3 = parsed.t3;
-      existing.t4 = parsed.t4;
-      await existing.save();
-      importedSnapshots += 1;
-      continue;
-    }
-
-    await PlayerPowerHistory.create({
-      player: parsed.nickname,
-      snapshotDay: day,
-      snapshotDate,
-      t1: parsed.t1,
-      t2: parsed.t2,
-      t3: parsed.t3,
-      t4: parsed.t4
-    });
-    importedSnapshots += 1;
+    if (updated) importedSnapshots += 1;
   }
 
   return {
