@@ -7,12 +7,18 @@
       <p class="muted"><%= t("event_log_desc") %></p>
     </div>
     <div class="pageHeaderActions">
+      <form method="POST" action="/registro/tracking/rebuild" class="inlineForm">
+        <button class="button secondary" type="submit">Genera tracking table</button>
+      </form>
       <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
     </div>
   </div>
 
   <% if (typeof error !== "undefined" && error) { %>
     <div class="alert error"><%= error %></div>
+  <% } %>
+  <% if (typeof trackingMessage !== "undefined" && trackingMessage) { %>
+    <div class="alert success"><%= trackingMessage %></div>
   <% } %>
 
   <form method="GET" action="/registro" class="filterBar">
