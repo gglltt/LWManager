@@ -532,7 +532,6 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
     const days = Number.isFinite(daysRaw) ? Math.min(Math.max(Math.floor(daysRaw), 1), 365) : 30;
 
     const now = new Date();
-    const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
     const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, 0, 0, 0, 0));
     const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
@@ -543,40 +542,25 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
       .sort({ snapshotDate: 1 })
       .lean();
 
-    const recordsByDay = new Map();
-    records.forEach((r) => {
-      recordsByDay.set(r.snapshotDay, r);
-    });
-
-    let carry = { t1: 0, t2: 0, t3: 0, t4: 0 };
-    const history = [];
-    for (let i = 0; i <= days; i++) {
-      const day = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate() + i, 0, 0, 0, 0));
-      if (day > todayUtc) break;
-      const dayKey = day.toISOString().slice(0, 10);
-      const record = recordsByDay.get(dayKey);
-
-      if (record) {
-        carry = {
-          t1: Number(record.t1 || 0),
-          t2: Number(record.t2 || 0),
-          t3: Number(record.t3 || 0),
-          t4: Number(record.t4 || 0)
+    const history = records
+      .filter((record) => record && record.snapshotDay)
+      .map((record) => {
+        const t1 = Math.round(Number(record.t1 || 0) * 100) / 100;
+        const t2 = Math.round(Number(record.t2 || 0) * 100) / 100;
+        const t3 = Math.round(Number(record.t3 || 0) * 100) / 100;
+        const t4 = Math.round(Number(record.t4 || 0) * 100) / 100;
+        const total = Math.round((t1 + t2 + t3 + t4) * 100) / 100;
+        return {
+          id: record.seqId ?? "-",
+          player: player.nickname,
+          date: record.snapshotDay,
+          t1,
+          t2,
+          t3,
+          t4,
+          total
         };
-      }
-
-      const total = Number(carry.t1 || 0) + Number(carry.t2 || 0) + Number(carry.t3 || 0) + Number(carry.t4 || 0);
-      history.push({
-        id: record ? record.seqId : "-",
-        player: player.nickname,
-        date: dayKey,
-        t1: Math.round(Number(carry.t1 || 0) * 100) / 100,
-        t2: Math.round(Number(carry.t2 || 0) * 100) / 100,
-        t3: Math.round(Number(carry.t3 || 0) * 100) / 100,
-        t4: Math.round(Number(carry.t4 || 0) * 100) / 100,
-        total: Math.round(total * 100) / 100
       });
-    }
 
     return res.json({ ok: true, player: player.nickname, days, history });
   } catch (err) {
