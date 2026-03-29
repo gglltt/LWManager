@@ -537,6 +537,8 @@
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = serie.color;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
         points.forEach((point, i) => {
           const x = xForIndex(i);
           const y = yForValue(Number(point[serie.key] || 0));
