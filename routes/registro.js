@@ -58,7 +58,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
 router.post("/tracking/rebuild", requireAuth, requireLevel(5), async (req, res) => {
   try {
     const stats = await rebuildSnapshotsFromEventLog();
-    const message = `Tracking aggiornato: eventi totali ${stats.totalEvents}, validi ${stats.processedEvents}, snapshot scritti ${stats.importedSnapshots}.`;
+    const message = `Tracking aggiornato: player totali ${stats.totalPlayers}, player processati ${stats.processedPlayers}, eventi totali ${stats.totalEvents}, eventi validi ${stats.processedEvents}, snapshot scritti ${stats.importedSnapshots}.`;
     return res.redirect(`/registro?trackingMessage=${encodeURIComponent(message)}`);
   } catch (err) {
     console.error(err);
