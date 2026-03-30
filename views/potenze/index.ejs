@@ -325,7 +325,7 @@
       <button type="button" class="historyScaleBtn isActive" data-history-scale="weekly" aria-pressed="true"><%= t('weekly') %></button>
     </div>
     <div class="historyChartWrap">
-      <canvas id="playerHistoryCanvas" width="980" height="320"></canvas>
+      <canvas id="playerHistoryCanvas" height="320"></canvas>
     </div>
     <div class="historyLegend" id="playerHistoryLegend"></div>
     <div class="tableWrap historyTableWrap">
@@ -515,8 +515,20 @@
       return seriesConfig.filter((serie) => seriesVisibility[serie.key] !== false);
     }
 
+    function resizeHistoryCanvas() {
+      if (!historyCanvas) return;
+      const cssWidth = Math.max(320, Math.floor(historyCanvas.clientWidth || 980));
+      const cssHeight = 320;
+
+      if (historyCanvas.width !== cssWidth || historyCanvas.height !== cssHeight) {
+        historyCanvas.width = cssWidth;
+        historyCanvas.height = cssHeight;
+      }
+    }
+
     function drawHistoryChart(points) {
       if (!historyCanvas) return;
+      resizeHistoryCanvas();
       const ctx = historyCanvas.getContext("2d");
       const w = historyCanvas.width;
       const h = historyCanvas.height;
@@ -561,10 +573,7 @@
 
       const xForIndex = (i) => pad.l + (points.length === 1 ? chartW / 2 : (chartW * i) / (points.length - 1));
       const yForValue = (v) => pad.t + chartH - ((v - minY) / (maxY - minY)) * chartH;
-      const hasRealEntry = (point) => {
-        const rawId = String(point?.id ?? "").trim();
-        return rawId && rawId !== "-";
-      };
+      const hasRealEntry = (point) => point?._real === true;
 
       points.forEach((point, i) => {
         if (!hasRealEntry(point)) return;
@@ -704,7 +713,8 @@
             t2: Number(realRow.t2 || 0),
             t3: Number(realRow.t3 || 0),
             t4: Number(realRow.t4 || 0),
-            total: Number(realRow.total || 0)
+            total: Number(realRow.total || 0),
+            _real: true
           };
           result.push(normalized);
           lastKnown = normalized;
@@ -716,7 +726,8 @@
               t2: 0,
               t3: 0,
               t4: 0,
-              total: 0
+              total: 0,
+              _real: false
             });
             continue;
           }
@@ -726,7 +737,8 @@
             t2: lastKnown.t2,
             t3: lastKnown.t3,
             t4: lastKnown.t4,
-            total: lastKnown.total
+            total: lastKnown.total,
+            _real: false
           });
         }
       }
@@ -798,6 +810,12 @@
     }
 
     setupScaleControls();
+
+    window.addEventListener("resize", () => {
+      if (historyModal && !historyModal.hidden) {
+        drawHistoryChart(currentChartPoints);
+      }
+    });
 
     document.querySelectorAll(".playerHistoryOpenBtn").forEach((btn) => {
       btn.addEventListener("click", () => {
