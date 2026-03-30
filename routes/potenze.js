@@ -6,6 +6,8 @@ const { TEAM_TYPE_OPTIONS } = require("../config/i18n");
 const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
 const PlayerPowerHistory = require("../models/playerPowerHistory");
 const { savePlayerPowerSnapshot } = require("../utils/playerPowerHistory");
+const { translateTextAuto } = require("../utils/translate");
+const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
 
@@ -13,6 +15,18 @@ const TYPE_OPTIONS = TEAM_TYPE_OPTIONS;
 const ROLE_OPTIONS = ["R1", "R2", "R3", "R4", "R5"];
 
 const SORT_FIELDS = ["nickname", "role", "powerT1", "typeT1", "powerT2", "typeT2", "powerT3", "typeT3", "powerT4", "typeT4", "total", "updatedAt"];
+
+const translateNoteLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  handler: (req, res) => {
+    const t = res.locals.t || ((k) => k);
+    return res.status(429).json({ ok: false, error: t("translation_error") });
+  }
+});
 
 function parseOptionalNumber(v) {
   if (v === null || v === undefined) return null;
@@ -102,102 +116,6 @@ async function addAutoTranslatedNotes(players, targetLang) {
   );
 
   return translatedPlayers;
-}
-
-async function translateTextAuto(text, targetLang) {
-  const cleanText = String(text ?? "").trim();
-  const cleanTarget = String(targetLang ?? "").trim().toLowerCase();
-  if (!cleanText || !["it", "en", "fr", "es", "de", "ar", "pl", "sv", "da"].includes(cleanTarget)) {
-    return { ok: false, errorCode: "invalid_input" };
-  }
-
-  async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 7000) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
-      if (!response.ok) return null;
-      return await response.json();
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
-  function isProviderErrorText(value) {
-    const textValue = String(value ?? "").trim().toLowerCase();
-    if (!textValue) return true;
-    return (
-      textValue.includes("invalid source language") ||
-      textValue.includes("invalid target language") ||
-      textValue.includes("langpair=") ||
-      textValue.includes("example:")
-    );
-  }
-
-  const providers = [
-    {
-      name: "google_public",
-      run: async () => {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(cleanTarget)}&dt=t&q=${encodeURIComponent(cleanText)}`;
-        const data = await fetchJsonWithTimeout(url, { method: "GET" });
-        if (!Array.isArray(data) || !Array.isArray(data[0])) return null;
-
-        const translatedText = data[0].map((part) => String(part?.[0] ?? "")).join("").trim();
-        const sourceLang = String(data?.[2] ?? "").trim().toLowerCase();
-        if (!translatedText) return null;
-        return { translatedText, sourceLang: sourceLang || null };
-      }
-    },
-    {
-      name: "mymemory",
-      run: async () => {
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=auto|${encodeURIComponent(cleanTarget)}`;
-        const data = await fetchJsonWithTimeout(url, { method: "GET" });
-        if (Number(data?.responseStatus) !== 200) return null;
-        const translatedText = String(data?.responseData?.translatedText ?? "").trim();
-        if (isProviderErrorText(translatedText)) return null;
-        const sourceLang = String(data?.responseData?.match ?? "").trim(); // MyMemory does not expose source lang reliably
-        if (!translatedText) return null;
-        return { translatedText, sourceLang: sourceLang && sourceLang.length === 2 ? sourceLang.toLowerCase() : null };
-      }
-    },
-    {
-      name: "libretranslate",
-      run: async () => {
-        const data = await fetchJsonWithTimeout("https://translate.argosopentech.com/translate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            q: cleanText,
-            source: "auto",
-            target: cleanTarget,
-            format: "text"
-          })
-        });
-        const translatedText = String(data?.translatedText ?? "").trim();
-        const sourceLang = String(data?.detectedLanguage?.language ?? "").trim().toLowerCase();
-        if (!translatedText) return null;
-        return { translatedText, sourceLang: sourceLang || null };
-      }
-    }
-  ];
-
-  for (const provider of providers) {
-    try {
-      const translated = await provider.run();
-      if (!translated?.translatedText) continue;
-      if (isProviderErrorText(translated.translatedText)) continue;
-      const detectedLanguage = String(translated.sourceLang || "").toLowerCase();
-      if (detectedLanguage && detectedLanguage === cleanTarget) {
-        return { ok: true, translatedText: cleanText, sourceLang: detectedLanguage, sameLanguage: true };
-      }
-      return { ok: true, translatedText: translated.translatedText, sourceLang: detectedLanguage || null, sameLanguage: false };
-    } catch (err) {
-      // try next provider
-    }
-  }
-
-  return { ok: false, errorCode: "provider_unavailable" };
 }
 
 async function existsNicknameInsensitive(nickname, excludeId = null) {
@@ -415,7 +333,7 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
   }
 });
 
-router.post("/translate-note", requireAuth, async (req, res) => {
+router.post("/translate-note", requireAuth, translateNoteLimiter, async (req, res) => {
   try {
     const t = res.locals.t || ((k) => k);
     const text = sanitizeText(req.body?.text, 2000);

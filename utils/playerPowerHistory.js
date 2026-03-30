@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const PlayerPowerHistory = require("../models/playerPowerHistory");
 const Counter = require("../models/counter");
 const Player = require("../models/player");
@@ -68,73 +69,12 @@ function parsePlayerDetails(details) {
   return result;
 }
 
-async function upsertSnapshot(player, snapshotDay, values, { overwriteExisting = true } = {}) {
-  if (!player || !snapshotDay) return false;
-
-  const query = { player, snapshotDay };
-  const existing = await PlayerPowerHistory.findOne(query).select("_id").lean();
-  if (existing && !overwriteExisting) return false;
-
-  const payload = {
-    snapshotDate: dayStartUtc(snapshotDay),
-    t1: toNumber(values.t1),
-    t2: toNumber(values.t2),
-    t3: toNumber(values.t3),
-    t4: toNumber(values.t4)
-  };
-
-  if (existing) {
-    await PlayerPowerHistory.updateOne({ _id: existing._id }, { $set: payload });
-    return true;
-  }
-
-  await PlayerPowerHistory.create({
-    player,
-    snapshotDay,
-    ...payload
-  });
-  return true;
-}
-
 async function rebuildSnapshotsFromEventLog() {
-  await PlayerPowerHistory.deleteMany({});
-  await Counter.findOneAndUpdate(
-    { key: "player_power_history" },
-    { $set: { seq: 0 } },
-    { upsert: true, new: true }
-  );
-
   const players = await Player.find({})
     .select("nickname powerT1 powerT2 powerT3 powerT4 updatedAt")
     .sort({ updatedAt: 1, _id: 1 })
     .lean();
 
-  let processedPlayers = 0;
-  let importedSnapshots = 0;
-
-  // 1) Seed tracking with current player powers (at least one snapshot per player),
-  // anchored to the player's last update day (not "today") to avoid fake recent entries.
-  for (const player of players) {
-    const nickname = String(player?.nickname || "").trim();
-    if (!nickname) continue;
-    processedPlayers += 1;
-
-    const day = toDayString(player.updatedAt || new Date());
-    const inserted = await upsertSnapshot(
-      nickname,
-      day,
-      {
-        t1: player.powerT1,
-        t2: player.powerT2,
-        t3: player.powerT3,
-        t4: player.powerT4
-      },
-      { overwriteExisting: true }
-    );
-    if (inserted) importedSnapshots += 1;
-  }
-
-  // 2) Backfill history from event log without replacing already seeded current-day snapshots.
   const events = await EventLog.find({
     eventType: { $in: ["nuovo_player", "modifica_player"] }
   })
@@ -142,7 +82,30 @@ async function rebuildSnapshotsFromEventLog() {
     .select("details createdAt")
     .lean();
 
+  let processedPlayers = 0;
   let processedEvents = 0;
+  const snapshotsByKey = new Map();
+
+  // 1) Seed tracking with current player powers.
+  for (const player of players) {
+    const nickname = String(player?.nickname || "").trim();
+    if (!nickname) continue;
+    processedPlayers += 1;
+
+    const day = toDayString(player.updatedAt || new Date());
+    const key = `${nickname}::${day}`;
+    snapshotsByKey.set(key, {
+      player: nickname,
+      snapshotDay: day,
+      snapshotDate: dayStartUtc(day),
+      t1: toNumber(player.powerT1),
+      t2: toNumber(player.powerT2),
+      t3: toNumber(player.powerT3),
+      t4: toNumber(player.powerT4)
+    });
+  }
+
+  // 2) Backfill history from event log without replacing seeded snapshots.
   for (const event of events) {
     const fields = parsePlayerDetails(event?.details);
     const nickname = String(fields.nickname || "").trim();
@@ -150,32 +113,76 @@ async function rebuildSnapshotsFromEventLog() {
 
     processedEvents += 1;
     const day = toDayString(event.createdAt || new Date());
+    const key = `${nickname}::${day}`;
 
-    const inserted = await upsertSnapshot(
-      nickname,
-      day,
-      {
-        t1: fields.powerT1,
-        t2: fields.powerT2,
-        t3: fields.powerT3,
-        t4: fields.powerT4
-      },
-      { overwriteExisting: false }
-    );
+    if (snapshotsByKey.has(key)) continue;
 
-    if (inserted) {
-      importedSnapshots += 1;
-    }
+    snapshotsByKey.set(key, {
+      player: nickname,
+      snapshotDay: day,
+      snapshotDate: dayStartUtc(day),
+      t1: toNumber(fields.powerT1),
+      t2: toNumber(fields.powerT2),
+      t3: toNumber(fields.powerT3),
+      t4: toNumber(fields.powerT4)
+    });
   }
+
+  const snapshots = Array.from(snapshotsByKey.values()).sort((a, b) => {
+    const dateDiff = a.snapshotDate.getTime() - b.snapshotDate.getTime();
+    if (dateDiff !== 0) return dateDiff;
+    const playerDiff = a.player.localeCompare(b.player, "it");
+    if (playerDiff !== 0) return playerDiff;
+    return a.snapshotDay.localeCompare(b.snapshotDay);
+  });
+
+  const docs = snapshots.map((snapshot, index) => ({
+    ...snapshot,
+    seqId: index + 1
+  }));
+
+  const db = mongoose.connection.db;
+  const mainCollectionName = PlayerPowerHistory.collection.name;
+  const tempCollectionName = `${mainCollectionName}_rebuild_tmp`;
+  const dbName = mongoose.connection.name;
+
+  const existingCollections = await db.listCollections({ name: tempCollectionName }).toArray();
+  if (existingCollections.length > 0) {
+    await db.collection(tempCollectionName).drop();
+  }
+
+  if (docs.length > 0) {
+    await db.collection(tempCollectionName).insertMany(docs, { ordered: true });
+  } else {
+    await db.createCollection(tempCollectionName);
+  }
+
+  await db.collection(tempCollectionName).createIndex({ seqId: 1 }, { unique: true });
+  await db.collection(tempCollectionName).createIndex({ player: 1 });
+  await db.collection(tempCollectionName).createIndex({ snapshotDate: 1 });
+  await db.collection(tempCollectionName).createIndex({ player: 1, snapshotDay: 1 }, { unique: true });
+
+  await db.admin().command({
+    renameCollection: `${dbName}.${tempCollectionName}`,
+    to: `${dbName}.${mainCollectionName}`,
+    dropTarget: true
+  });
+
+  await Counter.findOneAndUpdate(
+    { key: "player_power_history" },
+    { $set: { seq: docs.length } },
+    { upsert: true, new: true }
+  );
 
   return {
     totalPlayers: players.length,
     processedPlayers,
     totalEvents: events.length,
     processedEvents,
-    importedSnapshots
+    importedSnapshots: docs.length
   };
 }
+
 
 module.exports = {
   savePlayerPowerSnapshot,
