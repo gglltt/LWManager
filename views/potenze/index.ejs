@@ -493,10 +493,10 @@
       return ticks;
     }
 
+    const hasRealEntry = (point) => point?._real === true;
     function shouldShowXAxisLabel(point, weeklyTickDays) {
-      const hasEntry = String(point?.id ?? "").trim() && String(point?.id ?? "").trim() !== "-";
       if (currentHistoryScale === "daily") return true;
-      return hasEntry || weeklyTickDays.has(point.date);
+      return hasRealEntry(point) || weeklyTickDays.has(point.date);
     }
 
     function closeHistoryModal() {
@@ -573,7 +573,6 @@
 
       const xForIndex = (i) => pad.l + (points.length === 1 ? chartW / 2 : (chartW * i) / (points.length - 1));
       const yForValue = (v) => pad.t + chartH - ((v - minY) / (maxY - minY)) * chartH;
-      const hasRealEntry = (point) => point?._real === true;
 
       points.forEach((point, i) => {
         if (!hasRealEntry(point)) return;
