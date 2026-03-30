@@ -332,11 +332,11 @@
       <table class="table tableCompact">
         <thead>
           <tr>
-            <th><%= t("date") %></th>
-            <th>T1</th>
-            <th>T2</th>
-            <th>T3</th>
-            <th>T4</th>
+            <th style="width: 40%;"><%= t("date") %></th>
+            <th style="width: 15%;">T1</th>
+            <th style="width: 15%;">T2</th>
+            <th style="width: 15%;">T3</th>
+            <th style="width: 15%;">T4</th>
           </tr>
         </thead>
         <tbody id="playerHistoryTableBody">
@@ -543,7 +543,7 @@
 
       if (!points || points.length === 0) {
         ctx.fillStyle = "#a9b6d3";
-        ctx.font = "14px sans-serif";
+        ctx.font = "11px sans-serif";
         ctx.fillText("Nessun dato", 20, 26);
         return;
       }
@@ -596,7 +596,7 @@
         ctx.translate(x, h - 6);
         ctx.rotate(-Math.PI / 3);
         ctx.fillStyle = hasRealEntry(p) ? "#d4dcf0" : "#a9b6d3";
-        ctx.font = "14px sans-serif";
+        ctx.font = "11px sans-serif";
         ctx.fillText(p.date.slice(5), 0, 0);
         ctx.restore();
       });
