@@ -320,9 +320,9 @@
     </div>
     <div class="historyMeta muted" id="playerHistoryMeta"></div>
     <div class="historyScaleControls" id="historyScaleControls">
-      <span class="historyScaleLabel">Scala:</span>
-      <button type="button" class="historyScaleBtn isActive" data-history-scale="daily" aria-pressed="true">Giornaliera</button>
-      <button type="button" class="historyScaleBtn" data-history-scale="weekly" aria-pressed="false">Settimanale</button>
+      <span class="historyScaleLabel"><%= t('scale') %></span>
+      <button type="button" class="historyScaleBtn " data-history-scale="daily" aria-pressed="false"><%= t('daily') %></button>
+      <button type="button" class="historyScaleBtn isActive" data-history-scale="weekly" aria-pressed="true"><%= t('weekly') %></button>
     </div>
     <div class="historyChartWrap">
       <canvas id="playerHistoryCanvas" width="980" height="320"></canvas>
@@ -332,17 +332,15 @@
       <table class="table tableCompact">
         <thead>
           <tr>
-            <th>ID</th>
             <th><%= t("date") %></th>
             <th>T1</th>
             <th>T2</th>
             <th>T3</th>
             <th>T4</th>
-            <th><%= t("total_results") %></th>
           </tr>
         </thead>
         <tbody id="playerHistoryTableBody">
-          <tr><td colspan="7" class="muted"><%= t("history_loading") %></td></tr>
+          <tr><td colspan="5" class="muted"><%= t("history_loading") %></td></tr>
         </tbody>
       </table>
     </div>
@@ -477,9 +475,9 @@
       { key: "t4", label: "T4", color: "#ff5c7a" },
       { key: "total", label: "TOT", color: "#b86bff" }
     ];
-    const seriesVisibility = Object.fromEntries(seriesConfig.map((serie) => [serie.key, true]));
+    const seriesVisibility = Object.fromEntries(seriesConfig.map((serie) => [serie.key, serie.key !== "total"]));
     let currentChartPoints = [];
-    let currentHistoryScale = "daily";
+    let currentHistoryScale = "weekly";
 
     const formatPointValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -590,7 +588,7 @@
         ctx.translate(x, h - 6);
         ctx.rotate(-Math.PI / 3);
         ctx.fillStyle = hasRealEntry(p) ? "#d4dcf0" : "#a9b6d3";
-        ctx.font = "10px sans-serif";
+        ctx.font = "14px sans-serif";
         ctx.fillText(p.date.slice(5), 0, 0);
         ctx.restore();
       });
@@ -701,7 +699,6 @@
         const realRow = rowsByDay.get(isoDay);
         if (realRow) {
           const normalized = {
-            id: realRow.id,
             date: isoDay,
             t1: Number(realRow.t1 || 0),
             t2: Number(realRow.t2 || 0),
@@ -714,7 +711,6 @@
         } else {
           if (!lastKnown) {
             result.push({
-              id: "-",
               date: isoDay,
               t1: 0,
               t2: 0,
@@ -725,7 +721,6 @@
             continue;
           }
           result.push({
-            id: "-",
             date: isoDay,
             t1: lastKnown.t1,
             t2: lastKnown.t2,
@@ -740,21 +735,21 @@
 
     async function openPlayerHistory(playerId, playerName) {
       seriesConfig.forEach((serie) => {
-        seriesVisibility[serie.key] = true;
+        seriesVisibility[serie.key] = serie.key !== "total";
       });
       currentChartPoints = [];
-      currentHistoryScale = "daily";
+      currentHistoryScale = "weekly";
       const controls = document.getElementById("historyScaleControls");
       if (controls) {
         controls.querySelectorAll("[data-history-scale]").forEach((item) => {
-          const active = item.getAttribute("data-history-scale") === "daily";
+          const active = item.getAttribute("data-history-scale") === "weekly";
           item.classList.toggle("isActive", active);
           item.setAttribute("aria-pressed", active ? "true" : "false");
         });
       }
       openHistoryModal();
       historyMeta.textContent = `${playerName} · <%= t("last_month") %>`;
-      historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("history_loading") %></td></tr>`;
+      historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("history_loading") %></td></tr>`;
       renderLegend();
       drawHistoryChart([]);
 
@@ -767,7 +762,7 @@
         const chartRows = buildLastDaysForChart(rows, Number(data.days || 30));
         currentChartPoints = chartRows;
         if (!rows.length) {
-          historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("no_history") %></td></tr>`;
+          historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("no_history") %></td></tr>`;
           drawHistoryChart(chartRows);
           return;
         }
@@ -783,7 +778,6 @@
           };
 
           return {
-            id: row.id,
             date: row.date,
             t1: showValue(row.t1, prev?.t1),
             t2: showValue(row.t2, prev?.t2),
@@ -794,12 +788,12 @@
         });
 
         historyTableBody.innerHTML = displayRows
-          .map((row) => `<tr><td>${row.id}</td><td class="historyDateCell">${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td><td><b>${row.total}</b></td></tr>`)
+          .map((row) => `<tr><td class="historyDateCell">${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td></tr>`)
           .join("");
 
         drawHistoryChart(chartRows);
       } catch (err) {
-        historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("err_internal") %></td></tr>`;
+        historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("err_internal") %></td></tr>`;
       }
     }
 
