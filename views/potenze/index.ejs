@@ -319,6 +319,11 @@
       <button type="button" class="iconBtn" id="playerHistoryModalClose" aria-label="<%= t('close') %>">✖</button>
     </div>
     <div class="historyMeta muted" id="playerHistoryMeta"></div>
+    <div class="historyScaleControls" id="historyScaleControls">
+      <span class="historyScaleLabel">Scala:</span>
+      <button type="button" class="historyScaleBtn isActive" data-history-scale="daily" aria-pressed="true">Giornaliera</button>
+      <button type="button" class="historyScaleBtn" data-history-scale="weekly" aria-pressed="false">Settimanale</button>
+    </div>
     <div class="historyChartWrap">
       <canvas id="playerHistoryCanvas" width="980" height="320"></canvas>
     </div>
@@ -474,6 +479,27 @@
     ];
     const seriesVisibility = Object.fromEntries(seriesConfig.map((serie) => [serie.key, true]));
     let currentChartPoints = [];
+    let currentHistoryScale = "daily";
+
+    const formatPointValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function getWeeklyTickDays(points) {
+      if (!Array.isArray(points) || points.length === 0) return new Set();
+      const lastDate = new Date(`${points[points.length - 1].date}T00:00:00Z`);
+      if (Number.isNaN(lastDate.getTime())) return new Set();
+      const month = lastDate.getUTCMonth();
+      const ticks = new Set();
+      for (let cursor = new Date(lastDate); cursor.getUTCMonth() === month; cursor = new Date(cursor.getTime() - 7 * 24 * 60 * 60 * 1000)) {
+        ticks.add(toIsoDayUTC(cursor));
+      }
+      return ticks;
+    }
+
+    function shouldShowXAxisLabel(point, weeklyTickDays) {
+      const hasEntry = String(point?.id ?? "").trim() && String(point?.id ?? "").trim() !== "-";
+      if (currentHistoryScale === "daily") return true;
+      return hasEntry || weeklyTickDays.has(point.date);
+    }
 
     function closeHistoryModal() {
       if (!historyModal) return;
@@ -556,7 +582,9 @@
         ctx.restore();
       });
 
+      const weeklyTickDays = getWeeklyTickDays(points);
       points.forEach((p, i) => {
+        if (!shouldShowXAxisLabel(p, weeklyTickDays)) return;
         const x = xForIndex(i);
         ctx.save();
         ctx.translate(x, h - 6);
@@ -606,7 +634,7 @@
         ctx.fillStyle = serie.color;
         ctx.font = "bold 11px sans-serif";
         ctx.textBaseline = "middle";
-        ctx.fillText(`${serie.label} ${Math.round(lastPoint.value)}`, labelX, labelY);
+        ctx.fillText(`${serie.label} ${formatPointValue(lastPoint.value)}`, labelX, labelY);
       });
     }
 
@@ -625,6 +653,24 @@
           if (!key || !(key in seriesVisibility)) return;
           seriesVisibility[key] = !seriesVisibility[key];
           renderLegend();
+          drawHistoryChart(currentChartPoints);
+        });
+      });
+    }
+
+    function setupScaleControls() {
+      const controls = document.getElementById("historyScaleControls");
+      if (!controls) return;
+      controls.querySelectorAll("[data-history-scale]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const selected = btn.getAttribute("data-history-scale");
+          if (!selected || (selected !== "daily" && selected !== "weekly")) return;
+          currentHistoryScale = selected;
+          controls.querySelectorAll("[data-history-scale]").forEach((item) => {
+            const active = item.getAttribute("data-history-scale") === currentHistoryScale;
+            item.classList.toggle("isActive", active);
+            item.setAttribute("aria-pressed", active ? "true" : "false");
+          });
           drawHistoryChart(currentChartPoints);
         });
       });
@@ -697,6 +743,15 @@
         seriesVisibility[serie.key] = true;
       });
       currentChartPoints = [];
+      currentHistoryScale = "daily";
+      const controls = document.getElementById("historyScaleControls");
+      if (controls) {
+        controls.querySelectorAll("[data-history-scale]").forEach((item) => {
+          const active = item.getAttribute("data-history-scale") === "daily";
+          item.classList.toggle("isActive", active);
+          item.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
       openHistoryModal();
       historyMeta.textContent = `${playerName} · <%= t("last_month") %>`;
       historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("history_loading") %></td></tr>`;
@@ -747,6 +802,8 @@
         historyTableBody.innerHTML = `<tr><td colspan="7" class="muted"><%= t("err_internal") %></td></tr>`;
       }
     }
+
+    setupScaleControls();
 
     document.querySelectorAll(".playerHistoryOpenBtn").forEach((btn) => {
       btn.addEventListener("click", () => {
