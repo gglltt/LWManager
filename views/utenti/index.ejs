@@ -59,11 +59,11 @@
                 <% const selfId = String(user?._id || user?.id || ""); %>
                 <% if (String(u._id) !== selfId) { %>
                   <form method="POST" action="/utenti/<%= u._id %>/delete" class="inlineForm"
-                        onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= u.email %>?');">
+                        onsubmit="return confirm('<%= t(&apos;confirm_delete_player&apos;) %> <%= u.email %>?');">
                     <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
                   </form>
                 <% } else { %>
-                  <span class="muted" title="<%= t('cannot_delete_self') %>">—</span>
+                  <span class="muted" title="<%= t(&apos;cannot_delete_self&apos;) %>">—</span>
                 <% } %>
               </div>
             </td>

@@ -111,7 +111,7 @@
       <button type="submit"><%= t("save_changes") %></button>
 
       <% if (isAdmin) { %>
-        <form class="inlineForm" method="POST" action="/potenze/<%= player._id %>/delete" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= player.nickname %>?');">
+        <form class="inlineForm" method="POST" action="/potenze/<%= player._id %>/delete" onsubmit="return confirm('<%= t(&apos;confirm_delete_player&apos;) %> <%= player.nickname %>?');">
           <button class="button danger" type="submit"><%= t("delete_player") %></button>
         </form>
       <% } %>
