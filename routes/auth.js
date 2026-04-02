@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
   const pin = normalizePin(req.body.pin);
 
   if (!isSixDigitPin(pin)) {
-    await createEventLog(req, "login_failed", "Tentativo login: formato PIN non valido");
+    await createEventLog(req, "login_failed", "Tentativo login: formato PIN non valido - PIN inserito: " + pin);
     return res.render("login", { error: "Inserisci un PIN valido di 6 cifre.", message: null });
   }
 
@@ -61,7 +61,7 @@ router.post("/login", async (req, res) => {
   }
 
   if (!role) {
-    await createEventLog(req, "login_failed", "Tentativo login: PIN errato");
+    await createEventLog(req, "login_failed", "Tentativo login: PIN errato - PIN inserito: " + pin);
     return res.render("login", { error: "PIN non valido.", message: null });
   }
 

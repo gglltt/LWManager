@@ -146,7 +146,7 @@
             <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
             <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
             <% if (isAdmin) { %>
-              <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t(&apos;confirm_delete_player&apos;) %> <%= p.nickname %>?');">
+              <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
                 <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
               </form>
             <% } %>
@@ -291,7 +291,7 @@
                 <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
             <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
                 <% if (isAdmin) { %>
-                  <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t(&apos;confirm_delete_player&apos;) %> <%= p.nickname %>?');">
+                  <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
                     <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
                   </form>
                 <% } %>
