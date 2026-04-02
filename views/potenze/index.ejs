@@ -480,6 +480,7 @@
     let currentHistoryScale = "weekly";
 
     const formatPointValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatTableValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     function getWeeklyTickDays(points) {
       if (!Array.isArray(points) || points.length === 0) return new Set();
@@ -748,6 +749,7 @@
       seriesConfig.forEach((serie) => {
         seriesVisibility[serie.key] = serie.key !== "total";
       });
+      seriesVisibility.t4 = false;
       currentChartPoints = [];
       currentHistoryScale = "weekly";
       const controls = document.getElementById("historyScaleControls");
@@ -772,34 +774,63 @@
         const rows = data.history || [];
         const chartRows = buildLastDaysForChart(rows, Number(data.days || 30));
         currentChartPoints = chartRows;
+        const hasT4Entries = rows.some((row) => Number(row?.t4 || 0) > 0);
+        seriesVisibility.t4 = hasT4Entries;
+        renderLegend();
         if (!rows.length) {
           historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("no_history") %></td></tr>`;
           drawHistoryChart(chartRows);
           return;
         }
 
-        const displayRows = rows.map((row, index) => {
-          const prev = index > 0 ? rows[index - 1] : null;
-          const showValue = (value, prevValue) => {
-            const numericValue = Number(value || 0);
-            const numericPrev = Number(prevValue || 0);
-            if (!Number.isFinite(numericValue) || numericValue === 0) return "";
-            if (prev && numericValue === numericPrev) return "";
-            return numericValue;
+        const sortedAsc = [...rows].sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+        const filledAscRows = [];
+        let previousSnapshot = null;
+        sortedAsc.forEach((row) => {
+          const current = {
+            date: String(row.date || ""),
+            t1: Number(row.t1),
+            t2: Number(row.t2),
+            t3: Number(row.t3),
+            t4: Number(row.t4)
           };
 
-          return {
-            date: row.date,
-            t1: showValue(row.t1, prev?.t1),
-            t2: showValue(row.t2, prev?.t2),
-            t3: showValue(row.t3, prev?.t3),
-            t4: showValue(row.t4, prev?.t4),
-            total: showValue(row.total, prev?.total)
-          };
+          ["t1", "t2", "t3", "t4"].forEach((key) => {
+            if (Number.isFinite(current[key])) return;
+            current[key] = previousSnapshot ? Number(previousSnapshot[key] || 0) : 0;
+          });
+          current.total = Math.round((current.t1 + current.t2 + current.t3 + current.t4) * 100) / 100;
+
+          if (previousSnapshot) {
+            current.growth = {};
+            ["t1", "t2", "t3", "t4", "total"].forEach((key) => {
+              const prevVal = Number(previousSnapshot[key] || 0);
+              const currVal = Number(current[key] || 0);
+              if (!Number.isFinite(prevVal) || !Number.isFinite(currVal) || prevVal === 0) {
+                current.growth[key] = null;
+                return;
+              }
+              const pct = ((currVal - prevVal) / prevVal) * 100;
+              current.growth[key] = Number.isFinite(pct) ? pct : null;
+            });
+          } else {
+            current.growth = { t1: null, t2: null, t3: null, t4: null, total: null };
+          }
+
+          filledAscRows.push(current);
+          previousSnapshot = current;
         });
 
+        const displayRows = [...filledAscRows].reverse();
+        const renderCell = (value, growthPct) => {
+          const valueHtml = formatTableValue(value);
+          if (!Number.isFinite(growthPct) || growthPct <= 0) return valueHtml;
+          const growthText = `(+${growthPct.toFixed(2)}%)`;
+          return `${valueHtml} <span class="historyGrowth">${growthText}</span>`;
+        };
+
         historyTableBody.innerHTML = displayRows
-          .map((row) => `<tr><td class="historyDateCell">${row.date}</td><td>${row.t1}</td><td>${row.t2}</td><td>${row.t3}</td><td>${row.t4}</td></tr>`)
+          .map((row) => `<tr><td class="historyDateCell">${row.date}</td><td>${renderCell(row.t1, row.growth?.t1)}</td><td>${renderCell(row.t2, row.growth?.t2)}</td><td>${renderCell(row.t3, row.growth?.t3)}</td><td>${renderCell(row.t4, row.growth?.t4)}</td></tr>`)
           .join("");
 
         drawHistoryChart(chartRows);

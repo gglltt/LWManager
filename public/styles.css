@@ -855,6 +855,11 @@ html[dir="rtl"] .pagination{
   white-space:nowrap;
 }
 
+.historyGrowth{
+  color:#2bd576;
+  font-weight:700;
+}
+
 
 .historyScaleControls{
   display:flex;
