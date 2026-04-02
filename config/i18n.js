@@ -238,7 +238,8 @@ const translations = {
     err_level_integer: "Livello deve essere un numero intero.",
     err_level_range: "Livello deve essere tra 1 e 5.",
     err_nickname_short: "Nickname troppo corto (min 2 caratteri).",
-    err_nickname_long: "Nickname troppo lungo (max 40 caratteri)."
+    err_nickname_long: "Nickname troppo lungo (max 40 caratteri).",
+    total_t1_t2_t3_only: "Totale T1+T2+T3 (escluso T4)"
   },
   en: {
     contact_us: "Contact us",
@@ -382,7 +383,8 @@ const translations = {
     err_level_integer: "Level must be an integer.",
     err_level_range: "Level must be between 1 and 5.",
     err_nickname_short: "Nickname too short (min 2 characters).",
-    err_nickname_long: "Nickname too long (max 40 characters)."
+    err_nickname_long: "Nickname too long (max 40 characters).",
+    total_t1_t2_t3_only: "Total T1+T2+T3 only (T4 excluded)"
   },
   fr: {
     contact_us: "Contactez-nous",
@@ -522,7 +524,8 @@ const translations = {
     err_level_integer: "Le niveau doit être un entier.",
     err_level_range: "Le niveau doit être entre 1 et 5.",
     err_nickname_short: "Pseudo trop court (min 2 caractères).",
-    err_nickname_long: "Pseudo trop long (max 40 caractères)."
+    err_nickname_long: "Pseudo trop long (max 40 caractères).",
+    total_t1_t2_t3_only: "Total T1+T2+T3 uniquement (T4 exclu)"
   },
   es: {
     contact_us: "Contáctanos",
@@ -662,7 +665,8 @@ const translations = {
     err_level_integer: "El nivel debe ser un número entero.",
     err_level_range: "El nivel debe estar entre 1 y 5.",
     err_nickname_short: "Nickname demasiado corto (mín 2 caracteres).",
-    err_nickname_long: "Nickname demasiado largo (máx 40 caracteres)."
+    err_nickname_long: "Nickname demasiado largo (máx 40 caracteres).",
+    total_t1_t2_t3_only: "Total T1+T2+T3 solo (T4 excluido)"
   },
   de: {
     contact_us: "Kontaktiere uns",
@@ -802,7 +806,8 @@ const translations = {
     err_level_integer: "Stufe muss eine ganze Zahl sein.",
     err_level_range: "Stufe muss zwischen 1 und 5 liegen.",
     err_nickname_short: "Nickname zu kurz (mind. 2 Zeichen).",
-    err_nickname_long: "Nickname zu lang (max. 40 Zeichen)."
+    err_nickname_long: "Nickname zu lang (max. 40 Zeichen).",
+    total_t1_t2_t3_only: "Nur T1+T2+T3 Gesamt (T4 ausgeschlossen)"
   },
   ar: {
     contact_us: "اتصل بنا",
@@ -942,7 +947,8 @@ const translations = {
     err_level_integer: "يجب أن يكون المستوى رقماً صحيحاً.",
     err_level_range: "يجب أن يكون المستوى بين 1 و5.",
     err_nickname_short: "الاسم المستعار قصير جداً (حد أدنى حرفان).",
-    err_nickname_long: "الاسم المستعار طويل جداً (حد أقصى 40 حرفاً)."
+    err_nickname_long: "الاسم المستعار طويل جداً (حد أقصى 40 حرفاً).",
+    total_t1_t2_t3_only: "إجمالي T1+T2+T3 فقط (T4 مستبعد)"
   }
 };
 
@@ -1084,7 +1090,8 @@ translations.pl = {
   "err_level_integer": "Poziom musi być liczbą całkowitą.",
   "err_level_range": "Poziom musi mieścić się w przedziale od 1 do 5.",
   "err_nickname_short": "Pseudonim jest za krótki (min. 2 znaki).",
-  "err_nickname_long": "Pseudonim jest za długi (maks. 40 znaków)."
+  "err_nickname_long": "Pseudonim jest za długi (maks. 40 znaków).",
+  "total_t1_t2_t3_only": "Tylko T1+T2+T3 łącznie (T4 wyłączone)"
 };
 
 translations.sv = {
@@ -1225,7 +1232,8 @@ translations.sv = {
   "err_level_integer": "Nivå måste vara ett heltal.",
   "err_level_range": "Nivån måste vara mellan 1 och 5.",
   "err_nickname_short": "Smeknamnet är för kort (minst 2 tecken).",
-  "err_nickname_long": "Smeknamnet är för långt (max 40 tecken)."
+  "err_nickname_long": "Smeknamnet är för långt (max 40 tecken).",
+  "total_t1_t2_t3_only": "Endast T1+T2+T3 totalt (T4 exkluderat)"
 };
 
 translations.da = {
@@ -1366,7 +1374,8 @@ translations.da = {
   "err_level_integer": "Niveau skal være et heltal.",
   "err_level_range": "Niveau skal være mellem 1 og 5.",
   "err_nickname_short": "Kaldenavnet er for kort (min. 2 tegn).",
-  "err_nickname_long": "Kaldenavnet er for langt (maks. 40 tegn)."
+  "err_nickname_long": "Kaldenavnet er for langt (maks. 40 tegn).",
+  "total_t1_t2_t3_only": "Endast T1+T2+T3 totalt (T4 exkluderat)"
 };
 
 function resolveLang(candidate) {

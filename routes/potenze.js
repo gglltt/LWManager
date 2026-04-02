@@ -142,8 +142,7 @@ router.get("/", requireAuth, async (req, res) => {
       $add: [
         { $ifNull: ["$powerT1", 0] },
         { $ifNull: ["$powerT2", 0] },
-        { $ifNull: ["$powerT3", 0] },
-        { $ifNull: ["$powerT4", 0] }
+        { $ifNull: ["$powerT3", 0] }
       ]
     };
 
@@ -311,7 +310,7 @@ router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
       "Type T3": p.typeT3 || "",
       "Power T4": p.powerT4 ?? "",
       "Type T4": p.typeT4 || "",
-      Total: (p.powerT1 || 0) + (p.powerT2 || 0) + (p.powerT3 || 0) + (p.powerT4 || 0),
+      Total: (p.powerT1 || 0) + (p.powerT2 || 0) + (p.powerT3 || 0),
       Note: p.notes || "",
       "Created At": p.createdAt ? new Date(p.createdAt).toLocaleString(res.locals.localeTag || "it-IT") : "",
       "Updated At": p.updatedAt ? new Date(p.updatedAt).toLocaleString(res.locals.localeTag || "it-IT") : ""
@@ -481,7 +480,7 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
         const t2 = Math.round(Number(record.t2 || 0) * 100) / 100;
         const t3 = Math.round(Number(record.t3 || 0) * 100) / 100;
         const t4 = Math.round(Number(record.t4 || 0) * 100) / 100;
-        const total = Math.round((t1 + t2 + t3 + t4) * 100) / 100;
+        const total = Math.round((t1 + t2 + t3) * 100) / 100;
         return {
           id: record.seqId ?? "-",
           player: player.nickname,
