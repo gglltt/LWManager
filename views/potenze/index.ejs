@@ -824,9 +824,11 @@
         const displayRows = [...filledAscRows].reverse();
         const renderCell = (value, growthPct) => {
           const valueHtml = formatTableValue(value);
-          if (!Number.isFinite(growthPct) || growthPct <= 0) return valueHtml;
-          const growthText = `(+${growthPct.toFixed(2)}%)`;
-          return `${valueHtml} <span class="historyGrowth">${growthText}</span>`;
+          if (!Number.isFinite(growthPct) || growthPct === 0) return valueHtml;
+          const growthSign = growthPct > 0 ? "+" : "-";
+          const growthClass = growthPct > 0 ? "historyGrowth" : "historyGrowth historyGrowthNegative";
+          const growthText = `(${growthSign}${Math.abs(growthPct).toFixed(2)}%)`;
+          return `${valueHtml} <span class="${growthClass}">${growthText}</span>`;
         };
 
         historyTableBody.innerHTML = displayRows

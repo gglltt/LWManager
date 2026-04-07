@@ -860,6 +860,10 @@ html[dir="rtl"] .pagination{
   font-weight:400;
 }
 
+.historyGrowthNegative{
+  color:#ff6b6b;
+}
+
 
 .historyScaleControls{
   display:flex;
