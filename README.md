@@ -32,7 +32,7 @@ npm install
 Per recuperare i player dell'alleanza **Biss** dal backend:
 
 - configura la variabile `LASTWAR_API_KEY` (Bearer token creato su api.lastwar.tools)
-- opzionale: `LASTWAR_API_BASE_URL` (default `https://api.lastwar.dev`)
+- opzionale: `LASTWAR_API_BASE_URL` (default `https://api.lastwar.tools`, con fallback automatico su `https://api.lastwar.dev`)
 - endpoint admin-only: `GET /lastwar/biss-players`
 
 L'endpoint richiede login con ruolo admin (`authLevel >= 5`) e restituisce JSON con lista giocatori.

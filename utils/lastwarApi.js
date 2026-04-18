@@ -1,9 +1,15 @@
-const DEFAULT_BASE_URL = "https://api.lastwar.dev";
+const DEFAULT_BASE_URL = "https://api.lastwar.tools";
 
 function getLastWarConfig() {
   const apiKey = String(process.env.LASTWAR_API_KEY || "").trim();
-  const baseUrl = String(process.env.LASTWAR_API_BASE_URL || DEFAULT_BASE_URL).trim().replace(/\/+$/, "");
-  return { apiKey, baseUrl };
+  const envBaseUrl = String(process.env.LASTWAR_API_BASE_URL || "").trim().replace(/\/+$/, "");
+
+  const baseUrls = [];
+  if (envBaseUrl) baseUrls.push(envBaseUrl);
+  if (!baseUrls.includes(DEFAULT_BASE_URL)) baseUrls.push(DEFAULT_BASE_URL);
+  if (!baseUrls.includes("https://api.lastwar.dev")) baseUrls.push("https://api.lastwar.dev");
+
+  return { apiKey, baseUrls };
 }
 
 function toArray(value) {
@@ -28,6 +34,7 @@ async function fetchJson(url, apiKey) {
   const response = await fetch(url, {
     method: "GET",
     headers: {
+      "X-API-Key": apiKey,
       Authorization: `Bearer ${apiKey}`,
       Accept: "application/json"
     }
@@ -56,18 +63,20 @@ function normalizePlayer(player) {
 }
 
 async function fetchBissPlayers() {
-  const { apiKey, baseUrl } = getLastWarConfig();
+  const { apiKey, baseUrls } = getLastWarConfig();
   if (!apiKey) {
     throw new Error("LASTWAR_API_KEY non configurata.");
   }
 
   const encodedAllianceName = encodeURIComponent("Biss");
-
-  const allianceSearchUrls = [
+  const allianceSearchUrls = baseUrls.flatMap((baseUrl) => [
+    `${baseUrl}/alliance/search?name=${encodedAllianceName}`,
+    `${baseUrl}/alliances/search?name=${encodedAllianceName}`,
+    `${baseUrl}/alliance?name=${encodedAllianceName}`,
     `${baseUrl}/v1/alliance/search?name=${encodedAllianceName}`,
     `${baseUrl}/v1/alliances/search?name=${encodedAllianceName}`,
     `${baseUrl}/v1/alliance?name=${encodedAllianceName}`
-  ];
+  ]);
 
   let selectedAlliance = null;
   let selectedAllianceEndpoint = null;
@@ -91,19 +100,30 @@ async function fetchBissPlayers() {
   if (selectedAlliance) {
     const allianceId = pickAllianceId(selectedAlliance);
     if (allianceId) {
-      playersSearchUrls.push(
-        `${baseUrl}/v1/alliance/${encodeURIComponent(String(allianceId))}/players`,
-        `${baseUrl}/v1/alliances/${encodeURIComponent(String(allianceId))}/players`,
-        `${baseUrl}/v1/alliance/${encodeURIComponent(String(allianceId))}/members`,
-        `${baseUrl}/v1/alliances/${encodeURIComponent(String(allianceId))}/members`
-      );
+      const encodedAllianceId = encodeURIComponent(String(allianceId));
+      for (const baseUrl of baseUrls) {
+        playersSearchUrls.push(
+          `${baseUrl}/alliance/${encodedAllianceId}/members`,
+          `${baseUrl}/alliances/${encodedAllianceId}/members`,
+          `${baseUrl}/alliance/${encodedAllianceId}/players`,
+          `${baseUrl}/alliances/${encodedAllianceId}/players`,
+          `${baseUrl}/v1/alliance/${encodedAllianceId}/members`,
+          `${baseUrl}/v1/alliances/${encodedAllianceId}/members`,
+          `${baseUrl}/v1/alliance/${encodedAllianceId}/players`,
+          `${baseUrl}/v1/alliances/${encodedAllianceId}/players`
+        );
+      }
     }
   }
 
-  playersSearchUrls.push(
-    `${baseUrl}/v1/player/search?alliance=${encodedAllianceName}`,
-    `${baseUrl}/v1/players/search?alliance=${encodedAllianceName}`
-  );
+  for (const baseUrl of baseUrls) {
+    playersSearchUrls.push(
+      `${baseUrl}/player/search?alliance=${encodedAllianceName}`,
+      `${baseUrl}/players/search?alliance=${encodedAllianceName}`,
+      `${baseUrl}/v1/player/search?alliance=${encodedAllianceName}`,
+      `${baseUrl}/v1/players/search?alliance=${encodedAllianceName}`
+    );
+  }
 
   let players = [];
   let selectedPlayersEndpoint = null;
