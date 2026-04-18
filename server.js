@@ -9,6 +9,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const potenzeRoutes = require("./routes/potenze");
 const registroRoutes = require("./routes/registro");
+const lastwarRoutes = require("./routes/lastwar");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
 const {
@@ -98,6 +99,7 @@ app.get("/dashboard", requireAuth, (req, res) => {
 
 app.use("/potenze", potenzeRoutes);
 app.use("/registro", registroRoutes);
+app.use("/lastwar", lastwarRoutes);
 
 app.get("/logout", (req, res) => {
   res.clearCookie("lw_token");
