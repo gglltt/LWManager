@@ -67,6 +67,48 @@ body{
 
 .nav a:hover{ color:var(--text); }
 
+.navGuide{
+  position:relative;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.navGuide__summary{
+  list-style:none;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.navGuide__summary::-webkit-details-marker{ display:none; }
+
+.navGuide__summary::after{
+  content:" |";
+}
+
+.navGuide__summary:hover{ color:var(--text); }
+
+.navGuide__menu{
+  position:absolute;
+  left:0;
+  top:calc(100% + 8px);
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(18,26,42,.98);
+  border-radius:12px;
+  min-width:220px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  z-index:20;
+}
+
+.navGuide__item{
+  display:block;
+  padding:9px 12px;
+}
+
+.navGuide__item:hover{
+  background:rgba(58,103,255,.15);
+}
+
 .topbarRight{
   display:flex;
   align-items:center;
