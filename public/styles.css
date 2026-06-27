@@ -416,6 +416,8 @@ textarea:focus{
   flex:0 0 auto;
 }
 
+.menuGridSingle{ grid-template-columns:1fr; }
+
 .menuText{ min-width:0; }
 .menuTitle{ font-weight:900; line-height:1.1; font-size:15px; }
 .menuDesc{ margin-top:4px; color:var(--muted); font-size:12.5px; line-height:1.2; }
