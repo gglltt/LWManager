@@ -96,6 +96,10 @@ app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", { user: req.user });
 });
 
+app.get("/novita", requireAuth, (req, res) => {
+  res.render("novita", { user: req.user });
+});
+
 app.use("/potenze", potenzeRoutes);
 app.use("/registro", registroRoutes);
 

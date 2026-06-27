@@ -1,0 +1,46 @@
+<%- include("partials/header") %>
+
+<section class="card">
+  <div class="pageHeader">
+    <div>
+      <h1><%= t('news_title') %></h1>
+      <p class="muted"><%= t('news_intro') %></p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <h2 class="sectionTitle"><%= t('season_guide') %></h2>
+
+  <div class="menuGrid menuGridSingle">
+    <a
+      class="menuCard"
+      href="https://docs.google.com/document/d/1YcVC1moniPG1R-NZlfpUI01_FJJAGMBQ/edit"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="<%= t('guide_document') %>">
+      <div class="menuIcon">📄</div>
+      <div class="menuText">
+        <div class="menuTitle"><%= t('guide_document') %></div>
+      </div>
+    </a>
+
+    <a
+      class="menuCard"
+      href="https://docs.google.com/spreadsheets/d/1XwqKaAeghyeFuhI9uwj8MoxJBKvY1Irz/edit"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="<%= t('guide_spreadsheet') %>">
+      <div class="menuIcon">📊</div>
+      <div class="menuText">
+        <div class="menuTitle"><%= t('guide_spreadsheet') %></div>
+      </div>
+    </a>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <a class="button secondary" href="/dashboard"><%= t('back_dashboard') %></a>
+  </div>
+</section>
+
+<%- include("partials/footer") %>
