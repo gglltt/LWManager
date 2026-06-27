@@ -1003,3 +1003,180 @@ html[dir="rtl"] .pagination{
     padding:0 8px 8px;
   }
 }
+
+/* ========================= */
+/* SEASON 6 GUIDE            */
+/* ========================= */
+
+.seasonPage{
+  max-width:1100px;
+}
+
+.seasonHero{
+  align-items:center;
+  padding:4px 0 8px;
+}
+
+.eyebrow{
+  margin:0 0 6px;
+  color:var(--accent);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.9px;
+  text-transform:uppercase;
+}
+
+.seasonLead{
+  max-width:760px;
+  line-height:1.55;
+}
+
+.seasonBadge{
+  border:1px solid rgba(48,224,198,.45);
+  background:linear-gradient(135deg, rgba(48,224,198,.18), rgba(58,103,255,.18));
+  color:var(--text);
+  border-radius:18px;
+  padding:12px 14px;
+  font-weight:950;
+  white-space:nowrap;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+
+.seasonQuickMessage{
+  border:1px solid rgba(43,213,118,.35);
+  background:rgba(43,213,118,.08);
+  border-radius:16px;
+  padding:14px;
+  margin:14px 0;
+}
+
+.seasonQuickMessage h2,
+.seasonQuickMessage p{ margin-top:0; }
+.seasonQuickMessage p{ margin-bottom:0; line-height:1.55; }
+
+.seasonToc{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:16px 0 20px;
+}
+
+.seasonToc a,
+.seasonRefs a{
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:999px;
+  padding:8px 11px;
+  font-size:13px;
+  font-weight:800;
+}
+
+.seasonToc a:hover,
+.seasonRefs a:hover{ border-color:rgba(58,103,255,.6); }
+
+.seasonSection{
+  scroll-margin-top:86px;
+  margin-top:22px;
+}
+
+.seasonSection h2{ font-size:18px; }
+
+.seasonGrid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px;
+}
+
+.seasonGrid4{
+  grid-template-columns:repeat(4, minmax(0,1fr));
+}
+
+.seasonInfoCard,
+.seasonPanel{
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:16px;
+  padding:14px;
+}
+
+.seasonInfoCard h3,
+.seasonPanel h3{ margin:4px 0 8px; font-size:15px; }
+.seasonInfoCard p,
+.seasonPanel p,
+.seasonPanel li,
+.seasonChecklist li{ color:var(--muted); line-height:1.5; }
+.seasonIcon{ font-size:24px; }
+
+.seasonChecklist{
+  display:grid;
+  gap:10px;
+  margin:0;
+  padding-left:22px;
+}
+
+.seasonTableWrap{ overflow-x:auto; }
+.seasonTable{ table-layout:auto; }
+.seasonTable th,
+.seasonTable td{ font-size:13px; line-height:1.45; }
+
+.seasonCallout{
+  border-color:rgba(255,193,7,.45);
+  background:rgba(255,193,7,.08);
+}
+
+.seasonTimeline{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+
+.seasonTimeline div{
+  position:relative;
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:16px;
+  padding:14px;
+}
+
+.seasonTimeline span{
+  display:inline-flex;
+  color:var(--accent);
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.seasonTimeline b{ display:block; }
+.seasonTimeline p{ color:var(--muted); line-height:1.45; margin-bottom:0; }
+
+.seasonRequirements{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:10px;
+  list-style:none;
+  padding:0;
+  margin:12px 0 0;
+}
+
+.seasonRequirements li{
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(18,26,42,.55);
+  border-radius:12px;
+  padding:10px;
+}
+
+.seasonRefs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+@media (max-width: 900px){
+  .seasonGrid4,
+  .seasonTimeline,
+  .seasonRequirements{ grid-template-columns:1fr; }
+  .seasonGrid{ grid-template-columns:1fr; }
+  .seasonHero{ align-items:flex-start; }
+}
