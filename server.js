@@ -100,6 +100,10 @@ app.get("/novita", requireAuth, (req, res) => {
   res.render("novita", { user: req.user });
 });
 
+app.get("/stagione-6", requireAuth, (req, res) => {
+  res.render("stagione6", { user: req.user });
+});
+
 app.use("/potenze", potenzeRoutes);
 app.use("/registro", registroRoutes);
 
