@@ -1180,3 +1180,164 @@ html[dir="rtl"] .pagination{
   .seasonGrid{ grid-template-columns:1fr; }
   .seasonHero{ align-items:flex-start; }
 }
+
+/* Season 6 refreshed portal guide */
+.seasonRainforest{
+  position:relative;
+  overflow:hidden;
+  border-color:rgba(43,213,118,.24);
+}
+
+.seasonRainforest::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(43,213,118,.18), transparent 28%),
+    radial-gradient(circle at 8% 18%, rgba(48,224,198,.12), transparent 30%),
+    linear-gradient(180deg, rgba(22,66,42,.18), transparent 220px);
+}
+
+.seasonRainforest > *{ position:relative; }
+
+.seasonHeroRainforest{
+  border:1px solid rgba(43,213,118,.28);
+  border-radius:22px;
+  padding:22px;
+  background:linear-gradient(135deg, rgba(7,34,24,.78), rgba(8,13,25,.55));
+  box-shadow:0 18px 42px rgba(0,0,0,.24);
+}
+
+.seasonHeroRainforest h1{
+  margin-bottom:8px;
+  font-size:clamp(30px, 5vw, 54px);
+  letter-spacing:-1.2px;
+}
+
+.seasonHeroRainforest .seasonBadge{
+  min-width:92px;
+  text-align:center;
+  font-size:28px;
+  line-height:1;
+}
+
+.seasonHeroRainforest .seasonBadge span{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+
+.seasonQuickMessage{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  border-color:rgba(43,213,118,.45);
+  background:linear-gradient(135deg, rgba(43,213,118,.13), rgba(48,224,198,.06));
+}
+
+.seasonQuickIcon{
+  display:grid;
+  place-items:center;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:rgba(43,213,118,.16);
+  font-size:22px;
+}
+
+.seasonIntro,
+.seasonPanel,
+.seasonInfoCard,
+.seasonFaq details{
+  backdrop-filter:blur(8px);
+}
+
+.seasonIntro{
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.32);
+  border-radius:18px;
+  padding:18px;
+}
+
+.seasonIntro p,
+.seasonSection > p,
+.seasonSectionLead,
+.seasonRule{
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.seasonGrid2{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+.seasonGrid3{ grid-template-columns:repeat(3, minmax(0,1fr)); }
+.seasonTimeline4{ grid-template-columns:repeat(4, minmax(0,1fr)); }
+
+.featureCard{
+  border-color:rgba(43,213,118,.24);
+}
+
+.seasonPillList,
+.seasonDangerList{
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  padding-left:0;
+  list-style:none;
+  margin-top:14px;
+}
+
+.seasonPillList li,
+.seasonDangerList li,
+.seasonNumbered li{
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:13px;
+  padding:11px 12px;
+}
+
+.seasonPillList li::before{ content:"✓ "; color:var(--ok); font-weight:900; }
+.seasonDangerList li::before{ content:"✕ "; color:#ff5c7a; font-weight:900; }
+
+.seasonNumbered{
+  list-style-position:inside;
+  padding-left:0;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+
+.seasonTableWrap{
+  margin:16px 0;
+  border-radius:16px;
+}
+
+.seasonFaq{
+  display:grid;
+  gap:10px;
+}
+
+.seasonFaq details{
+  border:1px solid rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  border-radius:14px;
+  padding:12px 14px;
+}
+
+.seasonFaq summary{
+  cursor:pointer;
+  font-weight:900;
+}
+
+.seasonFaq p{
+  color:var(--muted);
+  line-height:1.55;
+  margin:10px 0 0;
+}
+
+@media (max-width: 900px){
+  .seasonGrid2,
+  .seasonGrid3,
+  .seasonTimeline4,
+  .seasonPillList,
+  .seasonDangerList,
+  .seasonNumbered{ grid-template-columns:1fr; }
+  .seasonQuickMessage{ flex-direction:column; }
+}
