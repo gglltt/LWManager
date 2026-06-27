@@ -1,0 +1,123 @@
+<%- include("partials/header") %>
+
+<section class="s6 page-shell">
+  <header class="s6-hero">
+    <div class="s6-hero__copy">
+      <p class="s6-eyebrow">Last War Survival · S6</p>
+      <h1><%= strategyData.title %></h1>
+      <p class="s6-subtitle"><%= strategyData.subtitle %></p>
+      <p class="s6-intro"><%= strategyData.intro %></p>
+      <span class="s6-updated"><%= strategyData.updatedAt %></span>
+    </div>
+    <div class="s6-hero__badge" aria-hidden="true">S6<span>4v4</span></div>
+  </header>
+
+  <div class="s6-kpis" aria-label="Indicatori chiave">
+    <% strategyData.kpis.forEach((kpi) => { %>
+      <article class="s6-kpi"><span><%= kpi.label %></span><strong><%= kpi.value %></strong></article>
+    <% }) %>
+  </div>
+
+  <section class="s6-section" id="mappa-fronti">
+    <div class="s6-section__title"><span>01</span><h2>Mappa e fronti</h2></div>
+    <div class="s6-map-layout">
+      <div class="s6-map" role="img" aria-label="Mini mappa 3 per 3 dei server S6">
+        <% strategyData.mapRows.forEach((row) => { %>
+          <% row.forEach((cell) => { %>
+            <div class="s6-map__cell s6-map__cell--<%= cell.type %>">
+              <strong><%= cell.server %></strong>
+              <span><%= cell.label %></span>
+            </div>
+          <% }) %>
+        <% }) %>
+      </div>
+      <aside class="s6-note-card">
+        <h3>Note posizione</h3>
+        <ul>
+          <% strategyData.mapNotes.forEach((note) => { %><li><%= note %></li><% }) %>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="s6-section" id="forza-fazioni">
+    <div class="s6-section__title"><span>02</span><h2>Forza delle fazioni</h2></div>
+    <div class="s6-card-grid s6-card-grid--two">
+      <% strategyData.factions.forEach((faction) => { %>
+        <article class="s6-faction s6-faction--<%= faction.modifier %>">
+          <h3><%= faction.title %></h3>
+          <ul><% faction.rows.forEach((row) => { %><li><%= row %></li><% }) %></ul>
+          <div class="s6-faction__total"><span>Totale</span><strong><%= faction.total %></strong></div>
+        </article>
+      <% }) %>
+    </div>
+    <div class="s6-strategy-read"><strong>Lettura strategica</strong><p><%= strategyData.strategicReading %></p></div>
+  </section>
+
+  <section class="s6-section" id="due-fronti">
+    <div class="s6-section__title"><span>03</span><h2>I due fronti</h2></div>
+    <div class="s6-card-grid s6-card-grid--two">
+      <% strategyData.fronts.forEach((front) => { %>
+        <article class="s6-front"><h3><%= front.title %></h3><p><%= front.text %></p></article>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="s6-section" id="priorita">
+    <div class="s6-section__title"><span>04</span><h2>Priorità operative [BISS]</h2></div>
+    <div class="s6-priority-grid">
+      <% strategyData.priorities.forEach((priority, index) => { %>
+        <article class="s6-priority"><span><%= index + 1 %></span><h3><%= priority[0] %></h3><p><%= priority[1] %></p></article>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="s6-section" id="gantt">
+    <div class="s6-section__title"><span>05</span><h2>Gantt attività per settimana di stagione</h2></div>
+    <p class="s6-inline-note">Eventi ricorrenti: giorni di guerra = mercoledì e sabato ogni settimana. Altari = martedì dalla terza settimana. Le date esatte vanno verificate in-game.</p>
+    <div class="s6-gantt-wrap" tabindex="0">
+      <table class="s6-gantt">
+        <thead><tr><th>Categoria</th><th>Attività</th><% weeks.forEach((week) => { %><th><%= week %></th><% }) %><th>Note</th></tr></thead>
+        <tbody>
+          <% ganttRows.forEach((row) => { const catClass = `cat-${row.category.toLowerCase()}`; %>
+            <tr>
+              <td><span class="s6-cat <%= catClass %>"><%= row.category %></span></td>
+              <td><%= row.activity %></td>
+              <% weeks.forEach((week) => { const isActive = (row.active || []).includes(week); const isMilestone = row.milestone === week; %>
+                <td class="s6-week <%= isActive || isMilestone ? catClass : '' %>"><%= isMilestone ? '◆' : '' %></td>
+              <% }) %>
+              <td><%= row.note %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="s6-gantt-cards" aria-label="Vista mobile Gantt">
+      <% ganttRows.forEach((row) => { const catClass = `cat-${row.category.toLowerCase()}`; %>
+        <article class="s6-gantt-card">
+          <span class="s6-cat <%= catClass %>"><%= row.category %></span>
+          <h3><%= row.activity %></h3>
+          <p><strong>Settimane:</strong> <%= row.milestone ? `◆ ${row.milestone}` : row.active.join(', ') %></p>
+          <p><strong>Note:</strong> <%= row.note %></p>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="s6-section" id="legenda">
+    <div class="s6-section__title"><span>06</span><h2>Legenda categorie</h2></div>
+    <div class="s6-legend">
+      <% strategyData.categories.forEach((category) => { %><span class="s6-cat cat-<%= category.toLowerCase() %>"><%= category %></span><% }) %>
+    </div>
+    <p class="s6-inline-note">◆ = evento puntuale / milestone</p>
+  </section>
+
+  <section class="s6-section s6-data-notes" id="note-dati">
+    <div class="s6-section__title"><span>07</span><h2>Note sui dati</h2></div>
+    <button class="s6-toggle" type="button" data-toggle-notes aria-expanded="true">Mostra/Nascondi note</button>
+    <p data-notes-panel><%= strategyData.dataNotes %></p>
+  </section>
+</section>
+
+<%- include("partials/footer") %>

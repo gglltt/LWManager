@@ -4,5 +4,10 @@
       <small>LWManager © <%= new Date().getFullYear() %> • Build: <%= buildVersion %></small>
     </div>
   </footer>
+<% if (typeof extraJs !== "undefined" && Array.isArray(extraJs)) { %>
+  <% extraJs.forEach((src) => { %>
+    <script src="<%= src %>"></script>
+  <% }) %>
+<% } %>
 </body>
 </html>
