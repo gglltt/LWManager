@@ -6,8 +6,8 @@ const router = express.Router();
 const weeks = ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"];
 
 const strategyData = {
-  title: "Last War S6 — Strategia di alleanza",
-  subtitle: "Schema operativo [BISS] Made in Italy · Server 833",
+  title: "Shadow Rainforest — Strategia S6",
+  subtitle: "Guida strategica sintetica per l'alleanza · piano operativo 4 vs 4",
   intro:
     "La Stagione 6 di Last War Survival richiede coordinamento di fazione, controllo del territorio e gestione intelligente delle risorse. L’obiettivo non è vincere con la forza del singolo, ma massimizzare l’Influenza della fazione attraverso diplomazia, crescita ordinata, difesa dei fronti corretti e uso mirato degli eventi settimanali.",
   updatedAt: "Aggiornato al 24/06/2026",

@@ -392,3 +392,102 @@
 
 }
 
+
+/* Season 6 strategy page: match Shadow Rainforest guide styling */
+.s6{
+  color:var(--text);
+}
+.s6.page-shell{
+  max-width:1100px;
+  position:relative;
+  overflow:hidden;
+  margin:20px auto;
+  padding:18px;
+  border:1px solid rgba(43,213,118,.24);
+  border-radius:16px;
+  background:rgba(18,26,42,.9);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.s6.page-shell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(43,213,118,.18), transparent 28%),
+    radial-gradient(circle at 8% 18%, rgba(48,224,198,.12), transparent 30%),
+    linear-gradient(180deg, rgba(22,66,42,.18), transparent 220px);
+}
+.s6.page-shell > *{ position:relative; }
+.s6-hero{
+  margin:0 0 14px;
+  padding:22px;
+  border:1px solid rgba(43,213,118,.28);
+  border-radius:22px;
+  background:linear-gradient(135deg, rgba(7,34,24,.78), rgba(8,13,25,.55));
+  box-shadow:0 18px 42px rgba(0,0,0,.24);
+}
+.s6-eyebrow{ color:var(--accent); }
+.s6-hero h1{
+  color:var(--text);
+  font-size:clamp(30px, 5vw, 54px);
+  letter-spacing:-1.2px;
+}
+.s6-subtitle{ color:var(--text); }
+.s6-intro,
+.s6-kpi span,
+.s6-note-card li,
+.s6-front p,
+.s6-priority p{ color:var(--muted); }
+.s6-updated{
+  border-color:rgba(43,213,118,.45);
+  background:rgba(43,213,118,.13);
+  color:#bbf7d0;
+}
+.s6-hero__badge{
+  width:92px;
+  height:82px;
+  min-width:92px;
+  border:1px solid rgba(48,224,198,.45);
+  background:linear-gradient(135deg, rgba(48,224,198,.18), rgba(58,103,255,.18));
+  color:var(--text);
+  border-radius:18px;
+  font-size:28px;
+  line-height:1;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+.s6-hero__badge span{
+  color:var(--muted);
+  font-size:12px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+.s6-kpi,
+.s6-section,
+.s6-note-card,
+.s6-faction,
+.s6-front,
+.s6-priority,
+.s6-gantt-card{
+  border-color:rgba(34,48,77,.8);
+  background:rgba(9,12,20,.35);
+  box-shadow:none;
+  backdrop-filter:blur(8px);
+}
+.s6-section__title span{
+  background:rgba(48,224,198,.14);
+  color:var(--accent);
+}
+.s6-faction__total,
+.s6-front{
+  background:rgba(18,26,42,.55);
+}
+.s6-strategy-read,
+.s6-inline-note{
+  border-color:rgba(255,193,7,.45);
+  background:rgba(255,193,7,.08);
+  color:#fde68a;
+}
+.s6-gantt{ background:rgba(9,12,20,.35); }
+.s6-gantt th,
+.s6-gantt td{ border-bottom-color:rgba(34,48,77,.8); }
