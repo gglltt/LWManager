@@ -149,28 +149,34 @@
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  text-align:center
+  text-align:center;
+   color: #0f172a
 }
 .s6-map__cell strong{
-  font-size:1.75rem
+  font-size:1.75rem;
+  color: #0f172a
 }
 .s6-map__cell span{
   text-transform:uppercase;
   font-weight:900;
   font-size:.8rem;
-  letter-spacing:.08em
+  letter-spacing:.08em;
+  color: #334155;
 }
 .s6-map__cell--self{
   background:#86efac
 }
 .s6-map__cell--ally{
-  background:#dcfce7
+  background:#dcfce7;
+  color: #166534;
 }
 .s6-map__cell--enemy{
-  background:var(--s6-red-soft)
+  background:var(--s6-red-soft);
+   color: #7f1d1d;
 }
 .s6-map__cell--center{
-  background:var(--s6-sand)
+  background:var(--s6-sand);
+  color: #78350f;
 }
 .s6-note-card{
   padding:18px
