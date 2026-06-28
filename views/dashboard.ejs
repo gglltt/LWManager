@@ -36,14 +36,15 @@
       </div>
     </a>
 
-    <a class="menuCard" href="/season6-strategy" title="Strategia S6">
-      <div class="menuIcon">🗺️</div>
-      <div class="menuText">
-        <div class="menuTitle">Strategia S6</div>
-        <div class="menuDesc">Mappa, fronti, alleati, altari e piano operativo 4v4</div>
-      </div>
-    </a>
-
+    <% if (user && user.authLevel >= 3) { %>
+      <a class="menuCard" href="/season6-strategy" title="Strategia S6">
+        <div class="menuIcon">🗺️</div>
+        <div class="menuText">
+          <div class="menuTitle">Strategia S6</div>
+          <div class="menuDesc">Mappa, fronti, alleati, altari e piano operativo 4v4</div>
+        </div>
+      </a>
+    <% } %>
 
     <% if (user && user.authLevel >= 3) { %>
       <a class="menuCard" href="/performance-vs" title="<%= t('perf_title') %>">
