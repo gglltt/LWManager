@@ -41,6 +41,24 @@ const EventLogSchema = new mongoose.Schema(
       trim: true,
       maxlength: 120
     },
+    sourceRegion: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 120
+    },
+    sourceCountry: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 120
+    },
+    userAgent: {
+      type: String,
+      default: "unknown",
+      trim: true,
+      maxlength: 1000
+    },
     details: {
       type: String,
       default: "",
