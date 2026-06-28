@@ -19,7 +19,7 @@
         <div class="perfRow" data-row data-saved-row="1">
           <input type="hidden" name="rows[<%= i %>][rowId]" value="<%= row._id %>" data-row-id-name />
           <input type="hidden" name="rows[<%= i %>][playerId]" value="<%= row.playerId?._id || row.playerId %>" data-player-id />
-          <div class="field autocomplete"><label><%= t('perf_player') %></label><input type="text" value="<%= row.playerId?.nickname || '' %>" autocomplete="off" required data-player-search /><div class="autocompleteMenu" data-player-results></div></div>
+          <div class="field autocomplete"><label><%= t('perf_player') %></label><input type="text" value="<%= row.playerId?.nickname || '' %>" autocomplete="off" required data-player-search /><div class="autocompleteMenu" data-player-results hidden></div></div>
           <div class="field"><label><%= t('perf_position') %></label><input class="noSpinner" name="rows[<%= i %>][position]" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="<%= row.position %>" data-position-name /></div>
           <div class="field"><label><%= t('perf_score') %></label><input class="noSpinner" name="rows[<%= i %>][score]" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="<%= row.score %>" data-score-name /></div>
           <button type="button" class="button danger" data-remove-row><%= t('delete') %></button>

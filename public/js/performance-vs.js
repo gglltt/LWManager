@@ -76,7 +76,7 @@
     return `<div class="perfRow" data-row${savedAttr}>
       <input type="hidden" value="${escapeHtml(rowId)}" data-row-id-name>
       <input type="hidden" value="${escapeHtml(playerId)}" data-player-id>
-      <div class="field autocomplete"><label>${escapeHtml(i18n.player || "Player")}</label><input type="text" value="${escapeHtml(nickname)}" autocomplete="off" required data-player-search><div class="autocompleteMenu" data-player-results></div></div>
+      <div class="field autocomplete"><label>${escapeHtml(i18n.player || "Player")}</label><input type="text" value="${escapeHtml(nickname)}" autocomplete="off" required data-player-search><div class="autocompleteMenu" data-player-results hidden></div></div>
       <div class="field"><label>${escapeHtml(i18n.position || "Position")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="${escapeHtml(row.position || "")}" data-position-name></div>
       <div class="field"><label>${escapeHtml(i18n.score || "Score")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="${escapeHtml(row.score || "")}" data-score-name></div>
       <button type="button" class="button danger" data-remove-row>${escapeHtml(i18n.delete || "Delete")}</button>
@@ -90,18 +90,23 @@
     input.addEventListener("input", () => {
       hidden.value = ""; clearTimeout(timer); updateAddRowState();
       const q = input.value.trim();
-      if (!q) { menu.innerHTML = ""; return; }
+      if (!q) { menu.innerHTML = ""; menu.hidden = true; return; }
       timer = setTimeout(async () => {
         const res = await fetch(`/performance-vs/players/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
-        menu.innerHTML = (data.players || []).map((p) => `<button type="button" data-id="${escapeHtml(p.id)}" data-name="${escapeHtml(p.nickname)}">${escapeHtml(p.nickname)}</button>`).join("");
+        const players = data.players || [];
+        menu.innerHTML = players.map((p) => `<button type="button" data-id="${escapeHtml(p.id)}" data-name="${escapeHtml(p.nickname)}">${escapeHtml(p.nickname)}</button>`).join("");
+        menu.hidden = players.length === 0;
       }, 180);
     });
     ["input", "change"].forEach((eventName) => row.querySelectorAll("input").forEach((el) => el.addEventListener(eventName, updateAddRowState)));
     menu.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-id]");
       if (!btn) return;
-      hidden.value = btn.dataset.id; input.value = btn.dataset.name; menu.innerHTML = ""; updateAddRowState();
+      hidden.value = btn.dataset.id; input.value = btn.dataset.name; menu.innerHTML = ""; menu.hidden = true; updateAddRowState();
+    });
+    input.addEventListener("blur", () => {
+      setTimeout(() => { menu.innerHTML = ""; menu.hidden = true; }, 120);
     });
   }
   function makeRow() {
