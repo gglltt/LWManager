@@ -102,7 +102,8 @@ app.get("/novita", requireAuth, (req, res) => {
 });
 
 app.get("/stagione-6", requireAuth, (req, res) => {
-  res.render("stagione6", { user: req.user });
+  const seasonContentLang = req.resolvedSeason6Lang || (["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en");
+  res.render("stagione6", { user: req.user, seasonContentLang });
 });
 
 app.use("/potenze", potenzeRoutes);
