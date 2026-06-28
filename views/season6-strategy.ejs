@@ -79,7 +79,7 @@
       <table class="s6-gantt">
         <thead><tr><th><%= strategyData.labels.category %></th><th><%= strategyData.labels.activity %></th><% weeks.forEach((week) => { %><th><%= week %></th><% }) %><th><%= strategyData.labels.notes %></th></tr></thead>
         <tbody>
-          <% ganttRows.forEach((row) => { const catClass = `cat-${row.category.toLowerCase()}`; %>
+          <% ganttRows.forEach((row) => { const catClass = `cat-${row.categoryKey || row.category.toLowerCase()}`; %>
             <tr>
               <td><span class="s6-cat <%= catClass %>"><%= row.category %></span></td>
               <td><%= row.activity %></td>
@@ -94,7 +94,7 @@
     </div>
 
     <div class="s6-gantt-cards" aria-label="<%= strategyData.labels.mobile %>">
-      <% ganttRows.forEach((row) => { const catClass = `cat-${row.category.toLowerCase()}`; %>
+      <% ganttRows.forEach((row) => { const catClass = `cat-${row.categoryKey || row.category.toLowerCase()}`; %>
         <article class="s6-gantt-card">
           <span class="s6-cat <%= catClass %>"><%= row.category %></span>
           <h3><%= row.activity %></h3>
@@ -108,7 +108,7 @@
   <section class="s6-section" id="legenda">
     <div class="s6-section__title"><span>06</span><h2><%= strategyData.labels.legend %></h2></div>
     <div class="s6-legend">
-      <% strategyData.categories.forEach((category) => { %><span class="s6-cat cat-<%= category.toLowerCase() %>"><%= category %></span><% }) %>
+      <% strategyData.categories.forEach((category) => { %><span class="s6-cat cat-<%= (strategyData.categoryKeys && strategyData.categoryKeys[category]) || category.toLowerCase() %>"><%= category %></span><% }) %>
     </div>
     <p class="s6-inline-note"><%= strategyData.labels.milestone %></p>
   </section>
