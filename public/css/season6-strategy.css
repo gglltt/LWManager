@@ -478,6 +478,7 @@
   border-color:rgba(34,48,77,.8);
   background:rgba(9,12,20,.35);
   box-shadow:none;
+  -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
 }
 .s6-section__title span{
