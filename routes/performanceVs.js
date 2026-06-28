@@ -40,20 +40,25 @@ async function loadEventWithRows(query) {
   const rows = await PerformanceVsRow.find({ eventId: event._id }).populate("playerId", "nickname").sort({ position: 1 }).lean();
   return { event, rows };
 }
-async function loadEventsForView(eventType) {
-  const events = await PerformanceVsEvent.find({ eventType }).sort({ year: -1, week: -1 }).lean();
+async function loadEventSummaries(eventType) {
+  const events = await PerformanceVsEvent.find({ eventType }).sort({ year: -1, week: -1, eventType: 1 }).lean();
   if (events.length === 0) return [];
-  const rows = await PerformanceVsRow.find({ eventId: { $in: events.map((event) => event._id) } })
-    .populate("playerId", "nickname")
-    .sort({ position: 1 })
-    .lean();
-  const rowsByEvent = new Map();
-  rows.forEach((row) => {
-    const key = String(row.eventId);
-    if (!rowsByEvent.has(key)) rowsByEvent.set(key, []);
-    rowsByEvent.get(key).push(row);
+
+  const summaryRows = await PerformanceVsRow.aggregate([
+    { $match: { eventId: { $in: events.map((event) => event._id) } } },
+    { $group: { _id: "$eventId", playerCount: { $sum: 1 }, totalScore: { $sum: "$score" }, updatedAt: { $max: "$updatedAt" } } }
+  ]);
+  const summaryByEvent = new Map(summaryRows.map((row) => [String(row._id), row]));
+
+  return events.map((event) => {
+    const summary = summaryByEvent.get(String(event._id)) || {};
+    return {
+      ...event,
+      playerCount: summary.playerCount || 0,
+      totalScore: summary.totalScore || 0,
+      summaryUpdatedAt: summary.updatedAt || event.updatedAt
+    };
   });
-  return events.map((event) => ({ ...event, rows: rowsByEvent.get(String(event._id)) || [] }));
 }
 function renderEdit(res, req, data) {
   return res.render("performance-vs/edit", { user: req.user, eventTypes: EVENT_TYPES, ...data });
@@ -84,11 +89,31 @@ router.get("/view", async (req, res) => {
     return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: "VS" }, events: [], error: t("perf_invalid_event"), message: null });
   }
   try {
-    const events = await loadEventsForView(eventType);
+    const events = await loadEventSummaries(eventType);
     return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType }, events, error: null, message: null });
   } catch (err) {
     console.error(err);
     return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType }, events: [], error: t("perf_load_error"), message: null });
+  }
+});
+
+
+router.get("/view/:year/:week/:eventType", async (req, res) => {
+  const t = res.locals.t;
+  const header = validateHeader(req.params, t);
+  if (!header.ok) {
+    return res.render("performance-vs/detail", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: "VS" }, event: null, rows: [], error: header.error, message: null });
+  }
+
+  try {
+    const loaded = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
+    if (!loaded.event) {
+      return res.render("performance-vs/detail", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: header.eventType }, event: null, rows: [], error: t("perf_no_data_for_selection"), message: null });
+    }
+    return res.render("performance-vs/detail", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: header.eventType }, error: null, message: null, ...loaded });
+  } catch (err) {
+    console.error(err);
+    return res.render("performance-vs/detail", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: header.eventType }, event: null, rows: [], error: t("perf_load_error"), message: null });
   }
 });
 

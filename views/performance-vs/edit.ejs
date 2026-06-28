@@ -7,12 +7,12 @@
   <div class="alert error" data-load-error hidden></div>
   <form class="form" method="post" action="/performance-vs/events" data-performance-form data-autoload-event>
     <div class="perfHeaderGrid">
-      <div class="field"><label><%= t('perf_year') %></label><input class="noSpinner" name="year" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" required value="<%= form.year || '' %>" data-week-year /></div>
-      <div class="field"><label><%= t('perf_week') %></label><div class="weekInline"><input name="week" type="number" min="1" max="53" required value="<%= form.week || '' %>" data-week-number /><span class="help weekRangeInline" data-week-range><%= event ? `${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></span></div></div>
-      <div class="field"><label><%= t('perf_event') %></label><select name="eventType" data-event-type><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div>
+      <div class="field perfFieldYear"><label><%= t('perf_year') %></label><input class="noSpinner perfInputYear" name="year" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" required value="<%= form.year || '' %>" data-week-year /></div>
+      <div class="field perfFieldWeek"><label><%= t('perf_week') %></label><div class="weekInline"><input class="noSpinner perfInputWeek" name="week" type="text" inputmode="numeric" pattern="([1-9]|[1-4][0-9]|5[0-3])" maxlength="2" required value="<%= form.week || '' %>" data-week-number /><span class="help weekRangeInline" data-week-range><%= event ? `${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></span></div></div>
+      <div class="field perfFieldEvent"><label><%= t('perf_event') %></label><select class="perfInputEvent" name="eventType" data-event-type><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div>
     </div>
     <hr class="divider" />
-    <div class="pageHeader"><h2><%= t('perf_rows') %></h2><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
+    <div class="pageHeader"><h2><%= t('perf_rows') %></h2></div>
     <p class="muted" data-empty-rows <%= rows && rows.length ? 'hidden' : '' %>><%= t('perf_no_data_for_selection') %></p>
     <div class="perfRows" data-rows>
       <% (rows || []).forEach((row, i) => { %>
@@ -26,9 +26,14 @@
         </div>
       <% }) %>
     </div>
-    <div class="formActions"><button type="submit"><%= t('save') %></button><a class="button secondary" href="/performance-vs/view"><%= t('perf_data_view') %></a></div>
+    <div class="perfActionPanel">
+      <div class="perfActionGroup"><button type="submit"><%= t('save') %></button><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
+      <div class="perfActionGroup perfNavActions"><a class="button secondary" href="/performance-vs"><%= t('perf_title') %></a><a class="button secondary" href="/performance-vs/view"><%= t('perf_data_view') %></a></div>
+    </div>
   </form>
-  <form class="inlineForm" method="post" action="<%= event ? `/performance-vs/events/${event._id}/delete` : '#' %>" data-delete-event-form <%= event ? '' : 'hidden' %> onsubmit="return confirm(window.PERF_I18N.confirmDeleteEventTemplate.replace('{event}', '<%= event ? event.eventType : 'VS' %>').replace('{week}', '<%= event ? event.week : '' %>').replace('{year}', '<%= event ? event.year : '' %>'));"><button class="button danger" type="submit"><%= t('perf_delete_event') %></button></form>
+  <div class="perfDangerZone">
+    <form class="inlineForm" method="post" action="<%= event ? `/performance-vs/events/${event._id}/delete` : '#' %>" data-delete-event-form <%= event ? '' : 'hidden' %> onsubmit="return confirm(window.PERF_I18N.confirmDeleteEventTemplate.replace('{event}', '<%= event ? event.eventType : 'VS' %>').replace('{week}', '<%= event ? event.week : '' %>').replace('{year}', '<%= event ? event.year : '' %>'));"><button class="button danger" type="submit"><%= t('perf_delete_event') %></button></form>
+  </div>
 </section>
 <script>window.PERF_I18N={player:<%- JSON.stringify(t('perf_player')) %>,position:<%- JSON.stringify(t('perf_position')) %>,score:<%- JSON.stringify(t('perf_score')) %>,delete:<%- JSON.stringify(t('delete')) %>,selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>,emptyRowExists:<%- JSON.stringify(t('perf_empty_row_exists')) %>,noData:<%- JSON.stringify(t('perf_no_data_for_selection')) %>,dataLoaded:<%- JSON.stringify(t('perf_data_loaded')) %>,loadError:<%- JSON.stringify(t('perf_load_error')) %>,confirmDeleteEventTemplate:<%- JSON.stringify(t('perf_confirm_delete_event')) %>};</script>
 <script src="/js/performance-vs.js"></script>

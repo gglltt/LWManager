@@ -1350,15 +1350,21 @@ html[dir="rtl"] .pagination{
 }
 
 
+
 /* Performance VS */
 .perfHeaderGrid{
-  display:grid;
-  grid-template-columns:minmax(120px,.75fr) minmax(260px,1.5fr) minmax(160px,.8fr);
-  gap:12px;
-  align-items:start;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-start;
+  gap:12px 18px;
 }
-.weekInline{ display:flex; align-items:center; gap:10px; }
-.weekInline input{ flex:0 0 120px; }
+.perfFieldYear{ flex:0 0 120px; }
+.perfFieldWeek{ flex:0 1 280px; }
+.perfFieldEvent{ flex:0 0 170px; }
+.perfInputYear{ width:112px; max-width:112px; }
+.perfInputWeek{ width:88px; max-width:88px; }
+.perfInputEvent{ width:160px; max-width:160px; }
+.weekInline{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .weekRangeInline{ margin:0; white-space:nowrap; }
 .noSpinner::-webkit-outer-spin-button,
 .noSpinner::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
@@ -1370,15 +1376,31 @@ html[dir="rtl"] .pagination{
 .autocompleteMenu button{ display:block; width:100%; border-radius:0; background:transparent; text-align:left; font-weight:700; }
 .autocompleteMenu button:hover{ background:rgba(58,103,255,.18); }
 button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
-.perfViewFilter{ display:grid; grid-template-columns:minmax(180px,320px) auto; gap:12px; align-items:end; }
-.perfEventList{ display:grid; gap:16px; }
-.perfEventPanel{ border:1px solid rgba(34,48,77,.8); border-radius:16px; padding:14px; background:rgba(9,12,20,.24); }
-.perfEventHeader{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
-.perfEventHeader h2{ margin:0; }
+.perfActionPanel{ display:grid; gap:12px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(34,48,77,.65); }
+.perfActionGroup{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.perfNavActions{ padding-top:2px; }
+.perfDangerZone{ margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,92,122,.28); }
+.perfViewFilter{ display:grid; grid-template-columns:minmax(150px,190px) auto; gap:12px; align-items:end; }
+.perfSummaryTableWrap{ display:block; border-radius:12px; border:1px solid var(--border); overflow-x:auto; }
+.perfSummaryTable{ min-width:920px; }
+.perfWeekCards{ display:none; gap:14px; }
+.perfWeekCard,.perfEventPanel,.perfPlayerCard{ border:1px solid rgba(34,48,77,.8); border-radius:16px; padding:14px; background:rgba(9,12,20,.24); }
+.perfWeekCard h2{ margin-top:0; }
+.perfPlayerCards{ display:none; gap:10px; }
+.perfPlayerCard{ display:flex; align-items:center; gap:12px; }
+.perfPlayerRank{ width:52px; height:40px; border-radius:12px; display:grid; place-items:center; font-weight:900; background:rgba(58,103,255,.16); border:1px solid rgba(58,103,255,.35); }
 @media (max-width: 760px){
-  .perfHeaderGrid,.perfViewFilter,.perfRow{ grid-template-columns:1fr; }
-  .weekInline{ align-items:stretch; flex-direction:column; gap:6px; }
-  .weekInline input{ flex:auto; }
+  .perfHeaderGrid{ flex-direction:column; align-items:flex-start; }
+  .perfFieldYear,.perfFieldWeek,.perfFieldEvent{ flex:0 0 auto; width:auto; }
+  .perfInputYear{ width:112px; }
+  .perfInputWeek{ width:88px; }
+  .perfInputEvent{ width:150px; }
+  .weekInline{ align-items:flex-start; flex-direction:column; gap:6px; }
   .weekRangeInline{ white-space:normal; }
-  .tableWrap{ overflow-x:auto; }
+  .perfRow{ grid-template-columns:1fr; }
+  .perfActionGroup{ align-items:stretch; }
+  .perfActionGroup .button,.perfActionGroup button{ flex:1 1 180px; }
+  .perfViewFilter{ grid-template-columns:1fr; }
+  .perfSummaryTableWrap,.perfDetailTable{ display:none; }
+  .perfWeekCards,.perfPlayerCards{ display:grid; }
 }
