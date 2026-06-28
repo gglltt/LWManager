@@ -6,7 +6,7 @@
   --s6-line:#dbe3ef;
   --s6-green:#34d399;
   --s6-green-soft:#d9fbe8;
-  --s6-red-soft:#ffe1e6;
+  --s6-red-soft:#fa8094;
   --s6-sand:#f6e7bd;
   --s6-blue:#dbeafe;
   --s6-purple:#eadcff;
@@ -150,7 +150,7 @@
   align-items:center;
   justify-content:center;
   text-align:center;
-   color: #0f172a
+  color: #0f172a
 }
 .s6-map__cell strong{
   font-size:1.75rem;
@@ -164,10 +164,10 @@
   color: #334155;
 }
 .s6-map__cell--self{
-  background:#86efac
+  background:#33fd7d
 }
 .s6-map__cell--ally{
-  background:#dcfce7;
+  background:#a4f7c1;
   color: #166534;
 }
 .s6-map__cell--enemy{
