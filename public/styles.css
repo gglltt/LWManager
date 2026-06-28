@@ -813,6 +813,13 @@ textarea:focus{
   line-height:1.35;
 }
 
+.event-user-agent{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  font-size:.85rem;
+  opacity:.9;
+}
+
 /* ========================= */
 /* RTL (Arabic)             */
 /* ========================= */

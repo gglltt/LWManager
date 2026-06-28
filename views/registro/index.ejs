@@ -54,14 +54,18 @@
           const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString(localeTag, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
           const details = event.details || "-";
           const detailsPreview = details.length > 80 ? `${details.slice(0, 80)}…` : details;
-          const sourceSummary = [event.sourceIp, event.sourceCity || t("unknown")].filter(Boolean).join(" · ");
+          const unknown = t("unknown");
+          const sourceSummary = [event.sourceIp || unknown, event.sourceCity || unknown, event.sourceCountry || unknown].filter(Boolean).join(" · ");
           const fullDetails = [
             `${t("date")}: ${date} ${time}`,
             `${t("activity")}: ${event.eventType || "-"}`,
-            `${t("source_ip")}: ${event.sourceIp || t("unknown")}`,
-            `${t("browser")}: ${event.browserType || t("unknown")}`,
-            `${t("machine")}: ${event.sourceMachine || t("unknown")}`,
-            `${t("city")}: ${event.sourceCity || t("unknown")}`,
+            `${t("source_ip")}: ${event.sourceIp || unknown}`,
+            `${t("browser")}: ${event.browserType || unknown}`,
+            `${t("machine")}: ${event.sourceMachine || unknown}`,
+            `${t("city")}: ${event.sourceCity || unknown}`,
+            `Regione: ${event.sourceRegion || unknown}`,
+            `Nazione: ${event.sourceCountry || unknown}`,
+            `User-Agent: ${event.userAgent || unknown}`,
             "",
             `${t("details")}:`,
             details
@@ -118,7 +122,7 @@
       <h3 id="logModalTitle"><%= t("event_details") %></h3>
       <button type="button" class="iconBtn" id="logModalClose" aria-label="<%= t('close') %>">✖</button>
     </div>
-    <pre class="logModalBody" id="logModalBody"></pre>
+    <pre class="logModalBody event-user-agent" id="logModalBody"></pre>
   </div>
 </div>
 
