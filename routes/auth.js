@@ -24,7 +24,7 @@ function isSixDigitPin(pin) {
 function getPins() {
   return {
     standard: String(process.env.APP_PIN_STANDARD || "111111"),
-    supervisor: String(process.env.SUPERVISOR_PIN || process.env.APP_PIN_SUPERVISOR || ""),
+    supervisor: String(process.env.SUPERVISOR_PIN || process.env.APP_PIN_SUPERVISOR || "151515"),
     admin: String(process.env.APP_PIN_ADMIN || "999999")
   };
 }
