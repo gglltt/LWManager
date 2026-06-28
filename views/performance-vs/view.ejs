@@ -1,12 +1,20 @@
 <%- include("../partials/header", { title: t('perf_data_view') }) %>
 <section class="card cardWide">
-  <div class="pageHeader"><div><h1><%= t('perf_data_view') %></h1></div><a class="button secondary" href="/performance-vs"><%= t('back_dashboard') %></a></div>
+  <div class="pageHeader"><div><h1><%= t('perf_data_view') %></h1><p class="muted"><%= t('perf_data_view_desc') %></p></div><a class="button secondary" href="/performance-vs"><%= t('perf_title') %></a></div>
   <% if (error) { %><div class="alert error"><%= error %></div><% } %><% if (message) { %><div class="alert success"><%= message %></div><% } %>
-  <form class="form" method="get" action="/performance-vs/view"><div class="formGrid2"><div class="field"><label><%= t('perf_year') %></label><input name="year" type="number" value="<%= form.year %>" min="2000" max="2100" required data-week-year /></div><div class="field"><label><%= t('perf_week') %></label><input name="week" type="number" value="<%= form.week %>" min="1" max="53" required data-week-number /><div class="help" data-week-range><%= event ? `${t('perf_week_period')}: ${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></div></div><div class="field"><label><%= t('perf_event') %></label><select name="eventType"><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div></div><div class="formActions"><button><%= t('filter') %></button><a class="button secondary" href="/performance-vs/edit?year=<%= encodeURIComponent(form.year || '') %>&week=<%= encodeURIComponent(form.week || '') %>&eventType=<%= encodeURIComponent(form.eventType || 'VS') %>"><%= t('edit') %></a></div></form>
+  <form class="form" method="get" action="/performance-vs/view"><div class="perfViewFilter"><div class="field"><label><%= t('perf_event') %></label><select name="eventType"><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div><div class="formActions"><button><%= t('filter') %></button></div></div></form>
   <hr class="divider" />
-  <% if (!rows || rows.length === 0) { %><p class="muted"><%= t('perf_no_data') %></p><% } else { %>
-  <div class="tableWrap"><table class="table"><thead><tr><th><%= t('perf_position') %></th><th><%= t('perf_player') %></th><th><%= t('perf_score') %></th><th><%= t('actions_short') %></th></tr></thead><tbody><% rows.forEach(row => { %><tr><td><%= row.position %></td><td><%= row.playerId?.nickname || '-' %></td><td><%= Number(row.score).toLocaleString(localeTag) %></td><td><a class="button secondary" href="/performance-vs/edit?year=<%= event.year %>&week=<%= event.week %>&eventType=<%= event.eventType %>"><%= t('edit') %></a><form class="inlineForm" method="post" action="/performance-vs/events/<%= event._id %>/rows/<%= row._id %>/delete" onsubmit="return confirm('<%= t('confirm_delete') %>');"><button class="button danger" type="submit"><%= t('delete') %></button></form></td></tr><% }) %></tbody></table></div>
+  <% if (!events || events.length === 0) { %><p class="muted"><%= t('perf_no_data') %></p><% } else { %>
+    <div class="perfEventList">
+      <% events.forEach(event => { %>
+        <section class="perfEventPanel">
+          <div class="perfEventHeader"><h2><%= event.eventType %> · <%= t('perf_week') %> <%= event.week %>/<%= event.year %></h2><span class="muted"><%= t('perf_week_period') %>: <%= new Date(event.weekStartDate).toLocaleDateString(localeTag) %> - <%= new Date(event.weekEndDate).toLocaleDateString(localeTag) %></span></div>
+          <% if (!event.rows || event.rows.length === 0) { %><p class="muted"><%= t('perf_no_data_for_selection') %></p><% } else { %>
+            <div class="tableWrap"><table class="table"><thead><tr><th><%= t('perf_year') %></th><th><%= t('perf_week') %></th><th><%= t('perf_event') %></th><th><%= t('perf_position') %></th><th><%= t('perf_player') %></th><th><%= t('perf_score') %></th></tr></thead><tbody><% event.rows.forEach(row => { %><tr><td><%= event.year %></td><td><%= event.week %></td><td><%= event.eventType %></td><td><%= row.position %></td><td><%= row.playerId?.nickname || '-' %></td><td><%= Number(row.score).toLocaleString(localeTag) %></td></tr><% }) %></tbody></table></div>
+          <% } %>
+        </section>
+      <% }) %>
+    </div>
   <% } %>
 </section>
-<script>window.PERF_I18N={weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>};</script><script src="/js/performance-vs.js"></script>
 <%- include("../partials/footer") %>

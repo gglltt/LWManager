@@ -14,14 +14,12 @@ const MAX_SCORE = 999999999;
 function escapeRegex(v) { return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 function parseIntField(v) { const n = Number(v); return Number.isInteger(n) ? n : null; }
 function actor(req) { return req.user?.role || "unknown"; }
-function formatWeekRangeForView(event) {
-  return { start: event.weekStartDate?.toISOString().slice(0, 10), end: event.weekEndDate?.toISOString().slice(0, 10) };
-}
 function validateHeader(body, t) {
-  const year = parseIntField(body.year);
+  const yearRaw = String(body.year || "").trim();
+  const year = parseIntField(yearRaw);
   const week = parseIntField(body.week);
   const eventType = String(body.eventType || "VS").trim().toUpperCase();
-  if (!Number.isInteger(year) || year < 2000 || year > 2100) return { ok: false, error: t("perf_invalid_year") };
+  if (!/^\d{4}$/.test(yearRaw) || !Number.isInteger(year) || year < 2000 || year > 2100) return { ok: false, error: t("perf_invalid_year") };
   if (!Number.isInteger(week) || week < 1 || week > 53) return { ok: false, error: t("perf_invalid_week") };
   if (!EVENT_TYPES.includes(eventType)) return { ok: false, error: t("perf_invalid_event") };
   try { return { ok: true, year, week, eventType, range: getIsoWeekRange(year, week) }; }
@@ -42,6 +40,21 @@ async function loadEventWithRows(query) {
   const rows = await PerformanceVsRow.find({ eventId: event._id }).populate("playerId", "nickname").sort({ position: 1 }).lean();
   return { event, rows };
 }
+async function loadEventsForView(eventType) {
+  const events = await PerformanceVsEvent.find({ eventType }).sort({ year: -1, week: -1 }).lean();
+  if (events.length === 0) return [];
+  const rows = await PerformanceVsRow.find({ eventId: { $in: events.map((event) => event._id) } })
+    .populate("playerId", "nickname")
+    .sort({ position: 1 })
+    .lean();
+  const rowsByEvent = new Map();
+  rows.forEach((row) => {
+    const key = String(row.eventId);
+    if (!rowsByEvent.has(key)) rowsByEvent.set(key, []);
+    rowsByEvent.get(key).push(row);
+  });
+  return events.map((event) => ({ ...event, rows: rowsByEvent.get(String(event._id)) || [] }));
+}
 function renderEdit(res, req, data) {
   return res.render("performance-vs/edit", { user: req.user, eventTypes: EVENT_TYPES, ...data });
 }
@@ -53,26 +66,30 @@ router.get("/", (req, res) => res.render("performance-vs/index", { user: req.use
 router.get("/edit", async (req, res) => {
   const now = new Date();
   const form = { year: req.query.year || now.getUTCFullYear(), week: req.query.week || "", eventType: req.query.eventType || "VS" };
+  const message = req.query.deletedEvent ? (res.locals.t || ((k) => k))("perf_event_deleted") : null;
   if (form.year && form.week) {
     const header = validateHeader(form, res.locals.t || ((k) => k));
     if (header.ok) {
       const loaded = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
-      return renderEdit(res, req, { error: null, message: null, form, ...loaded });
+      return renderEdit(res, req, { error: null, message, form, ...loaded });
     }
   }
-  return renderEdit(res, req, { error: null, message: null, form, event: null, rows: [] });
+  return renderEdit(res, req, { error: null, message, form, event: null, rows: [] });
 });
 
 router.get("/view", async (req, res) => {
   const t = res.locals.t;
-  const form = { year: req.query.year || "", week: req.query.week || "", eventType: req.query.eventType || "VS" };
-  let data = { event: null, rows: [], error: null };
-  if (form.year && form.week) {
-    const header = validateHeader(form, t);
-    if (!header.ok) data.error = header.error;
-    else data = { ...(await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType })), error: null };
+  const eventType = String(req.query.eventType || "VS").trim().toUpperCase();
+  if (!EVENT_TYPES.includes(eventType)) {
+    return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: "VS" }, events: [], error: t("perf_invalid_event"), message: null });
   }
-  return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form, message: req.query.deleted ? t("perf_row_deleted") : null, ...data });
+  try {
+    const events = await loadEventsForView(eventType);
+    return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType }, events, error: null, message: null });
+  } catch (err) {
+    console.error(err);
+    return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType }, events: [], error: t("perf_load_error"), message: null });
+  }
 });
 
 router.get("/players/search", async (req, res) => {
@@ -86,8 +103,12 @@ router.get("/events", async (req, res) => {
   const t = res.locals.t;
   const header = validateHeader(req.query, t);
   if (!header.ok) return res.status(400).json({ ok: false, error: header.error });
-  const { event, rows } = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
-  return res.json({ ok: true, event, rows, weekRange: { start: header.range.start.toISOString(), end: header.range.end.toISOString() } });
+  try {
+    const { event, rows } = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
+    return res.json({ ok: true, event, rows, message: event ? t("perf_data_loaded") : t("perf_no_data_for_selection"), weekRange: { start: header.range.start.toISOString(), end: header.range.end.toISOString() } });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: t("perf_load_error") });
+  }
 });
 
 router.post("/events", async (req, res) => {
@@ -131,12 +152,19 @@ router.post("/events", async (req, res) => {
   }
 });
 
-router.post("/events/:eventId/rows/:rowId/delete", async (req, res) => {
-  await PerformanceVsRow.deleteOne({ _id: req.params.rowId, eventId: req.params.eventId });
-  await createEventLog(req, "performance_vs_row_delete", `Riga Performance VS eliminata: ${req.params.rowId}`);
-  const event = await PerformanceVsEvent.findById(req.params.eventId).lean();
-  const qs = event ? `?year=${event.year}&week=${event.week}&eventType=${event.eventType}&deleted=1` : "?deleted=1";
-  return res.redirect(`/performance-vs/view${qs}`);
+router.post("/events/:eventId/delete", async (req, res) => {
+  const t = res.locals.t;
+  try {
+    const event = await PerformanceVsEvent.findById(req.params.eventId).lean();
+    if (!event) return res.redirect("/performance-vs/edit?deletedEvent=1");
+    await PerformanceVsRow.deleteMany({ eventId: event._id });
+    await PerformanceVsEvent.deleteOne({ _id: event._id });
+    await createEventLog(req, "performance_vs_event_delete", `Evento Performance VS eliminato: ${event.eventType} W${event.week}/${event.year}`);
+    return res.redirect(`/performance-vs/edit?year=${event.year}&week=${event.week}&eventType=${encodeURIComponent(event.eventType)}&deletedEvent=1`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(`500 - ${t("perf_delete_error")}`);
+  }
 });
 
 module.exports = router;

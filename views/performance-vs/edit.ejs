@@ -1,19 +1,22 @@
 <%- include("../partials/header", { title: t('perf_data_entry') }) %>
 <section class="card cardWide">
-  <div class="pageHeader"><div><h1><%= t('perf_data_entry') %></h1><p class="muted"><%= t('perf_data_entry_desc') %></p></div><a class="button secondary" href="/performance-vs"><%= t('back_dashboard') %></a></div>
+  <div class="pageHeader"><div><h1><%= t('perf_data_entry') %></h1><p class="muted"><%= t('perf_data_entry_desc') %></p></div><a class="button secondary" href="/performance-vs"><%= t('perf_title') %></a></div>
   <% if (error) { %><div class="alert error"><%= error %></div><% } %>
   <% if (message) { %><div class="alert success"><%= message %></div><% } %>
-  <form class="form" method="post" action="/performance-vs/events" data-performance-form>
-    <div class="formGrid2">
-      <div class="field"><label><%= t('perf_year') %></label><input name="year" type="number" min="2000" max="2100" required value="<%= form.year || '' %>" data-week-year /></div>
-      <div class="field"><label><%= t('perf_week') %></label><input name="week" type="number" min="1" max="53" required value="<%= form.week || '' %>" data-week-number /><div class="help" data-week-range><%= event ? `${t('perf_week_period')}: ${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></div></div>
-      <div class="field"><label><%= t('perf_event') %></label><select name="eventType"><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div>
+  <div class="alert success" data-load-message hidden></div>
+  <div class="alert error" data-load-error hidden></div>
+  <form class="form" method="post" action="/performance-vs/events" data-performance-form data-autoload-event>
+    <div class="perfHeaderGrid">
+      <div class="field"><label><%= t('perf_year') %></label><input class="noSpinner" name="year" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" required value="<%= form.year || '' %>" data-week-year /></div>
+      <div class="field"><label><%= t('perf_week') %></label><div class="weekInline"><input name="week" type="number" min="1" max="53" required value="<%= form.week || '' %>" data-week-number /><span class="help weekRangeInline" data-week-range><%= event ? `${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></span></div></div>
+      <div class="field"><label><%= t('perf_event') %></label><select name="eventType" data-event-type><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div>
     </div>
     <hr class="divider" />
     <div class="pageHeader"><h2><%= t('perf_rows') %></h2><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
+    <p class="muted" data-empty-rows <%= rows && rows.length ? 'hidden' : '' %>><%= t('perf_no_data_for_selection') %></p>
     <div class="perfRows" data-rows>
       <% (rows || []).forEach((row, i) => { %>
-        <div class="perfRow" data-row>
+        <div class="perfRow" data-row data-saved-row="1">
           <input type="hidden" name="rows[<%= i %>][rowId]" value="<%= row._id %>" data-row-id-name />
           <input type="hidden" name="rows[<%= i %>][playerId]" value="<%= row.playerId?._id || row.playerId %>" data-player-id />
           <div class="field autocomplete"><label><%= t('perf_player') %></label><input type="text" value="<%= row.playerId?.nickname || '' %>" autocomplete="off" required data-player-search /><div class="autocompleteMenu" data-player-results></div></div>
@@ -25,7 +28,8 @@
     </div>
     <div class="formActions"><button type="submit"><%= t('save') %></button><a class="button secondary" href="/performance-vs/view"><%= t('perf_data_view') %></a></div>
   </form>
+  <form class="inlineForm" method="post" action="<%= event ? `/performance-vs/events/${event._id}/delete` : '#' %>" data-delete-event-form <%= event ? '' : 'hidden' %> onsubmit="return confirm(window.PERF_I18N.confirmDeleteEventTemplate.replace('{event}', '<%= event ? event.eventType : 'VS' %>').replace('{week}', '<%= event ? event.week : '' %>').replace('{year}', '<%= event ? event.year : '' %>'));"><button class="button danger" type="submit"><%= t('perf_delete_event') %></button></form>
 </section>
-<script>window.PERF_I18N={selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>};</script>
+<script>window.PERF_I18N={player:<%- JSON.stringify(t('perf_player')) %>,position:<%- JSON.stringify(t('perf_position')) %>,score:<%- JSON.stringify(t('perf_score')) %>,delete:<%- JSON.stringify(t('delete')) %>,selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>,emptyRowExists:<%- JSON.stringify(t('perf_empty_row_exists')) %>,noData:<%- JSON.stringify(t('perf_no_data_for_selection')) %>,dataLoaded:<%- JSON.stringify(t('perf_data_loaded')) %>,loadError:<%- JSON.stringify(t('perf_load_error')) %>,confirmDeleteEventTemplate:<%- JSON.stringify(t('perf_confirm_delete_event')) %>};</script>
 <script src="/js/performance-vs.js"></script>
 <%- include("../partials/footer") %>
