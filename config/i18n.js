@@ -107,7 +107,7 @@ const translations = {
     login_title: "Accesso con PIN",
     login_pin_label: "PIN (6 cifre)",
     login_button: "Accedi",
-    login_desc: "Usa il PIN standard per accesso base o il PIN amministratore per funzioni avanzate.",
+    login_desc: "Usa il PIN standard per accesso base, il PIN supervisore per Performance VS o il PIN amministratore per funzioni avanzate.",
     login_first_access: "Primo accesso",
     login_standard_pin: "PIN standard",
     login_step_1: "Accedi con PIN.",
@@ -252,7 +252,7 @@ const translations = {
     login_title: "PIN Login",
     login_pin_label: "PIN (6 digits)",
     login_button: "Log in",
-    login_desc: "Use the standard PIN for basic access or the admin PIN for advanced functions.",
+    login_desc: "Use the standard PIN for basic access, the supervisor PIN for Performance VS, or the admin PIN for advanced functions.",
     login_first_access: "First access",
     login_standard_pin: "Standard PIN",
     login_step_1: "Log in with your PIN.",
@@ -397,7 +397,7 @@ const translations = {
     login_title: "Connexion avec PIN",
     login_pin_label: "PIN (6 chiffres)",
     login_button: "Se connecter",
-    login_desc: "Utilisez le PIN standard pour l'accès de base ou le PIN administrateur pour les fonctions avancées.",
+    login_desc: "Utilisez le PIN standard pour l'accès de base, le PIN superviseur pour Performance VS ou le PIN administrateur pour les fonctions avancées.",
     login_first_access: "Premier accès",
     login_standard_pin: "PIN standard",
     login_step_1: "Connectez-vous avec votre PIN.",
@@ -1378,6 +1378,22 @@ translations.da = {
   "total_t1_t2_t3_only": "Endast T1+T2+T3 totalt (T4 exkluderat)"
 };
 
+
+const PERF_TRANSLATIONS = {
+  it: {
+    supervisor: "Supervisore", perf_title: "Performance VS", perf_desc: "Classifica settimanale evento VS", perf_data_entry: "Inserimento dati", perf_data_entry_desc: "Crea o aggiorna manualmente la classifica VS", perf_data_view: "Consultazione dati", perf_data_view_desc: "Consulta, modifica e cancella le righe salvate", perf_year: "Anno", perf_week: "Settimana", perf_event: "Evento", perf_week_period: "Periodo settimana", perf_player: "Player", perf_position: "Posizione", perf_score: "Punteggio", perf_rows: "Righe classifica", perf_add_row: "Aggiungi riga", confirm_delete: "Confermi la cancellazione?", perf_no_data: "Nessun dato trovato", perf_save_success: "Dati salvati correttamente", perf_save_error: "Errore durante il salvataggio", perf_player_required: "Player obbligatorio", perf_valid_player_required: "Seleziona un player valido", perf_invalid_position: "Posizione non valida", perf_invalid_score: "Punteggio non valido", perf_duplicate_player: "Riga duplicata per player", perf_duplicate_position: "Posizione duplicata", perf_invalid_year: "Anno non valido", perf_invalid_week: "Settimana non valida", perf_invalid_event: "Evento non valido", perf_row_deleted: "Riga cancellata correttamente"
+  },
+  en: {
+    supervisor: "Supervisor", perf_title: "Performance VS", perf_desc: "Weekly VS event ranking", perf_data_entry: "Data entry", perf_data_entry_desc: "Create or update the VS ranking manually", perf_data_view: "Data consultation", perf_data_view_desc: "View, edit and delete saved rows", perf_year: "Year", perf_week: "Week", perf_event: "Event", perf_week_period: "Week period", perf_player: "Player", perf_position: "Position", perf_score: "Score", perf_rows: "Ranking rows", perf_add_row: "Add row", confirm_delete: "Confirm deletion?", perf_no_data: "No data found", perf_save_success: "Data saved successfully", perf_save_error: "Error while saving", perf_player_required: "Player required", perf_valid_player_required: "Select a valid player", perf_invalid_position: "Invalid position", perf_invalid_score: "Invalid score", perf_duplicate_player: "Duplicate row for player", perf_duplicate_position: "Duplicate position", perf_invalid_year: "Invalid year", perf_invalid_week: "Invalid week", perf_invalid_event: "Invalid event", perf_row_deleted: "Row deleted successfully"
+  },
+  fr: {
+    supervisor: "Superviseur", perf_title: "Performance VS", perf_desc: "Classement hebdomadaire événement VS", perf_data_entry: "Saisie des données", perf_data_entry_desc: "Créer ou mettre à jour manuellement le classement VS", perf_data_view: "Consultation des données", perf_data_view_desc: "Consulter, modifier et supprimer les lignes enregistrées", perf_year: "Année", perf_week: "Semaine", perf_event: "Événement", perf_week_period: "Période de la semaine", perf_player: "Joueur", perf_position: "Position", perf_score: "Score", perf_rows: "Lignes du classement", perf_add_row: "Ajouter une ligne", confirm_delete: "Confirmer la suppression ?", perf_no_data: "Aucune donnée trouvée", perf_save_success: "Données enregistrées avec succès", perf_save_error: "Erreur lors de l'enregistrement", perf_player_required: "Joueur obligatoire", perf_valid_player_required: "Sélectionnez un joueur valide", perf_invalid_position: "Position non valide", perf_invalid_score: "Score non valide", perf_duplicate_player: "Ligne dupliquée pour ce joueur", perf_duplicate_position: "Position dupliquée", perf_invalid_year: "Année non valide", perf_invalid_week: "Semaine non valide", perf_invalid_event: "Événement non valide", perf_row_deleted: "Ligne supprimée avec succès"
+  }
+};
+for (const lang of SUPPORTED_LANGS) {
+  if (!PERF_TRANSLATIONS[lang]) PERF_TRANSLATIONS[lang] = PERF_TRANSLATIONS.en;
+}
+
 const NEWS_TRANSLATIONS = {
   it: {
     nav_news: "Novità",
@@ -1463,7 +1479,7 @@ const NEWS_TRANSLATIONS = {
 };
 
 for (const lang of SUPPORTED_LANGS) {
-  Object.assign(translations[lang], NEWS_TRANSLATIONS[lang]);
+  Object.assign(translations[lang], PERF_TRANSLATIONS[lang], NEWS_TRANSLATIONS[lang]);
 }
 
 function resolveLang(candidate) {

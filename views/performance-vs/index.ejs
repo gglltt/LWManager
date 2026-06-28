@@ -1,0 +1,11 @@
+<%- include("../partials/header", { title: t('perf_title') }) %>
+<section class="card">
+  <div class="pageHeader">
+    <div><h1><%= t('perf_title') %></h1><p class="muted"><%= t('perf_desc') %></p></div>
+  </div>
+  <div class="menuGrid menuGridSingle">
+    <a class="menuCard" href="/performance-vs/edit"><div class="menuIcon">✍️</div><div class="menuText"><div class="menuTitle"><%= t('perf_data_entry') %></div><div class="menuDesc"><%= t('perf_data_entry_desc') %></div></div></a>
+    <a class="menuCard" href="/performance-vs/view"><div class="menuIcon">🔎</div><div class="menuText"><div class="menuTitle"><%= t('perf_data_view') %></div><div class="menuDesc"><%= t('perf_data_view_desc') %></div></div></a>
+  </div>
+</section>
+<%- include("../partials/footer") %>

@@ -10,6 +10,7 @@ const authRoutes = require("./routes/auth");
 const potenzeRoutes = require("./routes/potenze");
 const registroRoutes = require("./routes/registro");
 const season6StrategyRoutes = require("./routes/season6Strategy");
+const performanceVsRoutes = require("./routes/performanceVs");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
 const {
@@ -109,6 +110,7 @@ app.get("/stagione-6", requireAuth, (req, res) => {
 app.use("/potenze", potenzeRoutes);
 app.use("/registro", registroRoutes);
 app.use("/season6-strategy", season6StrategyRoutes);
+app.use("/performance-vs", performanceVsRoutes);
 
 app.get("/logout", (req, res) => {
   res.clearCookie("lw_token");

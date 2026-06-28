@@ -1,0 +1,31 @@
+<%- include("../partials/header", { title: t('perf_data_entry') }) %>
+<section class="card cardWide">
+  <div class="pageHeader"><div><h1><%= t('perf_data_entry') %></h1><p class="muted"><%= t('perf_data_entry_desc') %></p></div><a class="button secondary" href="/performance-vs"><%= t('back_dashboard') %></a></div>
+  <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+  <% if (message) { %><div class="alert success"><%= message %></div><% } %>
+  <form class="form" method="post" action="/performance-vs/events" data-performance-form>
+    <div class="formGrid2">
+      <div class="field"><label><%= t('perf_year') %></label><input name="year" type="number" min="2000" max="2100" required value="<%= form.year || '' %>" data-week-year /></div>
+      <div class="field"><label><%= t('perf_week') %></label><input name="week" type="number" min="1" max="53" required value="<%= form.week || '' %>" data-week-number /><div class="help" data-week-range><%= event ? `${t('perf_week_period')}: ${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></div></div>
+      <div class="field"><label><%= t('perf_event') %></label><select name="eventType"><% eventTypes.forEach(et => { %><option value="<%= et %>" <%= (form.eventType || 'VS') === et ? 'selected' : '' %>><%= et %></option><% }) %></select></div>
+    </div>
+    <hr class="divider" />
+    <div class="pageHeader"><h2><%= t('perf_rows') %></h2><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
+    <div class="perfRows" data-rows>
+      <% (rows || []).forEach((row, i) => { %>
+        <div class="perfRow" data-row>
+          <input type="hidden" name="rows[<%= i %>][rowId]" value="<%= row._id %>" data-row-id-name />
+          <input type="hidden" name="rows[<%= i %>][playerId]" value="<%= row.playerId?._id || row.playerId %>" data-player-id />
+          <div class="field autocomplete"><label><%= t('perf_player') %></label><input type="text" value="<%= row.playerId?.nickname || '' %>" autocomplete="off" required data-player-search /><div class="autocompleteMenu" data-player-results></div></div>
+          <div class="field"><label><%= t('perf_position') %></label><input name="rows[<%= i %>][position]" type="number" min="1" max="1000" required value="<%= row.position %>" data-position-name /></div>
+          <div class="field"><label><%= t('perf_score') %></label><input name="rows[<%= i %>][score]" type="number" min="1" max="999999999" required value="<%= row.score %>" data-score-name /></div>
+          <button type="button" class="button danger" data-remove-row><%= t('delete') %></button>
+        </div>
+      <% }) %>
+    </div>
+    <div class="formActions"><button type="submit"><%= t('save') %></button><a class="button secondary" href="/performance-vs/view"><%= t('perf_data_view') %></a></div>
+  </form>
+</section>
+<script>window.PERF_I18N={selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>};</script>
+<script src="/js/performance-vs.js"></script>
+<%- include("../partials/footer") %>
