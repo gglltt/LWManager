@@ -24,6 +24,7 @@ function isSixDigitPin(pin) {
 function getPins() {
   return {
     standard: String(process.env.APP_PIN_STANDARD || "111111"),
+    supervisor: String(process.env.SUPERVISOR_PIN || process.env.APP_PIN_SUPERVISOR || ""),
     admin: String(process.env.APP_PIN_ADMIN || "999999")
   };
 }
@@ -47,7 +48,7 @@ router.post("/login", async (req, res) => {
   const pin = normalizePin(req.body.pin);
 
   if (!isSixDigitPin(pin)) {
-    await createEventLog(req, "login_failed", "Tentativo login: formato PIN non valido - PIN inserito: " + pin);
+    await createEventLog(req, "login_failed", "Tentativo login: formato PIN non valido");
     return res.render("login", { error: "Inserisci un PIN valido di 6 cifre.", message: null });
   }
 
@@ -56,12 +57,14 @@ router.post("/login", async (req, res) => {
 
   if (pin === pins.admin) {
     role = "admin";
+  } else if (pins.supervisor && pin === pins.supervisor) {
+    role = "supervisor";
   } else if (pin === pins.standard) {
     role = "standard";
   }
 
   if (!role) {
-    await createEventLog(req, "login_failed", "Tentativo login: PIN errato - PIN inserito: " + pin);
+    await createEventLog(req, "login_failed", "Tentativo login: PIN errato");
     return res.render("login", { error: "PIN non valido.", message: null });
   }
 

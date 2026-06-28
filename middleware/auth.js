@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const ROLE_LEVEL = {
   standard: 1,
+  supervisor: 3,
   admin: 5
 };
 
@@ -20,7 +21,7 @@ function requireAuth(req, res, next) {
     if (!token) return res.redirect("/auth/login");
 
     const decoded = jwt.verify(token, getJwtSecret());
-    const role = decoded?.role === "admin" ? "admin" : "standard";
+    const role = ["admin", "supervisor"].includes(decoded?.role) ? decoded.role : "standard";
 
     req.user = {
       role,
@@ -42,4 +43,7 @@ function requireLevel(minLevel) {
   };
 }
 
-module.exports = { requireAuth, requireLevel };
+const requireSupervisor = requireLevel(ROLE_LEVEL.supervisor);
+const requireAdmin = requireLevel(ROLE_LEVEL.admin);
+
+module.exports = { ROLE_LEVEL, requireAuth, requireLevel, requireSupervisor, requireAdmin };

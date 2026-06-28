@@ -4,7 +4,7 @@
   <h1><%= t('dashboard_title') %></h1>
 
   <div class="kv">
-    <div><b><%= t('access_mode') %>:</b> <%= user && user.authLevel >= 5 ? t('admin') : t('standard') %></div>
+    <div><b><%= t('access_mode') %>:</b> <%= user && user.authLevel >= 5 ? t('admin') : (user && user.authLevel >= 3 ? t('supervisor') : t('standard')) %></div>
   </div>
 
   <hr class="divider" />
@@ -43,6 +43,17 @@
         <div class="menuDesc">Mappa, fronti, alleati, altari e piano operativo 4v4</div>
       </div>
     </a>
+
+
+    <% if (user && user.authLevel >= 3) { %>
+      <a class="menuCard" href="/performance-vs" title="<%= t('perf_title') %>">
+        <div class="menuIcon">🏆</div>
+        <div class="menuText">
+          <div class="menuTitle"><%= t('perf_title') %></div>
+          <div class="menuDesc"><%= t('perf_desc') %></div>
+        </div>
+      </a>
+    <% } %>
 
     <% if (user && user.authLevel >= 5) { %>
       <a class="menuCard" href="/registro" title="<%= t('nav_logs') %>">

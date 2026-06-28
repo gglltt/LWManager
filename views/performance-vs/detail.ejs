@@ -1,0 +1,11 @@
+<%- include("../partials/header", { title: t('perf_ranking_details') }) %>
+<section class="card cardWide">
+  <div class="pageHeader"><div><h1><%= t('perf_ranking_details') %></h1><% if (event) { %><p class="muted"><%= event.eventType %> · <%= t('perf_week') %> <%= event.week %>/<%= event.year %></p><p class="muted"><%= t('perf_week_period') %>: <%= new Date(event.weekStartDate).toLocaleDateString(localeTag) %> - <%= new Date(event.weekEndDate).toLocaleDateString(localeTag) %></p><% } %></div><a class="button secondary" href="/performance-vs/view?eventType=<%= encodeURIComponent(form.eventType || 'VS') %>"><%= t('perf_back_to_view') %></a></div>
+  <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+  <% if (!rows || rows.length === 0) { %><p class="muted"><%= t('perf_no_data_for_selection') %></p><% } else { %>
+    <div class="tableWrap perfDetailTable"><table class="table"><thead><tr><th><%= t('perf_position') %></th><th><%= t('perf_player') %></th><th><%= t('perf_score') %></th></tr></thead><tbody><% rows.forEach(row => { %><tr><td><%= row.position %></td><td><%= row.playerId?.nickname || '-' %></td><td><%= Number(row.score).toLocaleString(localeTag) %></td></tr><% }) %></tbody></table></div>
+    <div class="perfPlayerCards"><% rows.forEach(row => { %><article class="perfPlayerCard"><div class="perfPlayerRank">#<%= row.position %></div><div><strong><%= row.playerId?.nickname || '-' %></strong><div class="muted"><%= Number(row.score).toLocaleString(localeTag) %></div></div></article><% }) %></div>
+  <% } %>
+  <% if (event) { %><div class="formActions"><a class="button secondary" href="/performance-vs/edit?year=<%= event.year %>&week=<%= event.week %>&eventType=<%= encodeURIComponent(event.eventType) %>"><%= t('perf_go_to_edit') %></a></div><% } %>
+</section>
+<%- include("../partials/footer") %>
