@@ -6,6 +6,7 @@
   const loadMessageEl = document.querySelector("[data-load-message]");
   const loadErrorEl = document.querySelector("[data-load-error]");
   const addRowButton = document.querySelector("[data-add-row]");
+  const saveButton = document.querySelector("[data-save-button]");
   const deleteEventForm = document.querySelector("[data-delete-event-form]");
   let loadTimer;
 
@@ -53,8 +54,18 @@
       return !row.querySelector("[data-player-id]").value && !row.querySelector("[data-position-name]").value && !row.querySelector("[data-score-name]").value;
     });
   }
+  function isHeaderValid() {
+    const form = document.querySelector("[data-autoload-event]");
+    if (!form) return true;
+    const year = form.querySelector("[data-week-year]")?.value.trim() || "";
+    const week = form.querySelector("[data-week-number]")?.value.trim() || "";
+    const eventType = form.querySelector("[data-event-type]")?.value || "";
+    return /^\d{4}$/.test(year) && /^([1-9]|[1-4][0-9]|5[0-3])$/.test(week) && eventType.trim().length > 0;
+  }
   function updateAddRowState() {
-    if (addRowButton) addRowButton.disabled = hasEmptyDraftRow();
+    const headerValid = isHeaderValid();
+    if (addRowButton) addRowButton.disabled = !headerValid || hasEmptyDraftRow();
+    if (saveButton) saveButton.disabled = !headerValid;
   }
   function rowTemplate(row = {}) {
     const rowId = row._id || "";
@@ -66,8 +77,8 @@
       <input type="hidden" value="${escapeHtml(rowId)}" data-row-id-name>
       <input type="hidden" value="${escapeHtml(playerId)}" data-player-id>
       <div class="field autocomplete"><label>${escapeHtml(i18n.player || "Player")}</label><input type="text" value="${escapeHtml(nickname)}" autocomplete="off" required data-player-search><div class="autocompleteMenu" data-player-results></div></div>
-      <div class="field"><label>${escapeHtml(i18n.position || "Position")}</label><input type="number" min="1" max="1000" required value="${escapeHtml(row.position || "")}" data-position-name></div>
-      <div class="field"><label>${escapeHtml(i18n.score || "Score")}</label><input type="number" min="1" max="999999999" required value="${escapeHtml(row.score || "")}" data-score-name></div>
+      <div class="field"><label>${escapeHtml(i18n.position || "Position")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="${escapeHtml(row.position || "")}" data-position-name></div>
+      <div class="field"><label>${escapeHtml(i18n.score || "Score")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="${escapeHtml(row.score || "")}" data-score-name></div>
       <button type="button" class="button danger" data-remove-row>${escapeHtml(i18n.delete || "Delete")}</button>
     </div>`;
   }
@@ -95,6 +106,7 @@
   }
   function makeRow() {
     if (!rowsEl) return;
+    if (!isHeaderValid()) { alert(i18n.headerRequiredAdd || "Select year, week and event first."); return; }
     if (hasEmptyDraftRow()) { alert(i18n.emptyRowExists || "A row is already being added."); return; }
     rowsEl.insertAdjacentHTML("beforeend", rowTemplate());
     attachAutocomplete(rowsEl.lastElementChild); reindexRows();
@@ -111,7 +123,7 @@
     const year = form.querySelector("[data-week-year]")?.value.trim();
     const week = form.querySelector("[data-week-number]")?.value.trim();
     const eventType = form.querySelector("[data-event-type]")?.value || "VS";
-    if (!/^\d{4}$/.test(year) || !week || Number(week) < 1 || Number(week) > 53) return;
+    if (!/^\d{4}$/.test(year) || !week || Number(week) < 1 || Number(week) > 53) { if (deleteEventForm) deleteEventForm.hidden = true; return; }
     try {
       showAlert(loadErrorEl, ""); showAlert(loadMessageEl, "");
       const res = await fetch(`/performance-vs/events?year=${encodeURIComponent(year)}&week=${encodeURIComponent(week)}&eventType=${encodeURIComponent(eventType)}`);
@@ -122,6 +134,9 @@
         if (data.event?._id) {
           deleteEventForm.hidden = false;
           deleteEventForm.action = `/performance-vs/events/${data.event._id}/delete`;
+          deleteEventForm.querySelector("[data-delete-year]").value = data.event.year;
+          deleteEventForm.querySelector("[data-delete-week]").value = data.event.week;
+          deleteEventForm.querySelector("[data-delete-event-type]").value = data.event.eventType;
           deleteEventForm.onsubmit = () => confirm((i18n.confirmDeleteEventTemplate || "Confirm delete {event} {week}/{year}?").replace("{event}", data.event.eventType).replace("{week}", data.event.week).replace("{year}", data.event.year));
         } else {
           deleteEventForm.hidden = true;
@@ -137,9 +152,12 @@
     refreshWeekRange(document);
     clearTimeout(loadTimer);
     loadTimer = setTimeout(autoLoadEvent, 300);
+    updateAddRowState();
+    if (!isHeaderValid() && deleteEventForm) deleteEventForm.hidden = true;
   }));
   document.querySelector("[data-event-type]")?.addEventListener("change", () => { clearTimeout(loadTimer); loadTimer = setTimeout(autoLoadEvent, 100); });
   refreshWeekRange(document);
+  updateAddRowState();
   addRowButton?.addEventListener("click", makeRow);
   if (rowsEl) {
     rowsEl.addEventListener("click", (e) => {
@@ -152,7 +170,10 @@
   }
   document.querySelector("[data-performance-form]")?.addEventListener("submit", (e) => {
     reindexRows();
-    const invalid = [...rowsEl.querySelectorAll("[data-row]")].some((row) => !row.querySelector("[data-player-id]").value);
+    if (!isHeaderValid()) { e.preventDefault(); alert(i18n.headerRequiredSave || "Select year, week and event before saving."); return; }
+    const allRows = [...rowsEl.querySelectorAll("[data-row]")];
+    if (allRows.length === 0) { e.preventDefault(); alert(i18n.rowRequired || "Add at least one valid row."); return; }
+    const invalid = allRows.some((row) => !row.querySelector("[data-player-id]").value);
     if (invalid) { e.preventDefault(); alert(i18n.selectPlayer || "Select a valid player"); }
   });
 })();

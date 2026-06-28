@@ -46,7 +46,7 @@ async function loadEventSummaries(eventType) {
 
   const summaryRows = await PerformanceVsRow.aggregate([
     { $match: { eventId: { $in: events.map((event) => event._id) } } },
-    { $group: { _id: "$eventId", playerCount: { $sum: 1 }, totalScore: { $sum: "$score" }, updatedAt: { $max: "$updatedAt" } } }
+    { $group: { _id: "$eventId", playerCount: { $sum: 1 }, updatedAt: { $max: "$updatedAt" } } }
   ]);
   const summaryByEvent = new Map(summaryRows.map((row) => [String(row._id), row]));
 
@@ -55,7 +55,6 @@ async function loadEventSummaries(eventType) {
     return {
       ...event,
       playerCount: summary.playerCount || 0,
-      totalScore: summary.totalScore || 0,
       summaryUpdatedAt: summary.updatedAt || event.updatedAt
     };
   });
@@ -143,6 +142,7 @@ router.post("/events", async (req, res) => {
   if (!header.ok) return renderEdit(res, req, { error: header.error, message: null, form, event: null, rows: [] });
 
   const rows = normalizeRows(req.body.rows);
+  if (rows.length === 0) return renderEdit(res, req, { error: t("perf_row_required"), message: null, form, event: null, rows: [] });
   const playerIds = rows.map((r) => r.playerId);
   if (rows.some((r) => !mongoose.Types.ObjectId.isValid(r.playerId))) return renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
   if (new Set(playerIds).size !== playerIds.length) return renderEdit(res, req, { error: t("perf_duplicate_player"), message: null, form, event: null, rows: [] });
@@ -179,9 +179,14 @@ router.post("/events", async (req, res) => {
 
 router.post("/events/:eventId/delete", async (req, res) => {
   const t = res.locals.t;
+  const header = validateHeader(req.body, t);
+  if (!header.ok || !mongoose.Types.ObjectId.isValid(req.params.eventId)) {
+    return res.status(400).send(`400 - ${t("perf_delete_requires_week")}`);
+  }
+
   try {
-    const event = await PerformanceVsEvent.findById(req.params.eventId).lean();
-    if (!event) return res.redirect("/performance-vs/edit?deletedEvent=1");
+    const event = await PerformanceVsEvent.findOne({ _id: req.params.eventId, year: header.year, week: header.week, eventType: header.eventType }).lean();
+    if (!event) return res.status(404).send(`404 - ${t("perf_event_not_found")}`);
     await PerformanceVsRow.deleteMany({ eventId: event._id });
     await PerformanceVsEvent.deleteOne({ _id: event._id });
     await createEventLog(req, "performance_vs_event_delete", `Evento Performance VS eliminato: ${event.eventType} W${event.week}/${event.year}`);

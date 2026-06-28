@@ -20,21 +20,26 @@
           <input type="hidden" name="rows[<%= i %>][rowId]" value="<%= row._id %>" data-row-id-name />
           <input type="hidden" name="rows[<%= i %>][playerId]" value="<%= row.playerId?._id || row.playerId %>" data-player-id />
           <div class="field autocomplete"><label><%= t('perf_player') %></label><input type="text" value="<%= row.playerId?.nickname || '' %>" autocomplete="off" required data-player-search /><div class="autocompleteMenu" data-player-results></div></div>
-          <div class="field"><label><%= t('perf_position') %></label><input name="rows[<%= i %>][position]" type="number" min="1" max="1000" required value="<%= row.position %>" data-position-name /></div>
-          <div class="field"><label><%= t('perf_score') %></label><input name="rows[<%= i %>][score]" type="number" min="1" max="999999999" required value="<%= row.score %>" data-score-name /></div>
+          <div class="field"><label><%= t('perf_position') %></label><input class="noSpinner" name="rows[<%= i %>][position]" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="<%= row.position %>" data-position-name /></div>
+          <div class="field"><label><%= t('perf_score') %></label><input class="noSpinner" name="rows[<%= i %>][score]" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="<%= row.score %>" data-score-name /></div>
           <button type="button" class="button danger" data-remove-row><%= t('delete') %></button>
         </div>
       <% }) %>
     </div>
     <div class="perfActionPanel">
-      <div class="perfActionGroup"><button type="submit"><%= t('save') %></button><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
-      <div class="perfActionGroup perfNavActions"><a class="button secondary" href="/performance-vs"><%= t('perf_title') %></a><a class="button secondary" href="/performance-vs/view"><%= t('perf_data_view') %></a></div>
+      <div class="perfActionGroup"><button type="submit" data-save-button><%= t('save') %></button><button type="button" class="button secondary" data-add-row><%= t('perf_add_row') %></button></div>
     </div>
   </form>
   <div class="perfDangerZone">
-    <form class="inlineForm" method="post" action="<%= event ? `/performance-vs/events/${event._id}/delete` : '#' %>" data-delete-event-form <%= event ? '' : 'hidden' %> onsubmit="return confirm(window.PERF_I18N.confirmDeleteEventTemplate.replace('{event}', '<%= event ? event.eventType : 'VS' %>').replace('{week}', '<%= event ? event.week : '' %>').replace('{year}', '<%= event ? event.year : '' %>'));"><button class="button danger" type="submit"><%= t('perf_delete_event') %></button></form>
+    <form class="inlineForm" method="post" action="<%= event ? `/performance-vs/events/${event._id}/delete` : '#' %>" data-delete-event-form <%= event ? '' : 'hidden' %> onsubmit="return confirm(window.PERF_I18N.confirmDeleteEventTemplate.replace('{event}', '<%= event ? event.eventType : 'VS' %>').replace('{week}', '<%= event ? event.week : '' %>').replace('{year}', '<%= event ? event.year : '' %>'));">
+      <input type="hidden" name="year" value="<%= event ? event.year : '' %>" data-delete-year />
+      <input type="hidden" name="week" value="<%= event ? event.week : '' %>" data-delete-week />
+      <input type="hidden" name="eventType" value="<%= event ? event.eventType : 'VS' %>" data-delete-event-type />
+      <button class="button danger" type="submit"><%= t('perf_delete_event') %></button>
+    </form>
   </div>
+
 </section>
-<script>window.PERF_I18N={player:<%- JSON.stringify(t('perf_player')) %>,position:<%- JSON.stringify(t('perf_position')) %>,score:<%- JSON.stringify(t('perf_score')) %>,delete:<%- JSON.stringify(t('delete')) %>,selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>,emptyRowExists:<%- JSON.stringify(t('perf_empty_row_exists')) %>,noData:<%- JSON.stringify(t('perf_no_data_for_selection')) %>,dataLoaded:<%- JSON.stringify(t('perf_data_loaded')) %>,loadError:<%- JSON.stringify(t('perf_load_error')) %>,confirmDeleteEventTemplate:<%- JSON.stringify(t('perf_confirm_delete_event')) %>};</script>
+<script>window.PERF_I18N={player:<%- JSON.stringify(t('perf_player')) %>,position:<%- JSON.stringify(t('perf_position')) %>,score:<%- JSON.stringify(t('perf_score')) %>,delete:<%- JSON.stringify(t('delete')) %>,selectPlayer:<%- JSON.stringify(t('perf_valid_player_required')) %>,weekPeriod:<%- JSON.stringify(t('perf_week_period')) %>,confirmDelete:<%- JSON.stringify(t('confirm_delete')) %>,emptyRowExists:<%- JSON.stringify(t('perf_empty_row_exists')) %>,noData:<%- JSON.stringify(t('perf_no_data_for_selection')) %>,dataLoaded:<%- JSON.stringify(t('perf_data_loaded')) %>,loadError:<%- JSON.stringify(t('perf_load_error')) %>,headerRequiredAdd:<%- JSON.stringify(t('perf_header_required_add')) %>,headerRequiredSave:<%- JSON.stringify(t('perf_header_required_save')) %>,rowRequired:<%- JSON.stringify(t('perf_row_required')) %>,confirmDeleteEventTemplate:<%- JSON.stringify(t('perf_confirm_delete_event')) %>};</script>
 <script src="/js/performance-vs.js"></script>
 <%- include("../partials/footer") %>
