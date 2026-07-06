@@ -319,11 +319,13 @@
       <button type="button" class="iconBtn" id="playerHistoryModalClose" aria-label="<%= t('close') %>">✖</button>
     </div>
     <div class="historyMeta muted" id="playerHistoryMeta"></div>
+    <!--
     <div class="historyScaleControls" id="historyScaleControls">
       <span class="historyScaleLabel"><%= t('scale') %></span>
       <button type="button" class="historyScaleBtn " data-history-scale="daily" aria-pressed="false"><%= t('daily') %></button>
       <button type="button" class="historyScaleBtn isActive" data-history-scale="weekly" aria-pressed="true"><%= t('weekly') %></button>
     </div>
+    -->
     <div class="historyChartWrap">
       <canvas id="playerHistoryCanvas" height="320"></canvas>
       <div class="historyChartTooltip" id="playerHistoryTooltip" hidden></div>
@@ -487,7 +489,7 @@
     let currentChartPoints = [];
     let currentDisplayChartPoints = [];
     let currentChartLayout = null;
-    let currentHistoryScale = "weekly";
+    let currentHistoryScale = "daily";
 
     const formatPointValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formatTableValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -863,7 +865,7 @@
       });
       seriesVisibility.t4 = false;
       currentChartPoints = [];
-      currentHistoryScale = "weekly";
+      currentHistoryScale = "daily";
       const controls = document.getElementById("historyScaleControls");
       if (controls) {
         controls.querySelectorAll("[data-history-scale]").forEach((item) => {
