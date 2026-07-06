@@ -1451,3 +1451,99 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   cursor: not-allowed;
   opacity: .55;
 }
+
+.seasonGuideLauncher{
+  border:1px solid rgba(48,224,198,.32);
+  background:linear-gradient(135deg, rgba(48,224,198,.12), rgba(58,103,255,.08));
+  border-radius:18px;
+  padding:14px;
+  margin:14px 0;
+}
+
+.seasonGuideLauncher__header{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.seasonGuideLauncher h2{ margin:0 0 4px; font-size:18px; }
+.seasonGuideLauncher p{ margin:0; color:var(--muted); line-height:1.5; }
+
+.seasonGuideButtons{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:10px;
+}
+
+.seasonGuideButton{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  min-height:72px;
+  text-align:left;
+  border:1px solid rgba(48,224,198,.36);
+  background:rgba(9,12,20,.45);
+  color:var(--text);
+  border-radius:15px;
+  padding:12px;
+  cursor:pointer;
+}
+
+.seasonGuideButton:hover,
+.seasonGuideButton:focus-visible{
+  border-color:rgba(48,224,198,.78);
+  box-shadow:0 0 0 3px rgba(48,224,198,.14);
+}
+
+.seasonGuideButton__icon{ font-size:24px; }
+.seasonGuideButton strong{ display:block; font-size:15px; }
+.seasonGuideButton small{ display:block; margin-top:3px; color:var(--muted); line-height:1.35; }
+
+.seasonGuideModal[hidden]{ display:none; }
+.seasonGuideModal{ position:fixed; inset:0; z-index:1000; padding:18px; }
+.seasonGuideModal__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.78); }
+.seasonGuideModal__dialog{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  width:min(960px, 100%);
+  max-height:calc(100vh - 36px);
+  margin:0 auto;
+  border:1px solid rgba(48,224,198,.34);
+  border-radius:18px;
+  background:var(--card);
+  box-shadow:0 24px 70px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+
+.seasonGuideModal__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(34,48,77,.8);
+}
+
+.seasonGuideModal__header h2{ margin:0; font-size:18px; }
+.seasonGuideModal__close{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  padding:0;
+  font-size:28px;
+  line-height:1;
+}
+
+.seasonGuideModal__body{ overflow:auto; padding:12px; text-align:center; }
+.seasonGuideModal__body img{ display:block; max-width:100%; height:auto; margin:0 auto; }
+.seasonGuideModalOpen{ overflow:hidden; }
+
+@media (max-width: 760px){
+  .seasonGuideButtons{ grid-template-columns:1fr; }
+  .seasonGuideButton{ min-height:64px; }
+  .seasonGuideModal{ padding:8px; }
+  .seasonGuideModal__dialog{ max-height:calc(100vh - 16px); }
+}

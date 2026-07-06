@@ -13,6 +13,18 @@
     <div class="seasonBadge">S6<br><span>4 vs 4</span></div>
   </div>
 
+
+  <%- include("partials/season6-guides", {
+    title: "Guide rapide S6",
+    lead: "Apri una guida visuale per configurare professioni e decorazioni della Stagione 6.",
+    closeLabel: "Chiudi",
+    guides: [
+      { icon: "⚔️", title: "War Leader", description: "guida skill/build professione War Leader S6", action: "Apri guida War Leader", alt: "Guida skill S6 War Leader", src: "/images/stagione-6/war-profession-skill-build-s6-guide.png" },
+      { icon: "🛠️", title: "Engineer", description: "guida skill/build professione Engineer S6", action: "Apri guida Engineer", alt: "Guida skill S6 Engineer", src: "/images/stagione-6/engineer-profession-skill-build-s6-guide-v0-ueqkmgs3wd0h1.png" },
+      { icon: "🏛️", title: "Decorazioni", description: "guida tier decorazioni S6", action: "Apri guida Decorazioni", alt: "Guida decorazioni S6", src: "/images/stagione-6/tkyeda68lj4f1.png" }
+    ]
+  }) %>
+
   <div class="seasonQuickMessage" id="messaggio-alleanza">
     <div class="seasonQuickIcon">📣</div>
     <div>
