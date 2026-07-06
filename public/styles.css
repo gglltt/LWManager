@@ -1422,3 +1422,32 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   .perfSummaryTableWrap,.perfDetailTable{ display:none; }
   .perfWeekCards,.perfPlayerCards{ display:grid; }
 }
+
+.notice {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.16);
+}
+.notice--success {
+  background: rgba(34, 197, 94, .15);
+  border-color: rgba(34, 197, 94, .45);
+}
+.notice--danger,
+.adminSection--danger {
+  background: rgba(239, 68, 68, .10);
+  border-color: rgba(239, 68, 68, .35);
+}
+.adminSection {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+}
+.button--danger {
+  background: #b91c1c;
+}
+.button--danger:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}

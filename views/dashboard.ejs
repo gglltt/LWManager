@@ -57,11 +57,11 @@
     <% } %>
 
     <% if (user && user.authLevel >= 5) { %>
-      <a class="menuCard" href="/registro" title="<%= t('nav_logs') %>">
-        <div class="menuIcon">📘</div>
+      <a class="menuCard" href="/admin" title="<%= t('admin_title') %>">
+        <div class="menuIcon">🛡️</div>
         <div class="menuText">
-          <div class="menuTitle"><%= t('nav_logs') %></div>
-          <div class="menuDesc"><%= t('logs_desc') %></div>
+          <div class="menuTitle"><%= t('admin_title') %></div>
+          <div class="menuDesc"><%= t('admin_desc') %></div>
         </div>
       </a>
     <% } %>
