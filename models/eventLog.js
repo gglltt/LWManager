@@ -6,7 +6,8 @@ const EVENT_TYPES = [
   "login_failed",
   "nuovo_player",
   "modifica_player",
-  "cancellazione_player"
+  "cancellazione_player",
+  "sync_prod_to_qa"
 ];
 
 const EventLogSchema = new mongoose.Schema(

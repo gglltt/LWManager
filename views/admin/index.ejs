@@ -1,0 +1,57 @@
+<%- include("../partials/header") %>
+
+<section class="card">
+  <h1><%= t('admin_title') %></h1>
+
+  <% if (syncMessage) { %>
+    <div class="notice <%= syncStatus === 'success' ? 'notice--success' : 'notice--danger' %>"><%= syncMessage %></div>
+  <% } %>
+
+  <section class="adminSection">
+    <h2 class="sectionTitle"><%= t('nav_logs') %></h2>
+    <p><%= t('logs_desc') %></p>
+    <a class="button" href="/registro"><%= t('open') %> <%= t('nav_logs') %></a>
+  </section>
+
+  <hr class="divider" />
+
+  <section class="adminSection adminSection--danger">
+    <h2 class="sectionTitle"><%= t('data_sync') %></h2>
+    <p><strong><%= t('sync_warning_overwrite') %></strong></p>
+    <p><%= t('sync_warning_qa_lost') %></p>
+
+    <% if (!syncEnabled || syncConfigError) { %>
+      <div class="notice notice--danger"><%= syncEnabled ? t(syncConfigError) : t('sync_disabled') %></div>
+    <% } %>
+
+    <form id="syncForm" action="/admin/sync-prod-to-qa" method="post">
+      <label for="confirmation"><%= t('sync_type_confirm') %></label>
+      <input id="confirmation" name="confirmation" type="text" autocomplete="off" placeholder="ALLINEA QA" />
+      <button id="syncButton" class="button button--danger" type="submit" disabled <%= (!syncEnabled || syncConfigError) ? 'aria-disabled="true"' : '' %>><%= t('sync_prod_to_qa') %></button>
+    </form>
+  </section>
+</section>
+
+<script>
+  (function () {
+    var input = document.getElementById('confirmation');
+    var button = document.getElementById('syncButton');
+    var form = document.getElementById('syncForm');
+    var configBlocked = <%- JSON.stringify(!syncEnabled || Boolean(syncConfigError)) %>;
+    function updateButton() {
+      button.disabled = configBlocked || input.value.trim() !== 'ALLINEA QA';
+    }
+    input.addEventListener('input', updateButton);
+    form.addEventListener('submit', function (event) {
+      if (button.disabled || !window.confirm(<%- JSON.stringify(t('sync_confirm_dialog')) %>)) {
+        event.preventDefault();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = <%- JSON.stringify(t('sync_running')) %>;
+    });
+    updateButton();
+  }());
+</script>
+
+<%- include("../partials/footer") %>
