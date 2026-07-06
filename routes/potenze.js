@@ -7,6 +7,7 @@ const { buildPlayerDetails, createEventLog } = require("../utils/eventLog");
 const PlayerPowerHistory = require("../models/playerPowerHistory");
 const { savePlayerPowerSnapshot } = require("../utils/playerPowerHistory");
 const { translateTextAuto } = require("../utils/translate");
+const { HISTORY_RETENTION_DAYS } = require("../config/history");
 const rateLimit = require("express-rate-limit");
 
 const router = express.Router();
@@ -176,7 +177,8 @@ router.get("/", requireAuth, async (req, res) => {
       message: null,
       sort,
       dir,
-      q
+      q,
+      historyRetentionDays: HISTORY_RETENTION_DAYS
     });
   } catch (err) {
     console.error(err);
@@ -192,7 +194,8 @@ router.get("/", requireAuth, async (req, res) => {
       message: null,
       sort: "powerT1",
       dir: "desc",
-      q: ""
+      q: "",
+      historyRetentionDays: HISTORY_RETENTION_DAYS
     });
   }
 });
@@ -459,8 +462,10 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
       return res.status(404).json({ ok: false, error: (res.locals.t || ((k) => k))("err_player_not_found") });
     }
 
-    const daysRaw = Number(req.query.days || 30);
-    const days = Number.isFinite(daysRaw) ? Math.min(Math.max(Math.floor(daysRaw), 1), 365) : 30;
+    const daysRaw = Number(req.query.days || HISTORY_RETENTION_DAYS);
+    const days = Number.isFinite(daysRaw)
+      ? Math.min(Math.max(Math.floor(daysRaw), 1), HISTORY_RETENTION_DAYS)
+      : HISTORY_RETENTION_DAYS;
 
     const now = new Date();
     const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, 0, 0, 0, 0));
@@ -493,7 +498,7 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
         };
       });
 
-    return res.json({ ok: true, player: player.nickname, days, history });
+    return res.json({ ok: true, player: player.nickname, days, from: from.toISOString(), to: to.toISOString(), history });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: (res.locals.t || ((k) => k))("err_internal") });

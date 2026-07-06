@@ -468,6 +468,8 @@
     const historyCanvas = document.getElementById("playerHistoryCanvas");
     const historyLegend = document.getElementById("playerHistoryLegend");
 
+    const HISTORY_RETENTION_DAYS = <%- JSON.stringify(historyRetentionDays) %>;
+
     const seriesConfig = [
       { key: "t1", label: "T1", color: "#3a67ff" },
       { key: "t2", label: "T2", color: "#2bd576" },
@@ -482,22 +484,30 @@
     const formatPointValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formatTableValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    function getWeeklyTickDays(points) {
+    function getXAxisTickDays(points, chartWidth) {
       if (!Array.isArray(points) || points.length === 0) return new Set();
-      const lastDate = new Date(`${points[points.length - 1].date}T00:00:00Z`);
-      if (Number.isNaN(lastDate.getTime())) return new Set();
-      const month = lastDate.getUTCMonth();
+
+      const maxLabels = Math.max(4, Math.floor((chartWidth || 320) / 70));
+      const step = currentHistoryScale === "daily"
+        ? Math.max(1, Math.ceil(points.length / maxLabels))
+        : Math.max(7, Math.ceil(points.length / maxLabels));
       const ticks = new Set();
-      for (let cursor = new Date(lastDate); cursor.getUTCMonth() === month; cursor = new Date(cursor.getTime() - 7 * 24 * 60 * 60 * 1000)) {
-        ticks.add(toIsoDayUTC(cursor));
-      }
+
+      points.forEach((point, index) => {
+        if (!point?.date) return;
+        const dateObj = new Date(`${point.date}T00:00:00Z`);
+        if (Number.isNaN(dateObj.getTime())) return;
+        const isBoundary = index === 0 || index === points.length - 1;
+        const isMonthlyTick = currentHistoryScale === "weekly" && dateObj.getUTCDate() === 1;
+        if (isBoundary || index % step === 0 || isMonthlyTick) ticks.add(point.date);
+      });
+
       return ticks;
     }
 
     const hasRealEntry = (point) => point?._real === true;
-    function shouldShowXAxisLabel(point, weeklyTickDays) {
-      if (currentHistoryScale === "daily") return true;
-      return hasRealEntry(point) || weeklyTickDays.has(point.date);
+    function shouldShowXAxisLabel(point, xAxisTickDays) {
+      return xAxisTickDays.has(point.date);
     }
 
     function closeHistoryModal() {
@@ -589,9 +599,9 @@
         ctx.restore();
       });
 
-      const weeklyTickDays = getWeeklyTickDays(points);
+      const xAxisTickDays = getXAxisTickDays(points, chartW);
       points.forEach((p, i) => {
-        if (!shouldShowXAxisLabel(p, weeklyTickDays)) return;
+        if (!shouldShowXAxisLabel(p, xAxisTickDays)) return;
         const x = xForIndex(i);
         ctx.save();
         ctx.translate(x, h - 6);
@@ -691,7 +701,7 @@
     }
 
     function buildLastDaysForChart(realRows, daysCount) {
-      const count = Number.isFinite(daysCount) ? Math.max(1, Math.floor(daysCount)) : 30;
+      const count = Number.isFinite(daysCount) ? Math.max(1, Math.floor(daysCount) + 1) : HISTORY_RETENTION_DAYS + 1;
       const rowsByDay = new Map(
         (realRows || [])
           .filter((row) => row && row.date)
@@ -761,18 +771,18 @@
         });
       }
       openHistoryModal();
-      historyMeta.textContent = `${playerName} · <%= t("last_month") %>`;
+      historyMeta.textContent = `${playerName} · <%= t("last_year") %>`;
       historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("history_loading") %></td></tr>`;
       renderLegend();
       drawHistoryChart([]);
 
       try {
-        const resp = await fetch(`/potenze/${playerId}/history-data?days=30`);
+        const resp = await fetch(`/potenze/${playerId}/history-data?days=${HISTORY_RETENTION_DAYS}`);
         const data = await resp.json();
         if (!resp.ok || !data?.ok) throw new Error("history_error");
 
         const rows = data.history || [];
-        const chartRows = buildLastDaysForChart(rows, Number(data.days || 30));
+        const chartRows = buildLastDaysForChart(rows, Number(data.days || HISTORY_RETENTION_DAYS));
         currentChartPoints = chartRows;
         const hasT4Entries = rows.some((row) => Number(row?.t4 || 0) > 0);
         seriesVisibility.t4 = hasT4Entries;
