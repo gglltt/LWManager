@@ -1,0 +1,5 @@
+const HISTORY_RETENTION_DAYS = 365;
+
+module.exports = {
+  HISTORY_RETENTION_DAYS
+};
