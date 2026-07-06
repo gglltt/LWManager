@@ -1,0 +1,40 @@
+<section class="seasonGuideLauncher" aria-labelledby="season-guide-launcher-title">
+  <div class="seasonGuideLauncher__header">
+    <div class="seasonQuickIcon" aria-hidden="true">🧭</div>
+    <div>
+      <h2 id="season-guide-launcher-title"><%= title %></h2>
+      <p><%= lead %></p>
+    </div>
+  </div>
+  <div class="seasonGuideButtons">
+    <% guides.forEach((guide) => { %>
+      <button
+        type="button"
+        class="seasonGuideButton"
+        data-s6-guide-open
+        data-guide-src="<%= guide.src %>"
+        data-guide-title="<%= guide.title %>"
+        data-guide-alt="<%= guide.alt %>"
+        aria-label="<%= guide.action %>">
+        <span class="seasonGuideButton__icon" aria-hidden="true"><%= guide.icon %></span>
+        <span>
+          <strong><%= guide.title %></strong>
+          <small><%= guide.description %></small>
+        </span>
+      </button>
+    <% }) %>
+  </div>
+</section>
+
+<div class="seasonGuideModal" data-s6-guide-modal hidden>
+  <div class="seasonGuideModal__backdrop" data-s6-guide-close></div>
+  <div class="seasonGuideModal__dialog" role="dialog" aria-modal="true" aria-labelledby="season-guide-modal-title">
+    <div class="seasonGuideModal__header">
+      <h2 id="season-guide-modal-title" data-s6-guide-title></h2>
+      <button type="button" class="seasonGuideModal__close" data-s6-guide-close aria-label="<%= closeLabel %>">×</button>
+    </div>
+    <div class="seasonGuideModal__body">
+      <img data-s6-guide-image src="" alt="">
+    </div>
+  </div>
+</div>
