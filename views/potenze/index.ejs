@@ -469,6 +469,8 @@
     const historyLegend = document.getElementById("playerHistoryLegend");
 
     const HISTORY_RETENTION_DAYS = <%- JSON.stringify(historyRetentionDays) %>;
+    const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
+    const HISTORY_NO_DATA_TEXT = <%- JSON.stringify(t("no_history")) %>;
 
     const seriesConfig = [
       { key: "t1", label: "T1", color: "#3a67ff" },
@@ -537,8 +539,31 @@
       }
     }
 
+    function getChartDisplayPoints(points) {
+      if (currentHistoryScale !== "weekly" || !Array.isArray(points) || points.length === 0) return points;
+      const weeks = [];
+      for (let i = 0; i < points.length; i += 7) {
+        const weekPoints = points.slice(i, i + 7);
+        const realPoint = [...weekPoints].reverse().find(hasRealEntry);
+        const lastPoint = weekPoints[weekPoints.length - 1];
+        const sourcePoint = realPoint || lastPoint;
+        if (!sourcePoint) continue;
+        weeks.push({
+          date: lastPoint.date,
+          t1: Number(sourcePoint.t1 || 0),
+          t2: Number(sourcePoint.t2 || 0),
+          t3: Number(sourcePoint.t3 || 0),
+          t4: Number(sourcePoint.t4 || 0),
+          total: Number(sourcePoint.total || 0),
+          _real: Boolean(realPoint)
+        });
+      }
+      return weeks;
+    }
+
     function drawHistoryChart(points) {
       if (!historyCanvas) return;
+      points = getChartDisplayPoints(points);
       resizeHistoryCanvas();
       const ctx = historyCanvas.getContext("2d");
       const w = historyCanvas.width;
@@ -555,7 +580,7 @@
       if (!points || points.length === 0) {
         ctx.fillStyle = "#a9b6d3";
         ctx.font = "11px sans-serif";
-        ctx.fillText("Nessun dato", 20, 26);
+        ctx.fillText(HISTORY_NO_DATA_TEXT, 20, 26);
         return;
       }
 
@@ -713,7 +738,7 @@
       const result = [];
       let lastKnown = null;
       for (let i = 0; i < count; i++) {
-        const dayUTC = new Date(startUTC.getTime() + i * 24 * 60 * 60 * 1000);
+        const dayUTC = new Date(startUTC.getTime() + i * HISTORY_DAY_MS);
         const isoDay = toIsoDayUTC(dayUTC);
         const realRow = rowsByDay.get(isoDay);
         if (realRow) {
