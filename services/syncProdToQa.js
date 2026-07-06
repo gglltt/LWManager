@@ -33,6 +33,10 @@ function normalizeCollectionInfo(collection) {
   return typeof collection === "string" ? { name: collection } : collection;
 }
 
+function isAtlasNoTimeoutCursorError(err) {
+  return err?.code === 8000 && String(err?.message || "").includes("noTimeout cursors are disallowed");
+}
+
 async function recreateIndexes(sourceCollection, targetCollection) {
   const indexes = await sourceCollection.indexes();
   for (const index of indexes) {
@@ -56,7 +60,7 @@ async function copyCollection(sourceCollection, targetCollection) {
 
   let copied = 0;
   let batch = [];
-  const cursor = sourceCollection.find({}, { noCursorTimeout: true }).batchSize(BATCH_SIZE);
+  const cursor = sourceCollection.find({}).batchSize(BATCH_SIZE);
 
   try {
     for await (const doc of cursor) {
@@ -73,7 +77,7 @@ async function copyCollection(sourceCollection, targetCollection) {
       copied += batch.length;
     }
   } finally {
-    await cursor.close();
+    await cursor.close().catch(() => {});
   }
 
   return copied;
@@ -129,7 +133,9 @@ async function syncProdToQa() {
       collections,
       documentsByCollection,
       totalDocuments: Object.values(documentsByCollection).reduce((sum, count) => sum + count, 0),
-      error: ["sync_same_database", "sync_target_not_qa"].includes(err.message) ? err.message : "sync_failed"
+      error: isAtlasNoTimeoutCursorError(err)
+        ? "sync_cursor_no_timeout_unsupported"
+        : (["sync_same_database", "sync_target_not_qa"].includes(err.message) ? err.message : "sync_failed")
     };
   } finally {
     if (prodClient) await prodClient.close().catch(() => {});
