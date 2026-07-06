@@ -326,6 +326,7 @@
     </div>
     <div class="historyChartWrap">
       <canvas id="playerHistoryCanvas" height="320"></canvas>
+      <div class="historyChartTooltip" id="playerHistoryTooltip" hidden></div>
     </div>
     <div class="historyLegend" id="playerHistoryLegend"></div>
     <div class="tableWrap historyTableWrap">
@@ -467,10 +468,13 @@
     const historyTableBody = document.getElementById("playerHistoryTableBody");
     const historyCanvas = document.getElementById("playerHistoryCanvas");
     const historyLegend = document.getElementById("playerHistoryLegend");
+    const historyTooltip = document.getElementById("playerHistoryTooltip");
 
     const HISTORY_RETENTION_DAYS = <%- JSON.stringify(historyRetentionDays) %>;
     const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
     const HISTORY_NO_DATA_TEXT = <%- JSON.stringify(t("no_history")) %>;
+    const HISTORY_LAST_YEAR_RANGE_TEXT = <%- JSON.stringify(t("last_year_range")) %>;
+    const localeTag = <%- JSON.stringify(localeTag) %>;
 
     const seriesConfig = [
       { key: "t1", label: "T1", color: "#3a67ff" },
@@ -481,41 +485,70 @@
     ];
     const seriesVisibility = Object.fromEntries(seriesConfig.map((serie) => [serie.key, serie.key !== "total"]));
     let currentChartPoints = [];
+    let currentDisplayChartPoints = [];
+    let currentChartLayout = null;
     let currentHistoryScale = "weekly";
 
-    const formatPointValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const formatTableValue = (value) => Number(value || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatPointValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatTableValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const monthYearFormatter = new Intl.DateTimeFormat(localeTag, { month: "short", year: "numeric", timeZone: "UTC" });
+    const fullDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+    const numericDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
 
-    function getXAxisTickDays(points, chartWidth) {
-      if (!Array.isArray(points) || points.length === 0) return new Set();
+    function parseIsoDayUTC(isoDay) {
+      const dateObj = new Date(`${isoDay}T00:00:00Z`);
+      return Number.isNaN(dateObj.getTime()) ? null : dateObj;
+    }
 
-      const maxLabels = Math.max(4, Math.floor((chartWidth || 320) / 70));
-      const step = currentHistoryScale === "daily"
-        ? Math.max(1, Math.ceil(points.length / maxLabels))
-        : Math.max(7, Math.ceil(points.length / maxLabels));
-      const ticks = new Set();
+    function formatMonthYear(isoDay) {
+      const dateObj = parseIsoDayUTC(isoDay);
+      return dateObj ? monthYearFormatter.format(dateObj) : String(isoDay || "");
+    }
+
+    function formatFullDate(isoDay) {
+      const dateObj = parseIsoDayUTC(isoDay);
+      return dateObj ? numericDateFormatter.format(dateObj) : String(isoDay || "");
+    }
+
+    function formatRangeDate(isoDay) {
+      const dateObj = parseIsoDayUTC(isoDay);
+      return dateObj ? fullDateFormatter.format(dateObj) : String(isoDay || "");
+    }
+
+    function getHistoryRangeLabel(points) {
+      if (!Array.isArray(points) || points.length === 0) return <%- JSON.stringify(t("last_year")) %>;
+      const start = formatRangeDate(points[0].date);
+      const end = formatRangeDate(points[points.length - 1].date);
+      return HISTORY_LAST_YEAR_RANGE_TEXT.replace("{range}", `${start} - ${end}`);
+    }
+
+    function getXAxisTicks(points) {
+      if (!Array.isArray(points) || points.length === 0) return new Map();
+
+      const ticks = new Map();
+      let lastMonthKey = "";
 
       points.forEach((point, index) => {
         if (!point?.date) return;
-        const dateObj = new Date(`${point.date}T00:00:00Z`);
-        if (Number.isNaN(dateObj.getTime())) return;
-        const isBoundary = index === 0 || index === points.length - 1;
-        const isMonthlyTick = currentHistoryScale === "weekly" && dateObj.getUTCDate() === 1;
-        if (isBoundary || index % step === 0 || isMonthlyTick) ticks.add(point.date);
+        const dateObj = parseIsoDayUTC(point.date);
+        if (!dateObj) return;
+        const monthKey = `${dateObj.getUTCFullYear()}-${dateObj.getUTCMonth()}`;
+        if (index === 0 || monthKey !== lastMonthKey) {
+          ticks.set(point.date, formatMonthYear(point.date));
+          lastMonthKey = monthKey;
+        }
       });
 
       return ticks;
     }
 
     const hasRealEntry = (point) => point?._real === true;
-    function shouldShowXAxisLabel(point, xAxisTickDays) {
-      return xAxisTickDays.has(point.date);
-    }
 
     function closeHistoryModal() {
       if (!historyModal) return;
       historyModal.hidden = true;
       historyModal.setAttribute("aria-hidden", "true");
+      hideHistoryTooltip();
     }
 
     function openHistoryModal() {
@@ -550,6 +583,8 @@
         if (!sourcePoint) continue;
         weeks.push({
           date: lastPoint.date,
+          startDate: weekPoints[0]?.date || lastPoint.date,
+          endDate: lastPoint.date,
           t1: Number(sourcePoint.t1 || 0),
           t2: Number(sourcePoint.t2 || 0),
           t3: Number(sourcePoint.t3 || 0),
@@ -564,6 +599,7 @@
     function drawHistoryChart(points) {
       if (!historyCanvas) return;
       points = getChartDisplayPoints(points);
+      currentDisplayChartPoints = points;
       resizeHistoryCanvas();
       const ctx = historyCanvas.getContext("2d");
       const w = historyCanvas.width;
@@ -571,6 +607,7 @@
       const pad = { l: 56, r: 78, t: 16, b: 74 };
       const chartW = w - pad.l - pad.r;
       const chartH = h - pad.t - pad.b;
+      currentChartLayout = { pad, chartW, chartH, width: w, height: h };
       const visibleSeries = getVisibleSeries();
 
       ctx.clearRect(0, 0, w, h);
@@ -624,16 +661,17 @@
         ctx.restore();
       });
 
-      const xAxisTickDays = getXAxisTickDays(points, chartW);
+      const xAxisTicks = getXAxisTicks(points);
       points.forEach((p, i) => {
-        if (!shouldShowXAxisLabel(p, xAxisTickDays)) return;
+        const tickLabel = xAxisTicks.get(p.date);
+        if (!tickLabel) return;
         const x = xForIndex(i);
         ctx.save();
-        ctx.translate(x, h - 6);
-        ctx.rotate(-Math.PI / 3);
+        ctx.translate(x, h - 26);
+        ctx.rotate(-Math.PI / 6);
         ctx.fillStyle = hasRealEntry(p) ? "#d4dcf0" : "#a9b6d3";
         ctx.font = "11px sans-serif";
-        ctx.fillText(p.date.slice(5), 0, 0);
+        ctx.fillText(tickLabel, 0, 0);
         ctx.restore();
       });
 
@@ -678,6 +716,45 @@
         ctx.textBaseline = "middle";
         ctx.fillText(`${serie.label} ${formatPointValue(lastPoint.value)}`, labelX, labelY);
       });
+    }
+
+    function hideHistoryTooltip() {
+      if (!historyTooltip) return;
+      historyTooltip.hidden = true;
+      historyTooltip.innerHTML = "";
+    }
+
+    function showHistoryTooltip(event) {
+      if (!historyTooltip || !historyCanvas || !currentChartLayout || !currentDisplayChartPoints.length) return;
+      const rect = historyCanvas.getBoundingClientRect();
+      const cssX = event.clientX - rect.left;
+      const canvasX = cssX * (historyCanvas.width / rect.width);
+      const { pad, chartW } = currentChartLayout;
+      if (canvasX < pad.l || canvasX > historyCanvas.width - pad.r) {
+        hideHistoryTooltip();
+        return;
+      }
+
+      const lastIndex = currentDisplayChartPoints.length - 1;
+      const rawIndex = lastIndex === 0 ? 0 : Math.round(((canvasX - pad.l) / chartW) * lastIndex);
+      const pointIndex = Math.min(lastIndex, Math.max(0, rawIndex));
+      const point = currentDisplayChartPoints[pointIndex];
+      if (!point) {
+        hideHistoryTooltip();
+        return;
+      }
+
+      const tooltipDate = currentHistoryScale === "weekly" && point.startDate && point.endDate
+        ? `${formatFullDate(point.startDate)} - ${formatFullDate(point.endDate)}`
+        : formatFullDate(point.date);
+      const rows = [`<strong>${tooltipDate}</strong>`];
+      getVisibleSeries().forEach((serie) => {
+        rows.push(`<span style="color:${serie.color}">${serie.label}: ${formatPointValue(point[serie.key])}</span>`);
+      });
+      historyTooltip.innerHTML = rows.join("<br>");
+      historyTooltip.hidden = false;
+      historyTooltip.style.left = `${Math.min(rect.width - 180, Math.max(8, cssX + 12))}px`;
+      historyTooltip.style.top = `${Math.max(8, event.clientY - rect.top - 12)}px`;
     }
 
     function renderLegend() {
@@ -809,6 +886,7 @@
         const rows = data.history || [];
         const chartRows = buildLastDaysForChart(rows, Number(data.days || HISTORY_RETENTION_DAYS));
         currentChartPoints = chartRows;
+        historyMeta.textContent = `${playerName} · ${getHistoryRangeLabel(chartRows)}`;
         const hasT4Entries = rows.some((row) => Number(row?.t4 || 0) > 0);
         seriesVisibility.t4 = hasT4Entries;
         renderLegend();
@@ -877,6 +955,11 @@
     }
 
     setupScaleControls();
+
+    if (historyCanvas) {
+      historyCanvas.addEventListener("mousemove", showHistoryTooltip);
+      historyCanvas.addEventListener("mouseleave", hideHistoryTooltip);
+    }
 
     window.addEventListener("resize", () => {
       if (historyModal && !historyModal.hidden) {
