@@ -19,7 +19,7 @@
     <form method="GET" action="/registro" class="eventLogFilterBar">
       <label class="eventLogFilterField">
         <span><%= t("activity_type") %></span>
-        <select name="eventType" class="filterInput">
+        <select name="eventType" class="filterInput eventLogFilterSelect">
           <option value=""><%= t("all_activities") %></option>
           <% (eventTypes || []).forEach(type => { %>
             <option value="<%= type %>" <%= selectedEventType === type ? "selected" : "" %>><%= type %></option>
