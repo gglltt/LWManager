@@ -1,20 +1,13 @@
 <%- include("../partials/header") %>
 
-<section class="card cardWide">
-  <div class="pageHeader">
+<section class="card cardWide eventLogPage">
+  <div class="pageHeader eventLogHeader">
     <div>
       <h1><%= t("event_log_title") %></h1>
       <p class="muted"><%= t("event_log_desc") %></p>
     </div>
-    <!--
-    <div class="pageHeaderActions">
-      <form method="POST" action="/registro/tracking/rebuild" class="inlineForm">
-        <button class="button secondary" type="submit">Genera tracking table</button>
-      </form>
-      <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
-    </div>
   </div>
-  -->
+
   <% if (typeof error !== "undefined" && error) { %>
     <div class="alert error"><%= error %></div>
   <% } %>
@@ -22,38 +15,96 @@
     <div class="alert success"><%= trackingMessage %></div>
   <% } %>
 
-  <form method="GET" action="/registro" class="filterBar">
-    <select name="eventType" class="filterInput">
-      <option value=""><%= t("all_activities") %></option>
-      <% (eventTypes || []).forEach(type => { %>
-        <option value="<%= type %>" <%= selectedEventType === type ? "selected" : "" %>><%= type %></option>
-      <% }) %>
-    </select>
-    <button class="button" type="submit"><%= t("filter") %></button>
-  </form>
+  <div class="eventLogToolbar">
+    <form method="GET" action="/registro" class="eventLogFilterBar">
+      <label class="eventLogFilterField">
+        <span><%= t("activity_type") %></span>
+        <select name="eventType" class="filterInput eventLogFilterSelect">
+          <option value=""><%= t("all_activities") %></option>
+          <% (eventTypes || []).forEach(type => { %>
+            <option value="<%= type %>" <%= selectedEventType === type ? "selected" : "" %>><%= type %></option>
+          <% }) %>
+        </select>
+      </label>
+      <div class="eventLogFilterActions">
+        <button class="button" type="submit"><%= t("filter") %></button>
+        <% if (selectedEventType) { %>
+          <a class="button secondary" href="/registro"><%= t("reset") %></a>
+        <% } %>
+      </div>
+    </form>
+    <div class="eventLogTotal" aria-live="polite">
+      <span class="muted"><%= t("total_results") %>:</span>
+      <strong><%= total || 0 %></strong>
+    </div>
+  </div>
 
-  <div class="muted" style="margin-bottom:8px;"><%= t("total_results") %>: <%= total || 0 %></div>
+  <%
+    const currentPage = Math.max(1, Number(page) || 1);
+    const pagesCount = Math.max(1, Number(totalPages) || 1);
+    const selectedEventTypeParam = encodeURIComponent(selectedEventType || "");
+    const pageHref = (pageNumber) => `/registro?page=${pageNumber}&eventType=${selectedEventTypeParam}`;
+    const prevPage = currentPage > 1 ? currentPage - 1 : null;
+    const nextPage = currentPage < pagesCount ? currentPage + 1 : null;
+    const pageItems = [];
+    for (let pageNumber = 1; pageNumber <= pagesCount; pageNumber += 1) {
+      if (pageNumber === 1 || pageNumber === pagesCount || Math.abs(pageNumber - currentPage) <= 1) {
+        pageItems.push(pageNumber);
+      } else if (pageItems[pageItems.length - 1] !== "ellipsis") {
+        pageItems.push("ellipsis");
+      }
+    }
+  %>
 
-  <div class="tableWrap">
-    <table class="table tableEssentialLogs">
+  <% function renderPagination(position) { %>
+    <nav class="eventLogPagination eventLogPagination--<%= position %>" aria-label="<%= t('pagination') %>">
+      <div class="eventLogPageStatus"><%= t("page_x_of_y").replace("{current}", currentPage).replace("{total}", pagesCount) %></div>
+      <div class="eventLogPageButtons">
+        <% if (prevPage) { %>
+          <a class="button secondary" href="<%= pageHref(prevPage) %>">← <%= t("previous") %></a>
+        <% } else { %>
+          <span class="button secondary disabled" aria-disabled="true">← <%= t("previous") %></span>
+        <% } %>
+        <% pageItems.forEach((item) => { %>
+          <% if (item === "ellipsis") { %>
+            <span class="eventLogPageEllipsis" aria-hidden="true">…</span>
+          <% } else if (item === currentPage) { %>
+            <span class="button eventLogPageNumber active" aria-current="page"><%= item %></span>
+          <% } else { %>
+            <a class="button secondary eventLogPageNumber" href="<%= pageHref(item) %>"><%= item %></a>
+          <% } %>
+        <% }) %>
+        <% if (nextPage) { %>
+          <a class="button secondary" href="<%= pageHref(nextPage) %>"><%= t("next") %> →</a>
+        <% } else { %>
+          <span class="button secondary disabled" aria-disabled="true"><%= t("next") %> →</span>
+        <% } %>
+      </div>
+    </nav>
+  <% } %>
+
+  <% renderPagination("top"); %>
+
+  <div class="tableWrap eventLogTableWrap">
+    <table class="table tableEssentialLogs eventLogTable">
       <thead>
         <tr>
           <th><%= t("when") %></th>
           <th><%= t("activity") %></th>
           <th><%= t("origin") %></th>
           <th><%= t("details") %></th>
+          <th><%= t("actions_short") %></th>
         </tr>
       </thead>
       <tbody>
         <% if (!events || events.length === 0) { %>
-          <tr><td colspan="4" class="muted"><%= t("no_events") %></td></tr>
+          <tr><td colspan="5" class="muted eventLogEmpty"><%= t("no_events") %></td></tr>
         <% } %>
-        <% (events || []).forEach((event, idx) => {
+        <% (events || []).forEach((event) => {
           const dt = new Date(event.createdAt);
           const date = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleDateString(localeTag);
           const time = Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString(localeTag, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
           const details = event.details || "-";
-          const detailsPreview = details.length > 80 ? `${details.slice(0, 80)}…` : details;
           const unknown = t("unknown");
           const sourceSummary = [event.sourceIp || unknown, event.sourceCity || unknown, event.sourceCountry || unknown].filter(Boolean).join(" · ");
           const fullDetails = [
@@ -63,8 +114,8 @@
             `${t("browser")}: ${event.browserType || unknown}`,
             `${t("machine")}: ${event.sourceMachine || unknown}`,
             `${t("city")}: ${event.sourceCity || unknown}`,
-            `Regione: ${event.sourceRegion || unknown}`,
-            `Nazione: ${event.sourceCountry || unknown}`,
+            `${t("region")}: ${event.sourceRegion || unknown}`,
+            `${t("country")}: ${event.sourceCountry || unknown}`,
             `User-Agent: ${event.userAgent || unknown}`,
             "",
             `${t("details")}:`,
@@ -72,47 +123,18 @@
           ].join("\n");
         %>
           <tr>
-            <td>
-              <div class="cell2">
-                <span class="cellTop"><%= date %></span>
-                <span class="cellSub muted"><%= time %></span>
-              </div>
-            </td>
-            <td><%= event.eventType %></td>
-            <td><%= sourceSummary %></td>
-            <td>
-              <div class="logDetailsCell">
-                <span class="logDetailsPreview"><%= detailsPreview %></span>
-                <% if (details !== "-") { %>
-                  <button
-                    type="button"
-                    class="button secondary logDetailsBtn"
-                    data-log-details="<%= fullDetails %>">
-                    <%= t("open") %>
-                  </button>
-                <% } %>
-              </div>
-            </td>
+            <td data-label="<%= t('when') %>"><div class="cell2"><span class="cellTop"><%= date %></span><span class="cellSub muted"><%= time %></span></div></td>
+            <td data-label="<%= t('activity') %>"><span class="eventLogActivity" title="<%= event.eventType || '-' %>"><%= event.eventType || '-' %></span></td>
+            <td data-label="<%= t('origin') %>"><span class="eventLogOrigin" title="<%= sourceSummary %>"><%= sourceSummary %></span></td>
+            <td data-label="<%= t('details') %>"><span class="eventLogDetailsText" title="<%= details %>"><%= details %></span></td>
+            <td data-label="<%= t('actions_short') %>" class="eventLogActionCell"><button type="button" class="button secondary logDetailsBtn" data-log-details="<%= fullDetails %>"><%= t("open") %></button></td>
           </tr>
         <% }) %>
       </tbody>
     </table>
   </div>
 
-  <div class="pagination">
-    <% const prevPage = page > 1 ? page - 1 : null; %>
-    <% const nextPage = page < totalPages ? page + 1 : null; %>
-
-    <% if (prevPage) { %>
-      <a class="button secondary" href="/registro?page=<%= prevPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>">← <%= t("previous") %></a>
-    <% } %>
-
-    <span class="muted"><%= t("page") %> <%= page %> <%= t("of") %> <%= totalPages %></span>
-
-    <% if (nextPage) { %>
-      <a class="button secondary" href="/registro?page=<%= nextPage %>&eventType=<%= encodeURIComponent(selectedEventType || '') %>"><%= t("next") %> →</a>
-    <% } %>
-  </div>
+  <% renderPagination("bottom"); %>
 </section>
 
 <div class="logModal" id="logModal" hidden aria-hidden="true">

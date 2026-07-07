@@ -1478,7 +1478,7 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 
 .seasonGuideButton{
   display:flex;
-  gap:10px;
+  gap:14px;
   align-items:center;
   min-height:72px;
   text-align:left;
@@ -1496,9 +1496,29 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   box-shadow:0 0 0 3px rgba(48,224,198,.14);
 }
 
-.seasonGuideButton__icon{ font-size:24px; }
+.seasonGuideButton__content{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  flex:1;
+}
+
+.seasonGuideButton__icon{ flex:0 0 auto; font-size:24px; }
+.seasonGuideButton__text{ min-width:0; }
 .seasonGuideButton strong{ display:block; font-size:15px; }
 .seasonGuideButton small{ display:block; margin-top:3px; color:var(--muted); line-height:1.35; }
+.seasonGuideButton__thumb{
+  flex:0 0 auto;
+  width:64px;
+  height:64px;
+  object-fit:cover;
+  object-position:top;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 8px 18px rgba(0,0,0,.28);
+  background:rgba(255,255,255,.04);
+}
 
 .seasonGuideModal[hidden]{ display:none; }
 .seasonGuideModal{ position:fixed; inset:0; z-index:1000; padding:18px; }
@@ -1544,6 +1564,294 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 @media (max-width: 760px){
   .seasonGuideButtons{ grid-template-columns:1fr; }
   .seasonGuideButton{ min-height:64px; }
+  .seasonGuideButton__thumb{ width:56px; height:56px; }
   .seasonGuideModal{ padding:8px; }
   .seasonGuideModal__dialog{ max-height:calc(100vh - 16px); }
+}
+
+@media (max-width: 600px){
+  .seasonGuideButton{ padding:10px; gap:10px; }
+  .seasonGuideButton__content{ gap:10px; }
+  .seasonGuideButton__thumb{ width:48px; height:48px; border-radius:8px; }
+}
+
+/* Event log admin page */
+.eventLogPage{
+  max-width:1180px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.eventLogHeader{
+  margin-bottom:14px;
+}
+
+.eventLogToolbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  margin:12px 0 10px;
+  border:1px solid rgba(34,48,77,.85);
+  border-radius:14px;
+  background:rgba(15,23,42,.62);
+}
+
+.eventLogFilterBar{
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+  flex:0 1 auto;
+}
+
+.eventLogFilterField{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:0 0 auto;
+  min-width:0;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+
+.eventLogFilterField .filterInput,
+.eventLogFilterSelect{
+  flex:0 0 auto;
+  width:auto;
+  min-width:220px;
+  max-width:320px;
+  height:42px;
+  min-height:42px;
+  max-height:42px;
+  padding-top:0;
+  padding-bottom:0;
+  line-height:42px;
+}
+
+.eventLogFilterActions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.eventLogTotal{
+  display:flex;
+  align-items:baseline;
+  align-self:flex-end;
+  gap:6px;
+  margin-left:auto;
+  white-space:nowrap;
+  padding:8px 12px;
+  border:1px solid rgba(59,130,246,.28);
+  border-radius:12px;
+  background:rgba(37,99,235,.10);
+}
+
+.eventLogTotal strong{
+  font-size:18px;
+}
+
+.eventLogPagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 0;
+  margin:4px 0;
+}
+
+.eventLogPageStatus{
+  color:var(--muted);
+  font-weight:700;
+}
+
+.eventLogPageButtons{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.eventLogPageNumber{
+  min-width:36px;
+  justify-content:center;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.eventLogPageNumber.active{
+  pointer-events:none;
+}
+
+.button.disabled,
+.button[aria-disabled="true"]{
+  opacity:.45;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+
+.eventLogPageEllipsis{
+  color:var(--muted);
+  padding:0 2px;
+}
+
+.eventLogTableWrap{
+  margin-top:4px;
+  border-radius:14px;
+}
+
+.eventLogTable{
+  table-layout:fixed;
+  min-width:860px;
+}
+
+.eventLogTable th:nth-child(1),
+.eventLogTable td:nth-child(1){ width:120px; }
+.eventLogTable th:nth-child(2),
+.eventLogTable td:nth-child(2){ width:150px; }
+.eventLogTable th:nth-child(3),
+.eventLogTable td:nth-child(3){ width:220px; }
+.eventLogTable th:nth-child(5),
+.eventLogTable td:nth-child(5){ width:92px; text-align:right; }
+
+.eventLogTable th,
+.eventLogTable td{
+  vertical-align:middle;
+}
+
+.eventLogTable tbody tr:nth-child(even){
+  background:rgba(15,23,42,.28);
+}
+
+.eventLogTable tbody tr:hover{
+  background:rgba(37,99,235,.10);
+}
+
+.eventLogActivity,
+.eventLogOrigin,
+.eventLogDetailsText{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.eventLogActivity,
+.eventLogOrigin{
+  white-space:nowrap;
+}
+
+.eventLogDetailsText{
+  white-space:normal;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+
+.eventLogActionCell .logDetailsBtn{
+  min-width:58px;
+}
+
+.eventLogEmpty{
+  text-align:center;
+  padding:22px !important;
+}
+
+@media (max-width: 720px){
+  .eventLogToolbar,
+  .eventLogFilterBar,
+  .eventLogFilterActions,
+  .eventLogPagination,
+  .eventLogPageButtons{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .eventLogToolbar{
+    padding:12px;
+  }
+
+  .eventLogFilterField,
+  .eventLogFilterField .filterInput,
+  .eventLogFilterSelect,
+  .eventLogFilterActions .button,
+  .eventLogTotal,
+  .eventLogPageButtons .button{
+    width:100%;
+    max-width:none;
+  }
+
+  .eventLogTotal{
+    justify-content:space-between;
+  }
+
+  .eventLogPageStatus{
+    text-align:center;
+  }
+
+  .eventLogPageNumber,
+  .eventLogPageEllipsis{
+    display:none;
+  }
+
+  .eventLogTableWrap{
+    overflow:visible;
+  }
+
+  .eventLogTable{
+    min-width:0;
+    border:0;
+  }
+
+  .eventLogTable thead{
+    display:none;
+  }
+
+  .eventLogTable,
+  .eventLogTable tbody,
+  .eventLogTable tr,
+  .eventLogTable td{
+    display:block;
+    width:100% !important;
+  }
+
+  .eventLogTable tr{
+    margin-bottom:12px;
+    padding:12px;
+    border:1px solid rgba(34,48,77,.85);
+    border-radius:14px;
+    background:rgba(15,23,42,.66);
+  }
+
+  .eventLogTable td{
+    border:0;
+    padding:8px 0;
+    text-align:left !important;
+  }
+
+  .eventLogTable td::before{
+    content:attr(data-label);
+    display:block;
+    margin-bottom:4px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  .eventLogDetailsText{
+    -webkit-line-clamp:4;
+  }
+
+  .eventLogActionCell .logDetailsBtn{
+    width:100%;
+    min-height:42px;
+  }
 }
