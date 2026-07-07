@@ -1855,3 +1855,60 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
     min-height:42px;
   }
 }
+
+.seasonBackLink,
+.seasonPrimaryLink{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid rgba(43,213,118,.45);
+  background:linear-gradient(135deg, rgba(43,213,118,.18), rgba(48,224,198,.08));
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  transition:border-color .15s ease, transform .15s ease, background .15s ease;
+}
+
+.seasonBackLink{ margin-bottom:16px; }
+
+.seasonBackLink:hover,
+.seasonBackLink:focus-visible,
+.seasonPrimaryLink:hover,
+.seasonPrimaryLink:focus-visible{
+  border-color:rgba(48,224,198,.8);
+  background:linear-gradient(135deg, rgba(43,213,118,.26), rgba(58,103,255,.12));
+  transform:translateY(-1px);
+  outline:none;
+}
+
+.seasonGuideLinkCard{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:14px;
+  border:1px solid rgba(48,224,198,.32);
+  background:rgba(48,224,198,.07);
+  border-radius:16px;
+  padding:14px;
+}
+
+.seasonGuideLinkCard h3,
+.seasonGuideLinkCard p{ margin:0; }
+.seasonGuideLinkCard p{ color:var(--muted); line-height:1.5; margin-top:4px; }
+
+.altarGuidePage .seasonCallout{ margin-top:14px; }
+.altarAbilityTable th,
+.altarAbilityTable td{ min-width:140px; vertical-align:top; }
+.altarAbilityTable th:nth-child(4),
+.altarAbilityTable td:nth-child(4),
+.altarAbilityTable th:nth-child(5),
+.altarAbilityTable td:nth-child(5){ min-width:220px; }
+
+@media (max-width: 700px){
+  .seasonGuideLinkCard{ align-items:stretch; flex-direction:column; }
+  .seasonPrimaryLink{ width:100%; }
+}
