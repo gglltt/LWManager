@@ -108,6 +108,16 @@ app.get("/stagione-6", requireAuth, (req, res) => {
   res.render("stagione6", { user: req.user, seasonContentLang, extraJs: ["/js/stagione6-guides.js"] });
 });
 
+app.get("/stagione-6/altari", requireAuth, (req, res) => {
+  const seasonContentLang = req.resolvedSeason6Lang || (["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en");
+  const titleByLang = {
+    it: "Altari Stagione 6",
+    fr: "Autels Saison 6",
+    en: "Season 6 Altars"
+  };
+  res.render("stagione6-altari", { user: req.user, seasonContentLang, title: titleByLang[seasonContentLang] || titleByLang.en });
+});
+
 app.use("/potenze", potenzeRoutes);
 app.use("/admin", adminRoutes);
 app.use("/registro", registroRoutes);
