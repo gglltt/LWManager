@@ -16,11 +16,18 @@
         data-guide-title="<%= guide.title %>"
         data-guide-alt="<%= guide.alt %>"
         aria-label="<%= guide.action %>">
-        <span class="seasonGuideButton__icon" aria-hidden="true"><%= guide.icon %></span>
-        <span>
-          <strong><%= guide.title %></strong>
-          <small><%= guide.description %></small>
+        <span class="seasonGuideButton__content">
+          <span class="seasonGuideButton__icon" aria-hidden="true"><%= guide.icon %></span>
+          <span class="seasonGuideButton__text">
+            <strong><%= guide.title %></strong>
+            <small><%= guide.description %></small>
+          </span>
         </span>
+        <img
+          class="seasonGuideButton__thumb"
+          src="<%= guide.src %>"
+          alt="<%= guide.thumbAlt || guide.alt %>"
+          loading="lazy">
       </button>
     <% }) %>
   </div>
