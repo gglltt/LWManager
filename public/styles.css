@@ -1478,7 +1478,7 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 
 .seasonGuideButton{
   display:flex;
-  gap:10px;
+  gap:14px;
   align-items:center;
   min-height:72px;
   text-align:left;
@@ -1496,9 +1496,29 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   box-shadow:0 0 0 3px rgba(48,224,198,.14);
 }
 
-.seasonGuideButton__icon{ font-size:24px; }
+.seasonGuideButton__content{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  flex:1;
+}
+
+.seasonGuideButton__icon{ flex:0 0 auto; font-size:24px; }
+.seasonGuideButton__text{ min-width:0; }
 .seasonGuideButton strong{ display:block; font-size:15px; }
 .seasonGuideButton small{ display:block; margin-top:3px; color:var(--muted); line-height:1.35; }
+.seasonGuideButton__thumb{
+  flex:0 0 auto;
+  width:64px;
+  height:64px;
+  object-fit:cover;
+  object-position:top;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 8px 18px rgba(0,0,0,.28);
+  background:rgba(255,255,255,.04);
+}
 
 .seasonGuideModal[hidden]{ display:none; }
 .seasonGuideModal{ position:fixed; inset:0; z-index:1000; padding:18px; }
@@ -1544,8 +1564,15 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 @media (max-width: 760px){
   .seasonGuideButtons{ grid-template-columns:1fr; }
   .seasonGuideButton{ min-height:64px; }
+  .seasonGuideButton__thumb{ width:56px; height:56px; }
   .seasonGuideModal{ padding:8px; }
   .seasonGuideModal__dialog{ max-height:calc(100vh - 16px); }
+}
+
+@media (max-width: 600px){
+  .seasonGuideButton{ padding:10px; gap:10px; }
+  .seasonGuideButton__content{ gap:10px; }
+  .seasonGuideButton__thumb{ width:48px; height:48px; border-radius:8px; }
 }
 
 /* Event log admin page */
