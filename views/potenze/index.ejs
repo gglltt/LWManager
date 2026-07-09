@@ -319,13 +319,16 @@
       <button type="button" class="iconBtn" id="playerHistoryModalClose" aria-label="<%= t('close') %>">✖</button>
     </div>
     <div class="historyMeta muted" id="playerHistoryMeta"></div>
-    <!--
     <div class="historyScaleControls" id="historyScaleControls">
       <span class="historyScaleLabel"><%= t('scale') %></span>
-      <button type="button" class="historyScaleBtn " data-history-scale="daily" aria-pressed="false"><%= t('daily') %></button>
-      <button type="button" class="historyScaleBtn isActive" data-history-scale="weekly" aria-pressed="true"><%= t('weekly') %></button>
+      <button type="button" class="historyScaleBtn isActive" data-history-scale="daily" aria-pressed="true"><%= t('daily') %></button>
+      <button type="button" class="historyScaleBtn" data-history-scale="weekly" aria-pressed="false"><%= t('weekly') %></button>
+      <span class="historyScaleLabel historyPeriodLabel"><%= t('period') %></span>
+      <button type="button" class="historyScaleBtn" data-history-period="month" aria-pressed="false"><%= t('last_month') %></button>
+      <button type="button" class="historyScaleBtn" data-history-period="3months" aria-pressed="false"><%= t('last_3_months') %></button>
+      <button type="button" class="historyScaleBtn" data-history-period="6months" aria-pressed="false"><%= t('last_6_months') %></button>
+      <button type="button" class="historyScaleBtn" data-history-period="year" aria-pressed="false"><%= t('last_year') %></button>
     </div>
-    -->
     <div class="historyChartWrap">
       <canvas id="playerHistoryCanvas" height="320"></canvas>
       <div class="historyChartTooltip" id="playerHistoryTooltip" hidden></div>
@@ -474,8 +477,13 @@
 
     const HISTORY_RETENTION_DAYS = <%- JSON.stringify(historyRetentionDays) %>;
     const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
-    const HISTORY_NO_DATA_TEXT = <%- JSON.stringify(t("no_history")) %>;
-    const HISTORY_LAST_YEAR_RANGE_TEXT = <%- JSON.stringify(t("last_year_range")) %>;
+    const HISTORY_LAST_YEAR_RANGE_TEXT = <%- JSON.stringify(t("history_period_range")) %>;
+    const HISTORY_PERIODS = [
+      { key: "month", days: 30, label: <%- JSON.stringify(t("last_month")) %>, noData: <%- JSON.stringify(t("no_history_last_month")) %> },
+      { key: "3months", days: 90, label: <%- JSON.stringify(t("last_3_months")) %>, noData: <%- JSON.stringify(t("no_history_last_3_months")) %> },
+      { key: "6months", days: 180, label: <%- JSON.stringify(t("last_6_months")) %>, noData: <%- JSON.stringify(t("no_history_last_6_months")) %> },
+      { key: "year", days: HISTORY_RETENTION_DAYS, label: <%- JSON.stringify(t("last_year")) %>, noData: <%- JSON.stringify(t("no_history_last_year")) %> }
+    ];
     const localeTag = <%- JSON.stringify(localeTag) %>;
 
     const seriesConfig = [
@@ -490,6 +498,9 @@
     let currentDisplayChartPoints = [];
     let currentChartLayout = null;
     let currentHistoryScale = "daily";
+    let currentHistoryPeriod = "year";
+    let currentHistoryRows = [];
+    let currentPlayerName = "";
 
     const formatPointValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formatTableValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -517,24 +528,43 @@
       return dateObj ? fullDateFormatter.format(dateObj) : String(isoDay || "");
     }
 
+    function getCurrentPeriod() {
+      return HISTORY_PERIODS.find((period) => period.key === currentHistoryPeriod) || HISTORY_PERIODS[HISTORY_PERIODS.length - 1];
+    }
+
     function getHistoryRangeLabel(points) {
-      if (!Array.isArray(points) || points.length === 0) return <%- JSON.stringify(t("last_year")) %>;
+      const period = getCurrentPeriod();
+      if (!Array.isArray(points) || points.length === 0) return period.label;
       const start = formatRangeDate(points[0].date);
       const end = formatRangeDate(points[points.length - 1].date);
-      return HISTORY_LAST_YEAR_RANGE_TEXT.replace("{range}", `${start} - ${end}`);
+      return HISTORY_LAST_YEAR_RANGE_TEXT
+        .replace("{period}", period.label)
+        .replace("{range}", `${start} - ${end}`);
     }
 
     function getXAxisTicks(points) {
       if (!Array.isArray(points) || points.length === 0) return new Map();
 
       const ticks = new Map();
+      const period = getCurrentPeriod();
       let lastMonthKey = "";
+      let lastWeekKey = "";
 
       points.forEach((point, index) => {
         if (!point?.date) return;
         const dateObj = parseIsoDayUTC(point.date);
         if (!dateObj) return;
         const monthKey = `${dateObj.getUTCFullYear()}-${dateObj.getUTCMonth()}`;
+        const weekKey = `${dateObj.getUTCFullYear()}-${Math.floor((dateObj.getTime() / HISTORY_DAY_MS) / 7)}`;
+        if (period.key === "month") {
+          if (index === 0 || index === points.length - 1 || dateObj.getUTCDate() % 7 === 1) ticks.set(point.date, formatFullDate(point.date));
+          return;
+        }
+        if (period.key === "3months") {
+          if (index === 0 || weekKey !== lastWeekKey && dateObj.getUTCDay() === 1) ticks.set(point.date, formatFullDate(point.date));
+          lastWeekKey = weekKey;
+          return;
+        }
         if (index === 0 || monthKey !== lastMonthKey) {
           ticks.set(point.date, formatMonthYear(point.date));
           lastMonthKey = monthKey;
@@ -619,7 +649,7 @@
       if (!points || points.length === 0) {
         ctx.fillStyle = "#a9b6d3";
         ctx.font = "11px sans-serif";
-        ctx.fillText(HISTORY_NO_DATA_TEXT, 20, 26);
+        ctx.fillText(getCurrentPeriod().noData, 20, 26);
         return;
       }
 
@@ -779,6 +809,21 @@
       });
     }
 
+    function updateHistoryControls() {
+      const controls = document.getElementById("historyScaleControls");
+      if (!controls) return;
+      controls.querySelectorAll("[data-history-scale]").forEach((item) => {
+        const active = item.getAttribute("data-history-scale") === currentHistoryScale;
+        item.classList.toggle("isActive", active);
+        item.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      controls.querySelectorAll("[data-history-period]").forEach((item) => {
+        const active = item.getAttribute("data-history-period") === currentHistoryPeriod;
+        item.classList.toggle("isActive", active);
+        item.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
     function setupScaleControls() {
       const controls = document.getElementById("historyScaleControls");
       if (!controls) return;
@@ -787,12 +832,16 @@
           const selected = btn.getAttribute("data-history-scale");
           if (!selected || (selected !== "daily" && selected !== "weekly")) return;
           currentHistoryScale = selected;
-          controls.querySelectorAll("[data-history-scale]").forEach((item) => {
-            const active = item.getAttribute("data-history-scale") === currentHistoryScale;
-            item.classList.toggle("isActive", active);
-            item.setAttribute("aria-pressed", active ? "true" : "false");
-          });
+          updateHistoryControls();
           drawHistoryChart(currentChartPoints);
+        });
+      });
+      controls.querySelectorAll("[data-history-period]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const selected = btn.getAttribute("data-history-period");
+          if (!HISTORY_PERIODS.some((period) => period.key === selected)) return;
+          currentHistoryPeriod = selected;
+          updateHistoryView();
         });
       });
     }
@@ -859,23 +908,106 @@
       return result;
     }
 
+    function getPeriodStartIso(period) {
+      const now = new Date();
+      return toIsoDayUTC(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - period.days, 0, 0, 0, 0)));
+    }
+
+    function chooseDefaultHistoryPeriod(rows) {
+      if (!Array.isArray(rows) || rows.length === 0) return "month";
+      const oldest = rows.reduce((min, row) => row?.date && (!min || String(row.date) < min) ? String(row.date) : min, "");
+      if (!oldest) return "month";
+      for (const period of HISTORY_PERIODS) {
+        if (oldest >= getPeriodStartIso(period)) return period.key;
+      }
+      return "year";
+    }
+
+    function buildFilledTableRows(rows) {
+      const sortedAsc = [...(rows || [])].sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+      const filledAscRows = [];
+      let previousSnapshot = null;
+      sortedAsc.forEach((row) => {
+        const current = {
+          date: String(row.date || ""),
+          t1: Number(row.t1),
+          t2: Number(row.t2),
+          t3: Number(row.t3),
+          t4: Number(row.t4)
+        };
+
+        ["t1", "t2", "t3", "t4"].forEach((key) => {
+          if (Number.isFinite(current[key])) return;
+          current[key] = previousSnapshot ? Number(previousSnapshot[key] || 0) : 0;
+        });
+        current.total = Math.round((current.t1 + current.t2 + current.t3 + current.t4) * 100) / 100;
+
+        if (previousSnapshot) {
+          current.growth = {};
+          ["t1", "t2", "t3", "t4", "total"].forEach((key) => {
+            const prevVal = Number(previousSnapshot[key] || 0);
+            const currVal = Number(current[key] || 0);
+            if (!Number.isFinite(prevVal) || !Number.isFinite(currVal) || prevVal === 0) {
+              current.growth[key] = null;
+              return;
+            }
+            const pct = ((currVal - prevVal) / prevVal) * 100;
+            current.growth[key] = Number.isFinite(pct) ? pct : null;
+          });
+        } else {
+          current.growth = { t1: null, t2: null, t3: null, t4: null, total: null };
+        }
+
+        filledAscRows.push(current);
+        previousSnapshot = current;
+      });
+      return filledAscRows;
+    }
+
+    function updateHistoryView() {
+      const period = getCurrentPeriod();
+      const periodStart = getPeriodStartIso(period);
+      const rowsInPeriod = currentHistoryRows.filter((row) => String(row?.date || "") >= periodStart);
+      const chartRows = buildLastDaysForChart(rowsInPeriod, period.days);
+      currentChartPoints = chartRows;
+      historyMeta.textContent = `${currentPlayerName} · ${getHistoryRangeLabel(chartRows)}`;
+      updateHistoryControls();
+      if (!rowsInPeriod.length) {
+        historyTableBody.innerHTML = `<tr><td colspan="5" class="muted">${period.noData}</td></tr>`;
+        drawHistoryChart(chartRows);
+        return;
+      }
+
+      const displayRows = buildFilledTableRows(rowsInPeriod).reverse();
+      const renderCell = (value, growthPct) => {
+        const valueHtml = formatTableValue(value);
+        if (!Number.isFinite(growthPct) || growthPct === 0) return valueHtml;
+        const growthSign = growthPct > 0 ? "+" : "-";
+        const growthClass = growthPct > 0 ? "historyGrowth" : "historyGrowth historyGrowthNegative";
+        const growthText = `(${growthSign}${Math.abs(growthPct).toFixed(2)}%)`;
+        return `${valueHtml} <span class="${growthClass}">${growthText}</span>`;
+      };
+
+      historyTableBody.innerHTML = displayRows
+        .map((row) => `<tr><td class="historyDateCell">${row.date}</td><td>${renderCell(row.t1, row.growth?.t1)}</td><td>${renderCell(row.t2, row.growth?.t2)}</td><td>${renderCell(row.t3, row.growth?.t3)}</td><td>${renderCell(row.t4, row.growth?.t4)}</td></tr>`)
+        .join("");
+
+      drawHistoryChart(chartRows);
+    }
+
     async function openPlayerHistory(playerId, playerName) {
       seriesConfig.forEach((serie) => {
         seriesVisibility[serie.key] = serie.key !== "total";
       });
       seriesVisibility.t4 = false;
       currentChartPoints = [];
+      currentHistoryRows = [];
+      currentPlayerName = playerName;
       currentHistoryScale = "daily";
-      const controls = document.getElementById("historyScaleControls");
-      if (controls) {
-        controls.querySelectorAll("[data-history-scale]").forEach((item) => {
-          const active = item.getAttribute("data-history-scale") === "weekly";
-          item.classList.toggle("isActive", active);
-          item.setAttribute("aria-pressed", active ? "true" : "false");
-        });
-      }
+      currentHistoryPeriod = "year";
+      updateHistoryControls();
       openHistoryModal();
-      historyMeta.textContent = `${playerName} · <%= t("last_year") %>`;
+      historyMeta.textContent = `${playerName} · ${getCurrentPeriod().label}`;
       historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("history_loading") %></td></tr>`;
       renderLegend();
       drawHistoryChart([]);
@@ -886,71 +1018,12 @@
         if (!resp.ok || !data?.ok) throw new Error("history_error");
 
         const rows = data.history || [];
-        const chartRows = buildLastDaysForChart(rows, Number(data.days || HISTORY_RETENTION_DAYS));
-        currentChartPoints = chartRows;
-        historyMeta.textContent = `${playerName} · ${getHistoryRangeLabel(chartRows)}`;
+        currentHistoryRows = rows;
+        currentHistoryPeriod = chooseDefaultHistoryPeriod(rows);
         const hasT4Entries = rows.some((row) => Number(row?.t4 || 0) > 0);
         seriesVisibility.t4 = hasT4Entries;
         renderLegend();
-        if (!rows.length) {
-          historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("no_history") %></td></tr>`;
-          drawHistoryChart(chartRows);
-          return;
-        }
-
-        const sortedAsc = [...rows].sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
-        const filledAscRows = [];
-        let previousSnapshot = null;
-        sortedAsc.forEach((row) => {
-          const current = {
-            date: String(row.date || ""),
-            t1: Number(row.t1),
-            t2: Number(row.t2),
-            t3: Number(row.t3),
-            t4: Number(row.t4)
-          };
-
-          ["t1", "t2", "t3", "t4"].forEach((key) => {
-            if (Number.isFinite(current[key])) return;
-            current[key] = previousSnapshot ? Number(previousSnapshot[key] || 0) : 0;
-          });
-          current.total = Math.round((current.t1 + current.t2 + current.t3 + current.t4) * 100) / 100;
-
-          if (previousSnapshot) {
-            current.growth = {};
-            ["t1", "t2", "t3", "t4", "total"].forEach((key) => {
-              const prevVal = Number(previousSnapshot[key] || 0);
-              const currVal = Number(current[key] || 0);
-              if (!Number.isFinite(prevVal) || !Number.isFinite(currVal) || prevVal === 0) {
-                current.growth[key] = null;
-                return;
-              }
-              const pct = ((currVal - prevVal) / prevVal) * 100;
-              current.growth[key] = Number.isFinite(pct) ? pct : null;
-            });
-          } else {
-            current.growth = { t1: null, t2: null, t3: null, t4: null, total: null };
-          }
-
-          filledAscRows.push(current);
-          previousSnapshot = current;
-        });
-
-        const displayRows = [...filledAscRows].reverse();
-        const renderCell = (value, growthPct) => {
-          const valueHtml = formatTableValue(value);
-          if (!Number.isFinite(growthPct) || growthPct === 0) return valueHtml;
-          const growthSign = growthPct > 0 ? "+" : "-";
-          const growthClass = growthPct > 0 ? "historyGrowth" : "historyGrowth historyGrowthNegative";
-          const growthText = `(${growthSign}${Math.abs(growthPct).toFixed(2)}%)`;
-          return `${valueHtml} <span class="${growthClass}">${growthText}</span>`;
-        };
-
-        historyTableBody.innerHTML = displayRows
-          .map((row) => `<tr><td class="historyDateCell">${row.date}</td><td>${renderCell(row.t1, row.growth?.t1)}</td><td>${renderCell(row.t2, row.growth?.t2)}</td><td>${renderCell(row.t3, row.growth?.t3)}</td><td>${renderCell(row.t4, row.growth?.t4)}</td></tr>`)
-          .join("");
-
-        drawHistoryChart(chartRows);
+        updateHistoryView();
       } catch (err) {
         historyTableBody.innerHTML = `<tr><td colspan="5" class="muted"><%= t("err_internal") %></td></tr>`;
       }
