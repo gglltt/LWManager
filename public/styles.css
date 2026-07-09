@@ -1912,3 +1912,168 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   .seasonGuideLinkCard{ align-items:stretch; flex-direction:column; }
   .seasonPrimaryLink{ width:100%; }
 }
+
+/* ========================= */
+/* BISS SPLASH SCREEN        */
+/* ========================= */
+
+.splash{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(48,224,198,.18), transparent 26%),
+    radial-gradient(circle at 18% 12%, rgba(43,213,118,.14), transparent 26%),
+    linear-gradient(145deg, #05080d 0%, #0b1420 48%, #07130f 100%);
+  opacity:1;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+
+.splash[hidden]{ display:none; }
+
+.splash::before,
+.splash::after{
+  content:"";
+  position:absolute;
+  inset:auto;
+  pointer-events:none;
+}
+
+.splash::before{
+  width:min(72vw, 520px);
+  aspect-ratio:1;
+  border:1px solid rgba(48,224,198,.22);
+  border-radius:50%;
+  box-shadow:0 0 80px rgba(48,224,198,.18), inset 0 0 80px rgba(43,213,118,.08);
+}
+
+.splash::after{
+  inset:0;
+  background:linear-gradient(115deg, transparent 0 38%, rgba(125,255,226,.08) 46%, transparent 55% 100%);
+  transform:translateX(-120%);
+  animation:splashSweep 2.3s ease-out forwards;
+}
+
+.splash.is-hiding{
+  opacity:0;
+  visibility:hidden;
+}
+
+.splash__scanline{
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.03) 0 1px, transparent 1px 7px);
+  opacity:.26;
+  mix-blend-mode:screen;
+}
+
+.splash__panel{
+  position:relative;
+  z-index:1;
+  width:min(420px, 100%);
+  padding:30px 24px 28px;
+  text-align:center;
+  border:1px solid rgba(48,224,198,.34);
+  border-radius:28px;
+  background:linear-gradient(180deg, rgba(18,26,42,.86), rgba(5,8,13,.78));
+  box-shadow:0 24px 80px rgba(0,0,0,.56), 0 0 44px rgba(48,224,198,.18);
+  animation:splashFadeIn .55s ease-out both;
+}
+
+.splash__logoWrap{
+  position:relative;
+  display:grid;
+  place-items:center;
+  width:clamp(108px, 28vw, 148px);
+  height:clamp(108px, 28vw, 148px);
+  margin:0 auto 16px;
+  border-radius:32px;
+  background:rgba(5,8,13,.55);
+  box-shadow:0 0 34px rgba(48,224,198,.32), inset 0 0 24px rgba(43,213,118,.08);
+  animation:splashLogoPulse 1.8s ease-in-out infinite;
+}
+
+.splash__logo{
+  position:relative;
+  z-index:1;
+  width:82%;
+  height:82%;
+  object-fit:contain;
+}
+
+.splash__logoFallback{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:var(--text);
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.splash__logo:not([src=""]){ background:transparent; }
+.splash__logo:not([src=""]) + .splash__logoFallback{ opacity:0; }
+.splash__logo[src=""],
+.splash__logo:not([src]){ display:none; }
+.splash__logo[src=""] + .splash__logoFallback,
+.splash__logo:not([src]) + .splash__logoFallback{ opacity:1; }
+
+.splash__eyebrow{
+  margin:0 0 5px;
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.splash__title{
+  margin:0;
+  color:#f3fff9;
+  font-size:clamp(42px, 13vw, 72px);
+  line-height:.95;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  text-shadow:0 0 22px rgba(48,224,198,.5);
+}
+
+.splash__subtitle{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:clamp(16px, 5vw, 24px);
+  font-weight:700;
+  letter-spacing:1.2px;
+}
+
+@keyframes splashFadeIn{
+  from{ opacity:0; transform:translateY(12px) scale(.98); }
+  to{ opacity:1; transform:translateY(0) scale(1); }
+}
+
+@keyframes splashLogoPulse{
+  0%, 100%{ transform:scale(1); box-shadow:0 0 30px rgba(48,224,198,.26), inset 0 0 24px rgba(43,213,118,.08); }
+  50%{ transform:scale(1.035); box-shadow:0 0 48px rgba(48,224,198,.42), inset 0 0 30px rgba(43,213,118,.12); }
+}
+
+@keyframes splashSweep{
+  to{ transform:translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .splash,
+  .splash__panel,
+  .splash__logoWrap,
+  .splash::after{
+    animation:none;
+    transition:opacity .18s ease;
+  }
+}
+
+.splash__logo.has-error{ display:none; }
+.splash__logo.has-error + .splash__logoFallback{ opacity:1; }

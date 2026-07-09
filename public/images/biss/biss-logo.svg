@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Logo alleanza Biss</title>
+  <desc id="desc">Emblema originale Biss con scudo, stella e colori verde teal su fondo scuro.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="68%">
+      <stop offset="0" stop-color="#183f3b"/>
+      <stop offset="0.58" stop-color="#0d1d25"/>
+      <stop offset="1" stop-color="#06090f"/>
+    </radialGradient>
+    <linearGradient id="edge" x1="36" x2="220" y1="24" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7dffe2"/>
+      <stop offset="0.5" stop-color="#2bd576"/>
+      <stop offset="1" stop-color="#2f6dff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle cx="128" cy="128" r="120" fill="url(#bg)" stroke="#21314a" stroke-width="4"/>
+  <path d="M128 30 205 62v58c0 53-31 90-77 111-46-21-77-58-77-111V62l77-32Z" fill="#0b1420" stroke="url(#edge)" stroke-width="8" filter="url(#glow)"/>
+  <path d="M80 91h96M72 125h112M87 159h82" stroke="#2bd576" stroke-width="10" stroke-linecap="round" opacity=".28"/>
+  <path d="m128 70 13 28 30 4-22 21 6 30-27-15-27 15 6-30-22-21 30-4 13-28Z" fill="#7dffe2" stroke="#e8fff9" stroke-width="3" filter="url(#glow)"/>
+  <text x="128" y="203" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="900" letter-spacing="3" fill="#e8fff9">BISS</text>
+</svg>
