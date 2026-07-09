@@ -505,6 +505,15 @@
     const fullDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
     const numericDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function parseIsoDayUTC(isoDay) {
       const dateObj = new Date(`${isoDay}T00:00:00Z`);
       return Number.isNaN(dateObj.getTime()) ? null : dateObj;
@@ -562,9 +571,22 @@
       const endDate = parseIsoDayUTC(points[points.length - 1].date);
       if (!startDate || !endDate) return ticks;
 
-      const addTick = (dateObj, labelFormatter) => {
+      const monthKeyForIsoDay = (isoDay) => {
+        const dateObj = parseIsoDayUTC(isoDay);
+        return dateObj ? `${dateObj.getUTCFullYear()}-${dateObj.getUTCMonth()}` : String(isoDay || "");
+      };
+      const hasTickInSameMonth = (isoDay) => {
+        const monthKey = monthKeyForIsoDay(isoDay);
+        return Array.from(ticks.keys()).some((tickIsoDay) => monthKeyForIsoDay(tickIsoDay) === monthKey);
+      };
+      const addTick = (dateObj, labelFormatter, options = {}) => {
         const isoDay = toIsoDayUTC(dateObj);
-        if (availableDays.has(isoDay)) ticks.set(isoDay, labelFormatter(isoDay));
+        if (!availableDays.has(isoDay)) return;
+        const label = labelFormatter(isoDay);
+        const previousLabel = Array.from(ticks.values()).at(-1);
+        if (options.skipDuplicateMonth && hasTickInSameMonth(isoDay)) return;
+        if (previousLabel === label) return;
+        ticks.set(isoDay, label);
       };
 
       if (period.key === "month") {
@@ -584,7 +606,7 @@
         }
         addTick(tickDate, period.key === "3months" ? formatMonthYear : formatMonthYear);
       }
-      addTick(endDate, period.key === "3months" ? formatDayMonth : formatMonthYear);
+      addTick(endDate, period.key === "3months" ? formatDayMonth : formatMonthYear, { skipDuplicateMonth: true });
 
       return ticks;
     }
@@ -944,7 +966,7 @@
       const rowsInPeriod = currentHistoryRows.filter((row) => String(row?.date || "") >= periodStart);
       const chartRows = buildLastDaysForChart(rowsInPeriod, period.days);
       currentChartPoints = chartRows;
-      historyMeta.textContent = `${currentPlayerName} · ${getHistoryRangeLabel(chartRows)}`;
+      historyMeta.innerHTML = `<strong>${escapeHtml(currentPlayerName)}</strong> · ${escapeHtml(getHistoryRangeLabel(chartRows))}`;
       updateHistoryControls();
       if (!rowsInPeriod.length) {
         historyTableBody.innerHTML = `<tr><td colspan="5" class="muted">${period.noData}</td></tr>`;

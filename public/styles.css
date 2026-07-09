@@ -878,7 +878,7 @@ html[dir="rtl"] .pagination{
 }
 
 .historyMeta{
-  padding:8px 14px 0;
+  padding:8px 14px 8px;
 }
 
 .historyChartWrap{
