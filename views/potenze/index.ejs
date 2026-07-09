@@ -320,10 +320,7 @@
     </div>
     <div class="historyMeta muted" id="playerHistoryMeta"></div>
     <div class="historyScaleControls" id="historyScaleControls">
-      <span class="historyScaleLabel"><%= t('scale') %></span>
-      <button type="button" class="historyScaleBtn isActive" data-history-scale="daily" aria-pressed="true"><%= t('daily') %></button>
-      <button type="button" class="historyScaleBtn" data-history-scale="weekly" aria-pressed="false"><%= t('weekly') %></button>
-      <span class="historyScaleLabel historyPeriodLabel"><%= t('period') %></span>
+      <span class="historyScaleLabel"><%= t('period') %></span>
       <button type="button" class="historyScaleBtn" data-history-period="month" aria-pressed="false"><%= t('last_month') %></button>
       <button type="button" class="historyScaleBtn" data-history-period="3months" aria-pressed="false"><%= t('last_3_months') %></button>
       <button type="button" class="historyScaleBtn" data-history-period="6months" aria-pressed="false"><%= t('last_6_months') %></button>
@@ -497,7 +494,6 @@
     let currentChartPoints = [];
     let currentDisplayChartPoints = [];
     let currentChartLayout = null;
-    let currentHistoryScale = "daily";
     let currentHistoryPeriod = "year";
     let currentHistoryRows = [];
     let currentPlayerName = "";
@@ -505,6 +501,7 @@
     const formatPointValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formatTableValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const monthYearFormatter = new Intl.DateTimeFormat(localeTag, { month: "short", year: "numeric", timeZone: "UTC" });
+    const dayMonthFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "short", timeZone: "UTC" });
     const fullDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
     const numericDateFormatter = new Intl.DateTimeFormat(localeTag, { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" });
 
@@ -521,6 +518,11 @@
     function formatFullDate(isoDay) {
       const dateObj = parseIsoDayUTC(isoDay);
       return dateObj ? numericDateFormatter.format(dateObj) : String(isoDay || "");
+    }
+
+    function formatDayMonth(isoDay) {
+      const dateObj = parseIsoDayUTC(isoDay);
+      return dateObj ? dayMonthFormatter.format(dateObj) : String(isoDay || "");
     }
 
     function formatRangeDate(isoDay) {
@@ -542,34 +544,47 @@
         .replace("{range}", `${start} - ${end}`);
     }
 
+    function addDaysUTC(dateObj, days) {
+      return new Date(Date.UTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth(), dateObj.getUTCDate() + days, 0, 0, 0, 0));
+    }
+
+    function addMonthsUTC(dateObj, months) {
+      return new Date(Date.UTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth() + months, 1, 0, 0, 0, 0));
+    }
+
     function getXAxisTicks(points) {
       if (!Array.isArray(points) || points.length === 0) return new Map();
 
       const ticks = new Map();
       const period = getCurrentPeriod();
-      let lastMonthKey = "";
-      let lastWeekKey = "";
+      const availableDays = new Set(points.map((point) => point?.date).filter(Boolean));
+      const startDate = parseIsoDayUTC(points[0].date);
+      const endDate = parseIsoDayUTC(points[points.length - 1].date);
+      if (!startDate || !endDate) return ticks;
 
-      points.forEach((point, index) => {
-        if (!point?.date) return;
-        const dateObj = parseIsoDayUTC(point.date);
-        if (!dateObj) return;
-        const monthKey = `${dateObj.getUTCFullYear()}-${dateObj.getUTCMonth()}`;
-        const weekKey = `${dateObj.getUTCFullYear()}-${Math.floor((dateObj.getTime() / HISTORY_DAY_MS) / 7)}`;
-        if (period.key === "month") {
-          if (index === 0 || index === points.length - 1 || dateObj.getUTCDate() % 7 === 1) ticks.set(point.date, formatFullDate(point.date));
-          return;
+      const addTick = (dateObj, labelFormatter) => {
+        const isoDay = toIsoDayUTC(dateObj);
+        if (availableDays.has(isoDay)) ticks.set(isoDay, labelFormatter(isoDay));
+      };
+
+      if (period.key === "month") {
+        [0, 7, 14, 21, 28].forEach((offset) => {
+          const tickDate = addDaysUTC(startDate, offset);
+          if (tickDate <= endDate) addTick(tickDate, formatDayMonth);
+        });
+        addTick(endDate, formatDayMonth);
+        return ticks;
+      }
+
+      const firstMonthTick = new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1, 0, 0, 0, 0));
+      for (let tickDate = firstMonthTick; tickDate <= endDate; tickDate = addMonthsUTC(tickDate, 1)) {
+        if (tickDate < startDate) {
+          addTick(startDate, period.key === "3months" ? formatDayMonth : formatMonthYear);
+          continue;
         }
-        if (period.key === "3months") {
-          if (index === 0 || weekKey !== lastWeekKey && dateObj.getUTCDay() === 1) ticks.set(point.date, formatFullDate(point.date));
-          lastWeekKey = weekKey;
-          return;
-        }
-        if (index === 0 || monthKey !== lastMonthKey) {
-          ticks.set(point.date, formatMonthYear(point.date));
-          lastMonthKey = monthKey;
-        }
-      });
+        addTick(tickDate, period.key === "3months" ? formatMonthYear : formatMonthYear);
+      }
+      addTick(endDate, period.key === "3months" ? formatDayMonth : formatMonthYear);
 
       return ticks;
     }
@@ -604,33 +619,8 @@
       }
     }
 
-    function getChartDisplayPoints(points) {
-      if (currentHistoryScale !== "weekly" || !Array.isArray(points) || points.length === 0) return points;
-      const weeks = [];
-      for (let i = 0; i < points.length; i += 7) {
-        const weekPoints = points.slice(i, i + 7);
-        const realPoint = [...weekPoints].reverse().find(hasRealEntry);
-        const lastPoint = weekPoints[weekPoints.length - 1];
-        const sourcePoint = realPoint || lastPoint;
-        if (!sourcePoint) continue;
-        weeks.push({
-          date: lastPoint.date,
-          startDate: weekPoints[0]?.date || lastPoint.date,
-          endDate: lastPoint.date,
-          t1: Number(sourcePoint.t1 || 0),
-          t2: Number(sourcePoint.t2 || 0),
-          t3: Number(sourcePoint.t3 || 0),
-          t4: Number(sourcePoint.t4 || 0),
-          total: Number(sourcePoint.total || 0),
-          _real: Boolean(realPoint)
-        });
-      }
-      return weeks;
-    }
-
     function drawHistoryChart(points) {
       if (!historyCanvas) return;
-      points = getChartDisplayPoints(points);
       currentDisplayChartPoints = points;
       resizeHistoryCanvas();
       const ctx = historyCanvas.getContext("2d");
@@ -776,9 +766,7 @@
         return;
       }
 
-      const tooltipDate = currentHistoryScale === "weekly" && point.startDate && point.endDate
-        ? `${formatFullDate(point.startDate)} - ${formatFullDate(point.endDate)}`
-        : formatFullDate(point.date);
+      const tooltipDate = formatFullDate(point.date);
       const rows = [`<strong>${tooltipDate}</strong>`];
       getVisibleSeries().forEach((serie) => {
         rows.push(`<span style="color:${serie.color}">${serie.label}: ${formatPointValue(point[serie.key])}</span>`);
@@ -812,11 +800,6 @@
     function updateHistoryControls() {
       const controls = document.getElementById("historyScaleControls");
       if (!controls) return;
-      controls.querySelectorAll("[data-history-scale]").forEach((item) => {
-        const active = item.getAttribute("data-history-scale") === currentHistoryScale;
-        item.classList.toggle("isActive", active);
-        item.setAttribute("aria-pressed", active ? "true" : "false");
-      });
       controls.querySelectorAll("[data-history-period]").forEach((item) => {
         const active = item.getAttribute("data-history-period") === currentHistoryPeriod;
         item.classList.toggle("isActive", active);
@@ -827,15 +810,6 @@
     function setupScaleControls() {
       const controls = document.getElementById("historyScaleControls");
       if (!controls) return;
-      controls.querySelectorAll("[data-history-scale]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const selected = btn.getAttribute("data-history-scale");
-          if (!selected || (selected !== "daily" && selected !== "weekly")) return;
-          currentHistoryScale = selected;
-          updateHistoryControls();
-          drawHistoryChart(currentChartPoints);
-        });
-      });
       controls.querySelectorAll("[data-history-period]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const selected = btn.getAttribute("data-history-period");
@@ -1003,7 +977,6 @@
       currentChartPoints = [];
       currentHistoryRows = [];
       currentPlayerName = playerName;
-      currentHistoryScale = "daily";
       currentHistoryPeriod = "year";
       updateHistoryControls();
       openHistoryModal();
