@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { createEventLog } = require("../utils/eventLog");
 
-const ROLE_LEVEL = { supervisor: 3, alliance_admin: 5, editor: 5, master: 99 };
+const ROLE_LEVEL = { standard: 1, supervisor: 3, alliance_admin: 5, editor: 5, master: 99 };
 function getJwtSecret(){ const s=process.env.JWT_SECRET; if(!s){ console.error("Missing JWT_SECRET in environment variables."); process.exit(1);} return s; }
 function toUser(decoded){ const role=decoded?.role||"supervisor"; return { userId: decoded.userId||decoded.accountId||null, accountId: decoded.accountId||decoded.userId||null, role, authLevel: ROLE_LEVEL[role]||1, allianceCode: decoded.allianceCode||null, serverNumber: decoded.serverNumber||null, allianceKey: decoded.allianceKey||null, isMaster: role==="master" || decoded.isMaster===true }; }
 function requireAuth(req,res,next){ try{ const token=req.cookies?.lw_token; if(!token) return res.redirect("/auth/login"); req.user=toUser(jwt.verify(token,getJwtSecret())); return next(); }catch(e){ res.clearCookie("lw_token"); return res.redirect("/auth/login"); } }
