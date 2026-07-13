@@ -11,7 +11,6 @@ const potenzeRoutes = require("./routes/potenze");
 const registroRoutes = require("./routes/registro");
 const adminRoutes = require("./routes/admin");
 const passwordsRoutes = require("./routes/passwords");
-const season6StrategyRoutes = require("./routes/season6Strategy");
 const performanceVsRoutes = require("./routes/performanceVs");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
@@ -100,9 +99,6 @@ app.get("/dashboard", requireAuth, (req, res) => {
   res.render("dashboard", { user: req.user });
 });
 
-app.get("/novita", requireAuth, (req, res) => {
-  res.render("novita", { user: req.user });
-});
 
 app.get("/stagione-6", requireAuth, (req, res) => {
   const seasonContentLang = req.resolvedSeason6Lang || (["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en");
@@ -123,7 +119,6 @@ app.use("/potenze", potenzeRoutes);
 app.use("/admin", adminRoutes);
 app.use("/passwords", passwordsRoutes);
 app.use("/registro", registroRoutes);
-app.use("/season6-strategy", season6StrategyRoutes);
 app.use("/performance-vs", performanceVsRoutes);
 
 app.get("/logout", requireAuth, async (req, res) => {
