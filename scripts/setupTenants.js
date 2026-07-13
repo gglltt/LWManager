@@ -29,7 +29,7 @@ async function accountExists(username, excludeId) {
 function expectedUsername(account, tf) {
   if (account.role === "master") return masterUsername();
   const allianceKey = account.allianceKey || (account.allianceCode && account.serverNumber ? `${account.allianceCode}#${account.serverNumber}` : null);
-  if (allianceKey === tf.allianceKey && ["alliance_admin", "supervisor"].includes(account.role)) {
+  if (allianceKey === tf.allianceKey && ["alliance_admin", "supervisor", "standard"].includes(account.role)) {
     return accountUsername(tf.allianceKey, account.role);
   }
   return null;
@@ -120,6 +120,11 @@ async function main() {
     username: accountUsername(tf.allianceKey, "supervisor"),
     doc: { ...tf, role: "supervisor", isActive: true },
     pin: process.env.DEFAULT_ALLIANCE_SUPERVISOR_PIN || "151515"
+  }));
+  accountSummary.push(await upsertAccount({
+    username: accountUsername(tf.allianceKey, "standard"),
+    doc: { ...tf, role: "standard", isActive: true },
+    pin: process.env.DEFAULT_ALLIANCE_STANDARD_PIN || process.env.APP_PIN_STANDARD || "000000"
   }));
 
   console.log("setup_tenants_summary:");
