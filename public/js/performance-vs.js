@@ -76,10 +76,10 @@
     return `<div class="perfRow" data-row${savedAttr}>
       <input type="hidden" value="${escapeHtml(rowId)}" data-row-id-name>
       <input type="hidden" value="${escapeHtml(playerId)}" data-player-id>
-      <div class="field autocomplete"><label>${escapeHtml(i18n.player || "Player")}</label><input type="text" value="${escapeHtml(nickname)}" autocomplete="off" required data-player-search><div class="autocompleteMenu" data-player-results hidden></div></div>
-      <div class="field"><label>${escapeHtml(i18n.position || "Position")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="${escapeHtml(row.position || "")}" data-position-name></div>
-      <div class="field"><label>${escapeHtml(i18n.score || "Score")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="${escapeHtml(row.score || "")}" data-score-name></div>
-      <button type="button" class="button danger" data-remove-row>${escapeHtml(i18n.delete || "Delete")}</button>
+      <div class="field autocomplete"><label>${escapeHtml(i18n.player || "")}</label><input type="text" value="${escapeHtml(nickname)}" autocomplete="off" required data-player-search><div class="autocompleteMenu" data-player-results hidden></div></div>
+      <div class="field"><label>${escapeHtml(i18n.position || "")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="([1-9][0-9]{0,2}|1000)" maxlength="4" required value="${escapeHtml(row.position || "")}" data-position-name></div>
+      <div class="field"><label>${escapeHtml(i18n.score || "")}</label><input class="noSpinner" type="text" inputmode="numeric" pattern="[1-9][0-9]{0,8}" maxlength="9" required value="${escapeHtml(row.score || "")}" data-score-name></div>
+      <button type="button" class="button danger" data-remove-row>${escapeHtml(i18n.delete || "")}</button>
     </div>`;
   }
   function attachAutocomplete(row) {
@@ -111,8 +111,8 @@
   }
   function makeRow() {
     if (!rowsEl) return;
-    if (!isHeaderValid()) { alert(i18n.headerRequiredAdd || "Select year, week and event first."); return; }
-    if (hasEmptyDraftRow()) { alert(i18n.emptyRowExists || "A row is already being added."); return; }
+    if (!isHeaderValid()) { alert(i18n.headerRequiredAdd || ""); return; }
+    if (hasEmptyDraftRow()) { alert(i18n.emptyRowExists || ""); return; }
     rowsEl.insertAdjacentHTML("beforeend", rowTemplate());
     attachAutocomplete(rowsEl.lastElementChild); reindexRows();
   }
@@ -142,14 +142,14 @@
           deleteEventForm.querySelector("[data-delete-year]").value = data.event.year;
           deleteEventForm.querySelector("[data-delete-week]").value = data.event.week;
           deleteEventForm.querySelector("[data-delete-event-type]").value = data.event.eventType;
-          deleteEventForm.onsubmit = () => confirm((i18n.confirmDeleteEventTemplate || "Confirm delete {event} {week}/{year}?").replace("{event}", data.event.eventType).replace("{week}", data.event.week).replace("{year}", data.event.year));
+          deleteEventForm.onsubmit = () => confirm((i18n.confirmDeleteEventTemplate || "").replace("{event}", data.event.eventType).replace("{week}", data.event.week).replace("{year}", data.event.year));
         } else {
           deleteEventForm.hidden = true;
         }
       }
       showAlert(loadMessageEl, data.event ? (i18n.dataLoaded || data.message) : (i18n.noData || data.message));
     } catch (err) {
-      showAlert(loadErrorEl, err.message || i18n.loadError || "Load error");
+      showAlert(loadErrorEl, err.message || i18n.loadError || "");
     }
   }
 
@@ -167,7 +167,7 @@
   if (rowsEl) {
     rowsEl.addEventListener("click", (e) => {
       if (!e.target.closest("[data-remove-row]")) return;
-      if (confirm(i18n.confirmDelete || "Confirm delete?")) e.target.closest("[data-row]").remove();
+      if (confirm(i18n.confirmDelete || "")) e.target.closest("[data-row]").remove();
       reindexRows();
     });
     rowsEl.querySelectorAll("[data-row]").forEach(attachAutocomplete);
@@ -175,10 +175,10 @@
   }
   document.querySelector("[data-performance-form]")?.addEventListener("submit", (e) => {
     reindexRows();
-    if (!isHeaderValid()) { e.preventDefault(); alert(i18n.headerRequiredSave || "Select year, week and event before saving."); return; }
+    if (!isHeaderValid()) { e.preventDefault(); alert(i18n.headerRequiredSave || ""); return; }
     const allRows = [...rowsEl.querySelectorAll("[data-row]")];
-    if (allRows.length === 0) { e.preventDefault(); alert(i18n.rowRequired || "Add at least one valid row."); return; }
+    if (allRows.length === 0) { e.preventDefault(); alert(i18n.rowRequired || ""); return; }
     const invalid = allRows.some((row) => !row.querySelector("[data-player-id]").value);
-    if (invalid) { e.preventDefault(); alert(i18n.selectPlayer || "Select a valid player"); }
+    if (invalid) { e.preventDefault(); alert(i18n.selectPlayer || ""); }
   });
 })();

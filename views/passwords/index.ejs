@@ -3,16 +3,16 @@
 <section class="card cardWide passwordsPage">
   <div class="pageHeader passwordsHeader">
     <div>
-      <h1>Gestione PIN</h1>
+      <h1><%= t("password_management") %></h1>
       <p class="muted">
         <% if (user && user.isMaster) { %>
-          Master: puoi vedere tutti gli utenti attivi e resettare qualsiasi PIN senza conoscere quello precedente.
+          <%= t("password_management_master_intro") %>
         <% } else { %>
-          Supervisore: puoi modificare solo i PIN standard e supervisore della tua alleanza inserendo il vecchio PIN e due volte quello nuovo.
+          <%= t("password_management_supervisor_intro") %>
         <% } %>
       </p>
     </div>
-    <a class="button secondary" href="/dashboard">Dashboard</a>
+    <a class="button secondary" href="/dashboard"><%= t("back_dashboard") %></a>
   </div>
 
   <% if (message) { %><div class="alert success"><%= message %></div><% } %>
@@ -20,26 +20,26 @@
 
   <div class="passwordList" role="list">
     <% if (!accounts.length) { %>
-      <div class="passwordAccountCard passwordAccountCard--empty" role="listitem">Nessun utente disponibile.</div>
+      <div class="passwordAccountCard passwordAccountCard--empty" role="listitem"><%= t("no_users_available") %></div>
     <% } %>
 
     <% accounts.forEach((account) => { %>
       <article class="passwordAccountCard" role="listitem">
         <div class="passwordAccountInfo">
           <div class="passwordAccountMeta">
-            <span class="passwordLabel">Utente</span>
+            <span class="passwordLabel"><%= t("user") %></span>
             <strong class="passwordAccountName"><%= account.username %></strong>
             <span class="passwordAccountUpdated"><%= account.updatedAt ? new Date(account.updatedAt).toLocaleString(localeTag || 'it-IT') : '' %></span>
           </div>
 
           <div class="passwordAccountMeta">
-            <span class="passwordLabel">Ruolo</span>
+            <span class="passwordLabel"><%= t("role") %></span>
             <strong><%= account.role %></strong>
           </div>
 
           <% if (user && user.isMaster) { %>
             <div class="passwordAccountMeta">
-              <span class="passwordLabel">Alleanza</span>
+              <span class="passwordLabel"><%= t("alliances") %></span>
               <strong><%= account.allianceId || '-' %></strong>
             </div>
           <% } %>
@@ -48,19 +48,19 @@
         <form class="passwordInlineForm" method="post" action="/passwords/<%= account._id %>">
           <% if (!(user && user.isMaster)) { %>
             <label>
-              <span>Vecchio PIN</span>
+              <span><%= t("old_pin") %></span>
               <input type="password" name="oldPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="current-password" />
             </label>
           <% } %>
           <label>
-            <span>Nuovo PIN</span>
+            <span><%= t("new_pin") %></span>
             <input type="password" name="newPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="new-password" />
           </label>
           <label>
-            <span>Ripeti PIN</span>
+            <span><%= t("repeat_pin") %></span>
             <input type="password" name="confirmPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="new-password" />
           </label>
-          <button type="submit"><%= user && user.isMaster ? 'Resetta PIN' : 'Modifica PIN' %></button>
+          <button type="submit"><%= user && user.isMaster ? t('reset_pin') : t('change_pin') %></button>
         </form>
       </article>
     <% }) %>

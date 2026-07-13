@@ -211,7 +211,7 @@ router.get("/", requireAuth, async (req, res) => {
 
 // NEW (FORM)
 router.get("/new", requireAuth, async (req, res) => {
-  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+  if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
   const playerCount = await Player.countDocuments(tenantQuery(req));
   return res.render("potenze/new", {
     user: req.user,
@@ -241,7 +241,7 @@ router.get("/new", requireAuth, async (req, res) => {
 
 // NEW (CREATE)
 router.post("/new", requireAuth, async (req, res) => {
-  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+  if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
   try {
     const t = res.locals.t;
     const playerCount = await Player.countDocuments(tenantQuery(req));
@@ -262,7 +262,7 @@ router.post("/new", requireAuth, async (req, res) => {
     }
 
     const currentTenant = req.user.isMaster ? Number(req.body.allianceId || selectedTenantFromRequest(req).allianceId) : req.user.allianceId;
-    if (!currentTenant) return res.status(400).send("400 - Seleziona un tenant");
+    if (!currentTenant) return res.status(400).send(`400 - ${(res.locals.t || ((k) => k))("select_alliance")}`);
     const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, null, currentTenant);
     if (nicknameAlreadyExists) {
       return res.render("potenze/new", {
@@ -395,7 +395,7 @@ router.post("/translate-note", requireAuth, translateNoteLimiter, async (req, re
 
 // EDIT (FORM)
 router.get("/:id/edit", requireAuth, async (req, res) => {
-  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+  if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
   try {
     const player = await Player.findOne(tenantQuery(req, { _id: req.params.id }));
     if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
@@ -417,7 +417,7 @@ router.get("/:id/edit", requireAuth, async (req, res) => {
 
 // EDIT (UPDATE)
 router.post("/:id/edit", requireAuth, async (req, res) => {
-  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+  if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
   try {
     const player = await Player.findOne(tenantQuery(req, { _id: req.params.id }));
     if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
