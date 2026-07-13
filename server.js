@@ -10,6 +10,7 @@ const authRoutes = require("./routes/auth");
 const potenzeRoutes = require("./routes/potenze");
 const registroRoutes = require("./routes/registro");
 const adminRoutes = require("./routes/admin");
+const passwordsRoutes = require("./routes/passwords");
 const season6StrategyRoutes = require("./routes/season6Strategy");
 const performanceVsRoutes = require("./routes/performanceVs");
 const { requireAuth } = require("./middleware/auth");
@@ -120,6 +121,7 @@ app.get("/stagione-6/altari", requireAuth, (req, res) => {
 
 app.use("/potenze", potenzeRoutes);
 app.use("/admin", adminRoutes);
+app.use("/passwords", passwordsRoutes);
 app.use("/registro", registroRoutes);
 app.use("/season6-strategy", season6StrategyRoutes);
 app.use("/performance-vs", performanceVsRoutes);

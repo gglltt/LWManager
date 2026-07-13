@@ -1,0 +1,62 @@
+<%- include("../partials/header") %>
+
+<section class="card cardWide">
+  <div class="pageHeader">
+    <div>
+      <h1>Gestione PIN</h1>
+      <p class="muted">
+        <% if (user && user.isMaster) { %>
+          Master: puoi vedere tutti gli utenti attivi e resettare qualsiasi PIN senza conoscere quello precedente.
+        <% } else { %>
+          Supervisore: puoi modificare solo i PIN standard e supervisore della tua alleanza inserendo il vecchio PIN e due volte quello nuovo.
+        <% } %>
+      </p>
+    </div>
+    <a class="button secondary" href="/dashboard">Dashboard</a>
+  </div>
+
+  <% if (message) { %><div class="alert success"><%= message %></div><% } %>
+  <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+  <div class="tableWrap">
+    <table class="table passwordsTable">
+      <thead>
+        <tr>
+          <th>Utente</th>
+          <th>Ruolo</th>
+          <% if (user && user.isMaster) { %><th>Alleanza</th><% } %>
+          <th>Nuovo PIN</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!accounts.length) { %>
+          <tr><td colspan="<%= user && user.isMaster ? 4 : 3 %>">Nessun utente disponibile.</td></tr>
+        <% } %>
+        <% accounts.forEach((account) => { %>
+          <tr>
+            <td>
+              <div class="cell2">
+                <span class="cellTop"><%= account.username %></span>
+                <span class="cellSub"><%= account.updatedAt ? new Date(account.updatedAt).toLocaleString(localeTag || 'it-IT') : '' %></span>
+              </div>
+            </td>
+            <td><%= account.role %></td>
+            <% if (user && user.isMaster) { %><td><%= account.allianceKey || '-' %></td><% } %>
+            <td>
+              <form class="form passwordInlineForm" method="post" action="/passwords/<%= account._id %>">
+                <% if (!(user && user.isMaster)) { %>
+                  <input type="password" name="oldPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Vecchio PIN" autocomplete="current-password" />
+                <% } %>
+                <input type="password" name="newPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Nuovo PIN" autocomplete="new-password" />
+                <input type="password" name="confirmPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Ripeti PIN" autocomplete="new-password" />
+                <button type="submit"><%= user && user.isMaster ? 'Resetta' : 'Modifica' %></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

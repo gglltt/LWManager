@@ -2077,3 +2077,17 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 
 .splash__logo.has-error{ display:none; }
 .splash__logo.has-error + .splash__logoFallback{ opacity:1; }
+
+.passwordsTable th:nth-child(1){ width:22%; }
+.passwordsTable th:nth-child(2){ width:12%; }
+.passwordsTable th:nth-child(3){ width:18%; }
+.passwordInlineForm{
+  grid-template-columns:repeat(4, minmax(120px,1fr));
+  align-items:center;
+}
+.passwordInlineForm input,
+.passwordInlineForm button{ min-width:0; }
+
+@media (max-width: 760px){
+  .passwordInlineForm{ grid-template-columns:1fr; }
+}
