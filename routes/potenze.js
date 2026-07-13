@@ -72,7 +72,7 @@ function validateNickname(nickname, t) {
 }
 
 function isAdmin(user) { return user && user.authLevel >= 5; }
-function canEdit(user) { return user && ["alliance_admin", "editor", "master"].includes(user.role); }
+function canEdit(user) { return user && ["editor", "master"].includes(user.role); }
 function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
 
 function normalizeSortParams(req) {
