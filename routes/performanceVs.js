@@ -16,7 +16,7 @@ function escapeRegex(v) { return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, 
 function parseIntField(v) { const n = Number(v); return Number.isInteger(n) ? n : null; }
 function actor(req) { return req.user?.role || "unknown"; }
 function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
-function canEdit(user) { return user && ["alliance_admin", "editor", "master"].includes(user.role); }
+function canEdit(user) { return user && ["editor", "master"].includes(user.role); }
 function validateHeader(body, t) {
   const yearRaw = String(body.year || "").trim();
   const year = parseIntField(yearRaw);
