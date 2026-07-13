@@ -8,7 +8,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "setup:tenants": "node scripts/setupTenants.js",
-    "migrate:alliances": "node scripts/migrateAllianceStructure.js"
+    "migrate:alliances": "node scripts/migrateAllianceStructure.js",
+    "i18n:check": "node scripts/checkI18n.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
