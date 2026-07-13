@@ -4,6 +4,12 @@ const EVENT_TYPES = [
   "login_page_view",
   "login_success",
   "login_failed",
+  "login_rate_limited",
+  "login_blocked",
+  "logout",
+  "admin_access_denied",
+  "performance_vs_save",
+  "performance_vs_event_delete",
   "nuovo_player",
   "modifica_player",
   "cancellazione_player",
@@ -12,6 +18,11 @@ const EVENT_TYPES = [
 
 const EventLogSchema = new mongoose.Schema(
   {
+    allianceCode: { type: String, default: null, uppercase: true, trim: true, index: true },
+    serverNumber: { type: Number, default: null, index: true },
+    allianceKey: { type: String, default: "GLOBAL", uppercase: true, trim: true, index: true },
+    role: { type: String, default: null, trim: true },
+    accountId: { type: String, default: null, trim: true },
     eventType: {
       type: String,
       enum: EVENT_TYPES,
@@ -74,6 +85,8 @@ const EventLogSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
+EventLogSchema.index({ allianceKey: 1, createdAt: -1 });
+EventLogSchema.index({ eventType: 1, createdAt: -1 });
 module.exports = {
   EventLog: mongoose.model("EventLog", EventLogSchema),
   EVENT_TYPES

@@ -6,6 +6,7 @@ const PerformanceVsRow = require("../models/performanceVsRow");
 const { requireAuth, requireSupervisor } = require("../middleware/auth");
 const { getIsoWeekRange } = require("../utils/isoWeek");
 const { createEventLog } = require("../utils/eventLog");
+const { scopeFilter, tenantFields, selectedTenantFromRequest } = require("../utils/tenant");
 
 const router = express.Router();
 const EVENT_TYPES = ["VS"];
@@ -14,6 +15,8 @@ const MAX_SCORE = 999999999;
 function escapeRegex(v) { return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 function parseIntField(v) { const n = Number(v); return Number.isInteger(n) ? n : null; }
 function actor(req) { return req.user?.role || "unknown"; }
+function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
+function canEdit(user) { return user && ["alliance_admin", "editor", "master"].includes(user.role); }
 function validateHeader(body, t) {
   const yearRaw = String(body.year || "").trim();
   const year = parseIntField(yearRaw);
@@ -40,8 +43,8 @@ async function loadEventWithRows(query) {
   const rows = await PerformanceVsRow.find({ eventId: event._id }).populate("playerId", "nickname").sort({ position: 1 }).lean();
   return { event, rows };
 }
-async function loadEventSummaries(eventType) {
-  const events = await PerformanceVsEvent.find({ eventType }).sort({ year: -1, week: -1, eventType: 1 }).lean();
+async function loadEventSummaries(req, eventType) {
+  const events = await PerformanceVsEvent.find(tenantQuery(req, { eventType })).sort({ year: -1, week: -1, eventType: 1 }).lean();
   if (events.length === 0) return [];
 
   const summaryRows = await PerformanceVsRow.aggregate([
@@ -74,7 +77,7 @@ router.get("/edit", async (req, res) => {
   if (form.year && form.week) {
     const header = validateHeader(form, res.locals.t || ((k) => k));
     if (header.ok) {
-      const loaded = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
+      const loaded = await loadEventWithRows(tenantQuery(req, { year: header.year, week: header.week, eventType: header.eventType }));
       return renderEdit(res, req, { error: null, message, form, ...loaded });
     }
   }
@@ -88,7 +91,7 @@ router.get("/view", async (req, res) => {
     return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: "VS" }, events: [], error: t("perf_invalid_event"), message: null });
   }
   try {
-    const events = await loadEventSummaries(eventType);
+    const events = await loadEventSummaries(req, eventType);
     return res.render("performance-vs/view", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType }, events, error: null, message: null });
   } catch (err) {
     console.error(err);
@@ -105,7 +108,7 @@ router.get("/view/:year/:week/:eventType", async (req, res) => {
   }
 
   try {
-    const loaded = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
+    const loaded = await loadEventWithRows(tenantQuery(req, { year: header.year, week: header.week, eventType: header.eventType }));
     if (!loaded.event) {
       return res.render("performance-vs/detail", { user: req.user, eventTypes: EVENT_TYPES, form: { eventType: header.eventType }, event: null, rows: [], error: t("perf_no_data_for_selection"), message: null });
     }
@@ -119,7 +122,7 @@ router.get("/view/:year/:week/:eventType", async (req, res) => {
 router.get("/players/search", async (req, res) => {
   const q = String(req.query.q || "").trim();
   if (q.length < 1) return res.json({ ok: true, players: [] });
-  const players = await Player.find({ nickname: { $regex: escapeRegex(q), $options: "i" } }).select("nickname").sort({ nickname: 1 }).limit(20).lean();
+  const players = await Player.find(tenantQuery(req, { nickname: { $regex: escapeRegex(q), $options: "i" } })).select("nickname").sort({ nickname: 1 }).limit(20).lean();
   return res.json({ ok: true, players: players.map((p) => ({ id: p._id, nickname: p.nickname })) });
 });
 
@@ -128,7 +131,7 @@ router.get("/events", async (req, res) => {
   const header = validateHeader(req.query, t);
   if (!header.ok) return res.status(400).json({ ok: false, error: header.error });
   try {
-    const { event, rows } = await loadEventWithRows({ year: header.year, week: header.week, eventType: header.eventType });
+    const { event, rows } = await loadEventWithRows(tenantQuery(req, { year: header.year, week: header.week, eventType: header.eventType }));
     return res.json({ ok: true, event, rows, message: event ? t("perf_data_loaded") : t("perf_no_data_for_selection"), weekRange: { start: header.range.start.toISOString(), end: header.range.end.toISOString() } });
   } catch (err) {
     return res.status(500).json({ ok: false, error: t("perf_load_error") });
@@ -151,19 +154,23 @@ router.post("/events", async (req, res) => {
   if (rows.some((r) => !Number.isInteger(r.position) || r.position < 1 || r.position > 1000)) return renderEdit(res, req, { error: t("perf_invalid_position"), message: null, form, event: null, rows: [] });
   if (rows.some((r) => !Number.isInteger(r.score) || r.score < 1 || r.score > MAX_SCORE)) return renderEdit(res, req, { error: t("perf_invalid_score"), message: null, form, event: null, rows: [] });
 
-  const existingPlayers = await Player.find({ _id: { $in: playerIds } }).select("_id").lean();
+  const existingPlayers = await Player.find(tenantQuery(req, { _id: { $in: playerIds } })).select("_id").lean();
   if (existingPlayers.length !== playerIds.length) return renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
 
   try {
+    if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+    const ak = req.user.isMaster ? selectedTenantFromRequest(req).allianceKey : req.user.allianceKey;
+    if (!ak) return res.status(400).send("400 - Seleziona un tenant");
+    const tf = tenantFields(ak.split("#")[0], ak.split("#")[1]);
     const event = await PerformanceVsEvent.findOneAndUpdate(
-      { year: header.year, week: header.week, eventType: header.eventType },
-      { $setOnInsert: { createdBy: actor(req) }, $set: { weekStartDate: header.range.start, weekEndDate: header.range.end, updatedBy: actor(req) } },
+      { ...tf, year: header.year, week: header.week, eventType: header.eventType },
+      { $setOnInsert: { ...tf, createdBy: actor(req) }, $set: { weekStartDate: header.range.start, weekEndDate: header.range.end, updatedBy: actor(req) } },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
     const keepIds = [];
     for (const row of rows) {
       const doc = row.rowId && mongoose.Types.ObjectId.isValid(row.rowId) ? await PerformanceVsRow.findOne({ _id: row.rowId, eventId: event._id }) : null;
-      const payload = { eventId: event._id, playerId: row.playerId, position: row.position, score: row.score, updatedBy: actor(req) };
+      const payload = { ...tf, eventId: event._id, playerId: row.playerId, position: row.position, score: row.score, updatedBy: actor(req) };
       const saved = doc ? await PerformanceVsRow.findByIdAndUpdate(doc._id, payload, { new: true }) : await PerformanceVsRow.create({ ...payload, createdBy: actor(req) });
       keepIds.push(saved._id);
     }
@@ -185,7 +192,8 @@ router.post("/events/:eventId/delete", async (req, res) => {
   }
 
   try {
-    const event = await PerformanceVsEvent.findOne({ _id: req.params.eventId, year: header.year, week: header.week, eventType: header.eventType }).lean();
+    if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+    const event = await PerformanceVsEvent.findOne(tenantQuery(req, { _id: req.params.eventId, year: header.year, week: header.week, eventType: header.eventType })).lean();
     if (!event) return res.status(404).send(`404 - ${t("perf_event_not_found")}`);
     await PerformanceVsRow.deleteMany({ eventId: event._id });
     await PerformanceVsEvent.deleteOne({ _id: event._id });
