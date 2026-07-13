@@ -36,12 +36,22 @@
       </div>
     </a>
 
-    <% if (user && user.authLevel >= 3) { %>
+    <% if (user && user.isMaster) { %>
       <a class="menuCard" href="/season6-strategy" title="Strategia S6">
         <div class="menuIcon">🗺️</div>
         <div class="menuText">
           <div class="menuTitle">Strategia S6</div>
           <div class="menuDesc">Mappa, fronti, alleati, altari e piano operativo 4v4</div>
+        </div>
+      </a>
+    <% } %>
+
+    <% if (user && (user.isMaster || user.role === 'supervisor')) { %>
+      <a class="menuCard" href="/passwords" title="Gestione PIN">
+        <div class="menuIcon">🔐</div>
+        <div class="menuText">
+          <div class="menuTitle">Gestione PIN</div>
+          <div class="menuDesc"><%= user.isMaster ? 'Reset PIN standard e supervisori di tutte le alleanze' : 'Modifica PIN standard e supervisore della tua alleanza' %></div>
         </div>
       </a>
     <% } %>
