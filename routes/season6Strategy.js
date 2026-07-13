@@ -1,5 +1,5 @@
 const express = require("express");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireMaster } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -108,7 +108,7 @@ ganttRowsByLang.fr[12].category = "GUERRE"; ganttRowsByLang.fr[12].activity = "P
 ganttRowsByLang.fr[13].category = "GUERRE"; ganttRowsByLang.fr[13].activity = "Défense Sanctuaire / villes clés";
 ganttRowsByLang.fr[14].category = "FINAL"; ganttRowsByLang.fr[14].activity = "Duel de Faction — grande guerre 4v4";
 
-router.get("/", requireAuth, (req, res) => {
+router.get("/", requireAuth, requireMaster, (req, res) => {
   const lang = ["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en";
   res.render("season6-strategy", { title: (labels[lang] || labels.en).title, user: req.user, extraCss: ["/css/season6-strategy.css"], extraJs: ["/js/season6-strategy.js"], strategyData: buildData(lang), ganttRows: withCategoryKeys(lang, ganttRowsByLang[lang] || ganttRowsByLang.en), weeks });
 });

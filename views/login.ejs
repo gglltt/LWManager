@@ -5,9 +5,9 @@
   <% if (error) { %><div class="alert error"><%= error %></div><% } %>
   <form method="POST" action="/auth/login" class="form">
     <label>Codice alleanza</label>
-    <input type="text" name="allianceCode" required minlength="2" maxlength="12" pattern="[A-Za-z0-9#]+" placeholder="BISS" value="<%= form?.allianceCode || '' %>" />
+    <input type="text" name="allianceCode" required minlength="2" maxlength="12" pattern="[A-Za-z0-9#]+" value="<%= form?.allianceCode || '' %>" />
     <label>Server</label>
-    <input type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" placeholder="833" value="<%= form?.serverNumber || '' %>" />
+    <input type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" value="<%= form?.serverNumber || '' %>" />
     <label>PIN</label>
     <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="6 cifre" />
     <button type="submit"><%= t('login_button') %></button>
