@@ -55,7 +55,7 @@
           <a href="/potenze"><%= t('nav_powers') %> |</a>
           <!--<% if (typeof user !== "undefined" && user && user.authLevel >= 3) { %><a href="/performance-vs"><%= t('perf_title') %> |</a><% } %>-->
           <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords">Gestione PIN |</a><% } %>
-          <% if (typeof user !== "undefined" && user && user.authLevel >= 5) { %><a href="/admin"><%= t('admin_title') %> |</a><% } %>
+          <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %> |</a><% } %>
           <a href="/auth/login"><%= t('nav_login') %> |</a>
           <a href="/logout"><%= t('nav_logout') %></a>
         </nav>

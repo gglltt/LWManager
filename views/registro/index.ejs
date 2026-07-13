@@ -17,6 +17,15 @@
 
   <div class="eventLogToolbar">
     <form method="GET" action="/registro" class="eventLogFilterBar">
+      <% if (user && user.isMaster) { %>
+      <label class="eventLogFilterField">
+        <span><%= t("alliances") %></span>
+        <select name="allianceId" class="filterInput eventLogFilterSelect">
+          <option value=""><%= t("all_alliances") %></option>
+          <% (alliances || []).forEach(a => { %><option value="<%= a.allianceId %>" <%= Number(selectedAllianceId) === Number(a.allianceId) ? "selected" : "" %>><%= a.displayName || a.code %>#<%= a.serverNumber %></option><% }) %>
+        </select>
+      </label>
+      <% } %>
       <label class="eventLogFilterField">
         <span><%= t("activity_type") %></span>
         <select name="eventType" class="filterInput eventLogFilterSelect">
@@ -43,7 +52,8 @@
     const currentPage = Math.max(1, Number(page) || 1);
     const pagesCount = Math.max(1, Number(totalPages) || 1);
     const selectedEventTypeParam = encodeURIComponent(selectedEventType || "");
-    const pageHref = (pageNumber) => `/registro?page=${pageNumber}&eventType=${selectedEventTypeParam}`;
+    const selectedAllianceIdParam = encodeURIComponent(selectedAllianceId || "");
+    const pageHref = (pageNumber) => `/registro?page=${pageNumber}&eventType=${selectedEventTypeParam}&allianceId=${selectedAllianceIdParam}`;
     const prevPage = currentPage > 1 ? currentPage - 1 : null;
     const nextPage = currentPage < pagesCount ? currentPage + 1 : null;
     const pageItems = [];

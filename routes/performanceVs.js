@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Player = require("../models/player");
 const PerformanceVsEvent = require("../models/performanceVsEvent");
 const PerformanceVsRow = require("../models/performanceVsRow");
+const Alliance = require("../models/alliance");
 const { requireAuth, requireSupervisor } = require("../middleware/auth");
 const { getIsoWeekRange } = require("../utils/isoWeek");
 const { createEventLog } = require("../utils/eventLog");
@@ -16,7 +17,7 @@ function escapeRegex(v) { return String(v || "").replace(/[.*+?^${}()|[\]\\]/g, 
 function parseIntField(v) { const n = Number(v); return Number.isInteger(n) ? n : null; }
 function actor(req) { return req.user?.role || "unknown"; }
 function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
-function canEdit(user) { return user && ["editor", "master"].includes(user.role); }
+function canEdit(user) { return user && ["editor", "alliance_admin", "master"].includes(user.role); }
 function validateHeader(body, t) {
   const yearRaw = String(body.year || "").trim();
   const year = parseIntField(yearRaw);
@@ -62,8 +63,9 @@ async function loadEventSummaries(req, eventType) {
     };
   });
 }
-function renderEdit(res, req, data) {
-  return res.render("performance-vs/edit", { user: req.user, eventTypes: EVENT_TYPES, ...data });
+async function renderEdit(res, req, data) {
+  const alliances = req.user?.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [];
+  return res.render("performance-vs/edit", { user: req.user, eventTypes: EVENT_TYPES, alliances, selectedAllianceId: selectedTenantFromRequest(req).allianceId || req.body?.allianceId || "", ...data });
 }
 
 router.use(requireAuth, requireSupervisor);
@@ -78,10 +80,10 @@ router.get("/edit", async (req, res) => {
     const header = validateHeader(form, res.locals.t || ((k) => k));
     if (header.ok) {
       const loaded = await loadEventWithRows(tenantQuery(req, { year: header.year, week: header.week, eventType: header.eventType }));
-      return renderEdit(res, req, { error: null, message, form, ...loaded });
+      return await renderEdit(res, req, { error: null, message, form, ...loaded });
     }
   }
-  return renderEdit(res, req, { error: null, message, form, event: null, rows: [] });
+  return await renderEdit(res, req, { error: null, message, form, event: null, rows: [] });
 });
 
 router.get("/view", async (req, res) => {
@@ -142,26 +144,26 @@ router.post("/events", async (req, res) => {
   const t = res.locals.t;
   const header = validateHeader(req.body, t);
   const form = { year: req.body.year, week: req.body.week, eventType: req.body.eventType || "VS" };
-  if (!header.ok) return renderEdit(res, req, { error: header.error, message: null, form, event: null, rows: [] });
+  if (!header.ok) return await renderEdit(res, req, { error: header.error, message: null, form, event: null, rows: [] });
 
   const rows = normalizeRows(req.body.rows);
-  if (rows.length === 0) return renderEdit(res, req, { error: t("perf_row_required"), message: null, form, event: null, rows: [] });
+  if (rows.length === 0) return await renderEdit(res, req, { error: t("perf_row_required"), message: null, form, event: null, rows: [] });
   const playerIds = rows.map((r) => r.playerId);
-  if (rows.some((r) => !mongoose.Types.ObjectId.isValid(r.playerId))) return renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
-  if (new Set(playerIds).size !== playerIds.length) return renderEdit(res, req, { error: t("perf_duplicate_player"), message: null, form, event: null, rows: [] });
+  if (rows.some((r) => !mongoose.Types.ObjectId.isValid(r.playerId))) return await renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
+  if (new Set(playerIds).size !== playerIds.length) return await renderEdit(res, req, { error: t("perf_duplicate_player"), message: null, form, event: null, rows: [] });
   const positions = rows.map((r) => r.position).filter((v) => v !== null);
-  if (new Set(positions).size !== positions.length) return renderEdit(res, req, { error: t("perf_duplicate_position"), message: null, form, event: null, rows: [] });
-  if (rows.some((r) => !Number.isInteger(r.position) || r.position < 1 || r.position > 1000)) return renderEdit(res, req, { error: t("perf_invalid_position"), message: null, form, event: null, rows: [] });
-  if (rows.some((r) => !Number.isInteger(r.score) || r.score < 1 || r.score > MAX_SCORE)) return renderEdit(res, req, { error: t("perf_invalid_score"), message: null, form, event: null, rows: [] });
+  if (new Set(positions).size !== positions.length) return await renderEdit(res, req, { error: t("perf_duplicate_position"), message: null, form, event: null, rows: [] });
+  if (rows.some((r) => !Number.isInteger(r.position) || r.position < 1 || r.position > 1000)) return await renderEdit(res, req, { error: t("perf_invalid_position"), message: null, form, event: null, rows: [] });
+  if (rows.some((r) => !Number.isInteger(r.score) || r.score < 1 || r.score > MAX_SCORE)) return await renderEdit(res, req, { error: t("perf_invalid_score"), message: null, form, event: null, rows: [] });
 
   const existingPlayers = await Player.find(tenantQuery(req, { _id: { $in: playerIds } })).select("_id").lean();
-  if (existingPlayers.length !== playerIds.length) return renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
+  if (existingPlayers.length !== playerIds.length) return await renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
 
   try {
     if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
-    const ak = req.user.isMaster ? selectedTenantFromRequest(req).allianceKey : req.user.allianceKey;
-    if (!ak) return res.status(400).send("400 - Seleziona un tenant");
-    const tf = tenantFields(ak.split("#")[0], ak.split("#")[1]);
+    const selectedAllianceId = req.user.isMaster ? Number(req.body.allianceId || selectedTenantFromRequest(req).allianceId) : req.user.allianceId;
+    if (!selectedAllianceId) return res.status(400).send("400 - Seleziona un tenant");
+    const tf = tenantFields(selectedAllianceId);
     const event = await PerformanceVsEvent.findOneAndUpdate(
       { ...tf, year: header.year, week: header.week, eventType: header.eventType },
       { $setOnInsert: { ...tf, createdBy: actor(req) }, $set: { weekStartDate: header.range.start, weekEndDate: header.range.end, updatedBy: actor(req) } },
@@ -177,10 +179,10 @@ router.post("/events", async (req, res) => {
     await PerformanceVsRow.deleteMany({ eventId: event._id, _id: { $nin: keepIds } });
     await createEventLog(req, "performance_vs_save", `Performance VS ${header.year}-W${header.week}: ${rows.length} righe`);
     const loaded = await loadEventWithRows({ _id: event._id });
-    return renderEdit(res, req, { error: null, message: t("perf_save_success"), form, ...loaded });
+    return await renderEdit(res, req, { error: null, message: t("perf_save_success"), form, ...loaded });
   } catch (err) {
     console.error(err);
-    return renderEdit(res, req, { error: err?.code === 11000 ? t("perf_duplicate_player") : t("perf_save_error"), message: null, form, event: null, rows: [] });
+    return await renderEdit(res, req, { error: err?.code === 11000 ? t("perf_duplicate_player") : t("perf_save_error"), message: null, form, event: null, rows: [] });
   }
 });
 
