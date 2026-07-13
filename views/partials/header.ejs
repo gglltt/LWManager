@@ -12,16 +12,16 @@
   <% } %>
 </head>
 <body>
-  <div id="lwmanager-splash" class="splash" role="status" aria-live="polite" aria-label="Biss Made in Italy" hidden>
+  <div id="lwmanager-splash" class="splash" role="status" aria-live="polite" aria-label="<%= t('splash_label') %>" hidden>
     <div class="splash__scanline" aria-hidden="true"></div>
     <div class="splash__panel">
       <div class="splash__logoWrap">
-        <img class="splash__logo" src="/images/biss/biss-logo.svg" alt="Logo alleanza Biss" />
-        <span class="splash__logoFallback">Biss</span>
+        <img class="splash__logo" src="/images/biss/biss-logo.svg" alt="<%= t('biss_logo_alt') %>" />
+        <span class="splash__logoFallback"><%= t('brand_biss') %></span>
       </div>
       <p class="splash__eyebrow">LWManager</p>
       <h1 class="splash__title">Biss</h1>
-      <p class="splash__subtitle">Made in Italy</p>
+      <p class="splash__subtitle"><%= t('made_in_italy') %></p>
     </div>
   </div>
   <header class="topbar">
@@ -54,7 +54,7 @@
           <a href="/dashboard"><%= t('nav_dashboard') %> |</a>
           <a href="/potenze"><%= t('nav_powers') %> |</a>
           <!--<% if (typeof user !== "undefined" && user && user.authLevel >= 3) { %><a href="/performance-vs"><%= t('perf_title') %> |</a><% } %>-->
-          <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords">Gestione PIN |</a><% } %>
+          <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords"><%= t('password_management') %> |</a><% } %>
           <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %> |</a><% } %>
           <a href="/auth/login"><%= t('nav_login') %> |</a>
           <a href="/logout"><%= t('nav_logout') %></a>

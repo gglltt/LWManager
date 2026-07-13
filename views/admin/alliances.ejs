@@ -3,7 +3,7 @@
   <div class="pageHeader">
     <div>
       <h1><%= t('alliances_management') %></h1>
-      <p class="muted">Crea alleanze e gestisci i PIN standard/supervisore senza assegnare permessi amministrativi agli utenti standard.</p>
+      <p class="muted"><%= t('alliances_management_desc') %></p>
     </div>
     <a class="button secondary" href="/admin">← <%= t('admin_title') %></a>
   </div>
@@ -33,7 +33,7 @@
             <div class="allianceMeta">
               <span><%= t('alliance_code') %>: <b><%= a.code %></b></span>
               <span><%= t('server') %>: <b><%= a.serverNumber %></b></span>
-              <span class="statusPill <%= a.isActive ? 'statusPill--active' : 'statusPill--inactive' %>"><%= a.isActive ? 'Active' : 'Inactive' %></span>
+              <span class="statusPill <%= a.isActive ? 'statusPill--active' : 'statusPill--inactive' %>"><%= a.isActive ? t('active') : t('inactive') %></span>
               <span><%= t('created_at') %>: <b><%= a.createdAt ? new Date(a.createdAt).toLocaleString(localeTag) : '-' %></b></span>
             </div>
           </div>
