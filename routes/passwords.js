@@ -5,7 +5,7 @@ const { requireAuth } = require("../middleware/auth");
 const { createEventLog } = require("../utils/eventLog");
 
 const router = express.Router();
-const MANAGED_ROLES = ["supervisor", "standard"];
+const MANAGED_ROLES = ["supervisor", "standard", "alliance_admin"];
 
 function requirePasswordManager(req, res, next) {
   if (!req.user) return res.redirect("/auth/login");
@@ -25,7 +25,7 @@ function accountScope(user) {
   const query = { isActive: true };
   if (user.isMaster) return query;
   query.role = { $in: MANAGED_ROLES };
-  query.allianceKey = user.allianceKey;
+  query.allianceId = user.allianceId;
   return query;
 }
 
@@ -33,13 +33,13 @@ function canManageAccount(user, account) {
   if (!account || account.isActive === false) return false;
   if (user.isMaster) return true;
   if (!MANAGED_ROLES.includes(account.role)) return false;
-  return account.allianceKey && account.allianceKey === user.allianceKey;
+  return account.allianceId && Number(account.allianceId) === Number(user.allianceId);
 }
 
 async function renderIndex(req, res, statusCode = 200, message = "", error = "") {
   const accounts = await Account.find(accountScope(req.user))
-    .select("username allianceCode serverNumber allianceKey role updatedAt")
-    .sort({ allianceKey: 1, role: -1 })
+    .select("username allianceId role updatedAt")
+    .sort({ allianceId: 1, role: -1 })
     .lean();
 
   return res.status(statusCode).render("passwords/index", {
@@ -85,7 +85,7 @@ router.post("/:id", requireAuth, requirePasswordManager, async (req, res) => {
   await account.save();
 
   const eventType = req.user.isMaster ? "password_reset" : "password_change";
-  await createEventLog(req, eventType, `target=${account.username}|targetRole=${account.role}|targetAllianceKey=${account.allianceKey}`);
+  await createEventLog(req, eventType, `target=${account.username}|targetRole=${account.role}|targetAllianceId=${account.allianceId}`);
   return renderIndex(req, res, 200, req.user.isMaster ? "PIN resettato correttamente." : "PIN modificato correttamente.", "");
 });
 

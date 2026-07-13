@@ -2,6 +2,7 @@ const express = require("express");
 const { requireAuth, requireLevel } = require("../middleware/auth");
 const { scopeFilter, selectedTenantFromRequest } = require("../utils/tenant");
 const { EventLog, EVENT_TYPES } = require("../models/eventLog");
+const Alliance = require("../models/alliance");
 const { rebuildSnapshotsFromEventLog } = require("../utils/playerPowerHistory");
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       filter.eventType = eventType;
     }
 
+    const alliances = req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [];
     const [total, events] = await Promise.all([
       EventLog.countDocuments(filter),
       EventLog.find(filter)
@@ -37,7 +39,9 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       trackingMessage: String(req.query.trackingMessage || "").trim(),
       page,
       totalPages,
-      total
+      total,
+      alliances,
+      selectedAllianceId: req.query.allianceId || ""
     });
   } catch (err) {
     console.error(err);
@@ -51,6 +55,8 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
       page: 1,
       totalPages: 1,
       total: 0,
+      alliances: [],
+      selectedAllianceId: "",
       error: t("err_load_event_log")
     });
   }

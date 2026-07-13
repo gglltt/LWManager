@@ -17,14 +17,14 @@ const EVENT_TYPES = [
   "nuovo_player",
   "modifica_player",
   "cancellazione_player",
-  "sync_prod_to_qa"
+  "sync_prod_to_qa",
+  "alliance_create",
+  "alliance_deactivate"
 ];
 
 const EventLogSchema = new mongoose.Schema(
   {
-    allianceCode: { type: String, default: null, uppercase: true, trim: true, index: true },
-    serverNumber: { type: Number, default: null, index: true },
-    allianceKey: { type: String, default: "GLOBAL", uppercase: true, trim: true, index: true },
+    allianceId: { type: Number, default: null, index: true },
     role: { type: String, default: null, trim: true },
     accountId: { type: String, default: null, trim: true },
     eventType: {
@@ -89,7 +89,7 @@ const EventLogSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
-EventLogSchema.index({ allianceKey: 1, createdAt: -1 });
+EventLogSchema.index({ allianceId: 1, createdAt: -1 });
 EventLogSchema.index({ eventType: 1, createdAt: -1 });
 module.exports = {
   EventLog: mongoose.model("EventLog", EventLogSchema),

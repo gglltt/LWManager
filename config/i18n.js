@@ -1677,6 +1677,11 @@ for (const lang of SUPPORTED_LANGS) {
   Object.assign(translations[lang], PERF_TRANSLATIONS[lang], NEWS_TRANSLATIONS[lang], ADMIN_TRANSLATIONS[lang]);
 }
 
+const ALLIANCE_I18N = {
+  alliances_management: "Gestione Alleanze", alliances: "Alleanze", new_alliance: "Nuova alleanza", alliance_code: "Codice alleanza", server: "Server", display_name: "Nome visualizzato", standard_pin: "PIN standard", supervisor_pin: "PIN supervisore", create_alliance: "Crea alleanza", deactivate_alliance: "Disattiva alleanza", delete_alliance: "Cancella alleanza", update_pin: "Aggiorna PIN", alliance_exists: "Alleanza già esistente", alliance_created: "Alleanza creata correttamente", alliance_deactivated: "Alleanza disattivata", cannot_delete_linked_alliance: "Impossibile cancellare: esistono dati collegati", all_alliances: "Tutte le alleanze", select_alliance: "Seleziona alleanza", credentials_to_share: "Credenziali da comunicare", alliance_admin: "Amministratore alleanza", supervisor: "Supervisore", status: "Stato", actions: "Azioni", created_at: "Data creazione", err_invalid_input: "Dati non validi"
+};
+for (const lang of SUPPORTED_LANGS) { Object.assign(translations[lang], ALLIANCE_I18N); }
+
 function resolveLang(candidate) {
   return SUPPORTED_LANGS.includes(candidate) ? candidate : "it";
 }

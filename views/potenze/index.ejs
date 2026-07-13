@@ -100,8 +100,12 @@
     <input type="hidden" name="sort" value="<%= sort %>" />
     <input type="hidden" name="dir" value="<%= dir %>" />
     <% if (user && user.isMaster) { %>
-      <input type="text" name="allianceCode" placeholder="BISS o BISS#833" value="<%= (tenantFilter && tenantFilter.allianceKey) ? tenantFilter.allianceKey : (query?.allianceCode || '') %>" />
-      <input type="text" name="serverNumber" placeholder="833" value="<%= query?.serverNumber || '' %>" />
+      <select name="allianceId" class="filterInput">
+        <option value=""><%= t("all_alliances") %></option>
+        <% (alliances || []).forEach(a => { %>
+          <option value="<%= a.allianceId %>" <%= Number(tenantFilter && tenantFilter.allianceId) === Number(a.allianceId) ? "selected" : "" %>><%= a.displayName || a.code %>#<%= a.serverNumber %></option>
+        <% }) %>
+      </select>
     <% } %>
     <input
       type="text"

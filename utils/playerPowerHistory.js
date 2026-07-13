@@ -29,9 +29,7 @@ async function savePlayerPowerSnapshot(player) {
   const snapshotDate = dayStartUtc(day);
 
   const existing = await PlayerPowerHistory.findOne({
-    allianceCode: player.allianceCode,
-    serverNumber: player.serverNumber,
-    allianceKey: player.allianceKey,
+    allianceId: player.allianceId,
     player: player.nickname,
     snapshotDay: day
   });
@@ -47,9 +45,7 @@ async function savePlayerPowerSnapshot(player) {
   }
 
   await PlayerPowerHistory.create({
-    allianceCode: player.allianceCode,
-    serverNumber: player.serverNumber,
-    allianceKey: player.allianceKey,
+    allianceId: player.allianceId,
     player: player.nickname,
     snapshotDay: day,
     snapshotDate,
@@ -77,7 +73,7 @@ function parsePlayerDetails(details) {
 
 async function rebuildSnapshotsFromEventLog() {
   const players = await Player.find({})
-    .select("nickname allianceCode serverNumber allianceKey powerT1 powerT2 powerT3 powerT4 updatedAt")
+    .select("nickname allianceId powerT1 powerT2 powerT3 powerT4 updatedAt")
     .sort({ updatedAt: 1, _id: 1 })
     .lean();
 
@@ -85,7 +81,7 @@ async function rebuildSnapshotsFromEventLog() {
     eventType: { $in: ["nuovo_player", "modifica_player"] }
   })
     .sort({ createdAt: 1, _id: 1 })
-    .select("details createdAt allianceCode serverNumber allianceKey")
+    .select("details createdAt allianceId")
     .lean();
 
   let processedPlayers = 0;
@@ -99,14 +95,9 @@ async function rebuildSnapshotsFromEventLog() {
     processedPlayers += 1;
 
     const day = toDayString(player.updatedAt || new Date());
-    const key = `${player.allianceKey}::${nickname}::${day}`;
+    const key = `${player.allianceId}::${nickname}::${day}`;
     snapshotsByKey.set(key, {
-      allianceCode: player.allianceCode,
-      serverNumber: player.serverNumber,
-      allianceKey: player.allianceKey,
-      allianceCode: event.allianceCode,
-      serverNumber: event.serverNumber,
-      allianceKey: event.allianceKey,
+      allianceId: player.allianceId,
       player: nickname,
       snapshotDay: day,
       snapshotDate: dayStartUtc(day),
@@ -125,11 +116,12 @@ async function rebuildSnapshotsFromEventLog() {
 
     processedEvents += 1;
     const day = toDayString(event.createdAt || new Date());
-    const key = `${event.allianceKey}::${nickname}::${day}`;
+    const key = `${event.allianceId}::${nickname}::${day}`;
 
     if (snapshotsByKey.has(key)) continue;
 
     snapshotsByKey.set(key, {
+      allianceId: event.allianceId,
       player: nickname,
       snapshotDay: day,
       snapshotDate: dayStartUtc(day),
@@ -172,7 +164,7 @@ async function rebuildSnapshotsFromEventLog() {
   await db.collection(tempCollectionName).createIndex({ seqId: 1 }, { unique: true });
   await db.collection(tempCollectionName).createIndex({ player: 1 });
   await db.collection(tempCollectionName).createIndex({ snapshotDate: 1 });
-  await db.collection(tempCollectionName).createIndex({ allianceKey: 1, player: 1, snapshotDay: 1 }, { unique: true });
+  await db.collection(tempCollectionName).createIndex({ allianceId: 1, player: 1, snapshotDay: 1 }, { unique: true });
 
   await db.admin().command({
     renameCollection: `${dbName}.${tempCollectionName}`,
