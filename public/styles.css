@@ -2165,3 +2165,71 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   .passwordInlineForm{ grid-template-columns:1fr; }
   .passwordAccountCard{ padding:12px; }
 }
+
+/* Alliance management */
+.alliancesPage{ max-width:1100px; }
+.allianceCreatePanel{ background:rgba(9,12,20,.22); }
+.allianceCreateForm{
+  display:grid;
+  grid-template-columns:1.1fr .8fr 1.2fr 1fr 1fr auto;
+  gap:12px;
+  align-items:end;
+}
+.allianceCreateForm .field{ gap:6px; }
+.allianceCreateForm .field span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+.allianceCreateForm button{ min-height:43px; white-space:nowrap; }
+.allianceList{ display:grid; gap:12px; margin-top:16px; }
+.allianceCard{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;
+  gap:16px;
+  padding:16px;
+  border:1px solid rgba(34,48,77,.85);
+  border-radius:16px;
+  background:rgba(9,12,20,.35);
+}
+.allianceCard__main{ display:flex; gap:14px; min-width:0; }
+.allianceBadge{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  color:#dbeafe;
+  background:rgba(58,103,255,.18);
+  border:1px solid rgba(58,103,255,.35);
+  font-weight:900;
+}
+.allianceCard h2{ margin:0 0 8px; font-size:18px; }
+.allianceMeta{ display:flex; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:13px; }
+.allianceMeta span{
+  padding:6px 8px;
+  border:1px solid rgba(34,48,77,.65);
+  border-radius:999px;
+  background:rgba(18,26,42,.45);
+}
+.statusPill--active{ color:var(--ok); border-color:rgba(43,213,118,.35) !important; }
+.statusPill--inactive{ color:var(--err); border-color:rgba(255,92,122,.35) !important; }
+.allianceActions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; align-content:start; }
+.allianceActions form{ margin:0; }
+.allianceActions button{ width:100%; }
+.alliancePinForm{ grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.alliancePinForm button{ grid-column:1 / -1; }
+
+@media (max-width: 980px){
+  .allianceCreateForm{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .allianceCreateForm button{ grid-column:1 / -1; }
+  .allianceCard{ grid-template-columns:1fr; }
+}
+
+@media (max-width: 620px){
+  .allianceCreateForm,
+  .alliancePinForm,
+  .allianceActions{ grid-template-columns:1fr; }
+  .alliancePinForm button{ grid-column:auto; }
+}
