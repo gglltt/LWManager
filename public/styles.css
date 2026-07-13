@@ -2078,16 +2078,90 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
 .splash__logo.has-error{ display:none; }
 .splash__logo.has-error + .splash__logoFallback{ opacity:1; }
 
-.passwordsTable th:nth-child(1){ width:22%; }
-.passwordsTable th:nth-child(2){ width:12%; }
-.passwordsTable th:nth-child(3){ width:18%; }
+
+.passwordsPage{ overflow:hidden; }
+.passwordsHeader{ align-items:center; }
+.passwordList{
+  display:grid;
+  gap:12px;
+}
+.passwordAccountCard{
+  display:grid;
+  gap:14px;
+  padding:14px;
+  border:1px solid rgba(34,48,77,.85);
+  border-radius:16px;
+  background:rgba(9,12,20,.32);
+}
+.passwordAccountCard--empty{
+  color:var(--muted);
+  font-size:14px;
+}
+.passwordAccountInfo{
+  display:grid;
+  grid-template-columns:minmax(180px, 1.4fr) minmax(120px, .7fr) minmax(140px, .9fr);
+  gap:12px;
+  align-items:start;
+}
+.passwordAccountMeta{
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+.passwordLabel{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+.passwordAccountName,
+.passwordAccountMeta strong{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.passwordAccountUpdated{
+  color:var(--muted);
+  font-size:12px;
+}
 .passwordInlineForm{
-  grid-template-columns:repeat(4, minmax(120px,1fr));
-  align-items:center;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(130px, 1fr)) auto;
+  gap:10px;
+  align-items:end;
+}
+.passwordInlineForm label{
+  display:grid;
+  gap:6px;
+  min-width:0;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
 }
 .passwordInlineForm input,
-.passwordInlineForm button{ min-width:0; }
+.passwordInlineForm button{
+  width:100%;
+  min-width:0;
+}
+.passwordInlineForm button{
+  min-height:43px;
+  white-space:nowrap;
+}
 
-@media (max-width: 760px){
+@media (max-width: 900px){
+  .passwordAccountInfo{ grid-template-columns:1fr 1fr; }
+  .passwordInlineForm{ grid-template-columns:1fr 1fr; }
+  .passwordInlineForm button{ grid-column:1 / -1; }
+}
+
+@media (max-width: 620px){
+  .passwordsPage{ padding:14px; }
+  .passwordsHeader{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .passwordsHeader .button{ width:100%; }
+  .passwordAccountInfo,
   .passwordInlineForm{ grid-template-columns:1fr; }
+  .passwordAccountCard{ padding:12px; }
 }
