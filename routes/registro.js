@@ -1,5 +1,6 @@
 const express = require("express");
 const { requireAuth, requireLevel } = require("../middleware/auth");
+const { scopeFilter, selectedTenantFromRequest } = require("../utils/tenant");
 const { EventLog, EVENT_TYPES } = require("../models/eventLog");
 const { rebuildSnapshotsFromEventLog } = require("../utils/playerPowerHistory");
 
@@ -12,7 +13,7 @@ router.get("/", requireAuth, requireLevel(5), async (req, res) => {
     const page = Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1;
     const eventType = String(req.query.eventType || "").trim();
 
-    const filter = {};
+    const filter = scopeFilter(req.user, selectedTenantFromRequest(req));
     if (eventType && EVENT_TYPES.includes(eventType)) {
       filter.eventType = eventType;
     }

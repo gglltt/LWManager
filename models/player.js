@@ -18,6 +18,9 @@ const decimalField = {
 
 const PlayerSchema = new mongoose.Schema(
   {
+    allianceCode: { type: String, required: true, uppercase: true, trim: true, index: true },
+    serverNumber: { type: Number, required: true, index: true },
+    allianceKey: { type: String, required: true, uppercase: true, trim: true, index: true },
     nickname: {
       type: String,
       required: true,
@@ -52,4 +55,6 @@ const PlayerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+PlayerSchema.index({ allianceKey: 1, nickname: 1 });
+PlayerSchema.index({ allianceKey: 1, updatedAt: -1 });
 module.exports = mongoose.model("Player", PlayerSchema);
