@@ -8,6 +8,7 @@ module.exports = {
     pins: {
       standard: "111111",
       supervisor: "151515",
+      admin: "999999",
       master: "550130"
     }
   },
