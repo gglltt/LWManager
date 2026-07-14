@@ -12,6 +12,7 @@ const { defaults, collectionsWithAllianceId } = require("./migrationConfig");
 const migrationsDir = path.join(__dirname, "migrations");
 const requiredAccounts = [
   { email: "master@biss833.local", pin: defaults.pins.master, global: true },
+  { email: "admin@biss833.local", pin: defaults.pins.admin, allianceScoped: true },
   { email: "supervisor@biss833.local", pin: defaults.pins.supervisor, allianceScoped: true },
   { email: "standard@biss833.local", pin: defaults.pins.standard, allianceScoped: true }
 ];
@@ -74,8 +75,6 @@ async function main() {
       if (account.allianceScoped && user.allianceId !== defaults.allianceId) failures.push(`${account.email} does not have allianceId=1`);
     }
 
-    const obsoleteAdmin = await db.collection("users").findOne({ email: "admin@biss833.local" });
-    if (obsoleteAdmin) failures.push("obsolete account admin@biss833.local still exists");
 
     for (const id of migrationIds()) {
       const applied = await db.collection("schema_migrations").findOne({ id });
