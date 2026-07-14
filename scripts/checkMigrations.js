@@ -11,9 +11,9 @@ const { defaults, collectionsWithAllianceId } = require("./migrationConfig");
 
 const migrationsDir = path.join(__dirname, "migrations");
 const requiredAccounts = [
-  { email: "master@biss833.local", pin: defaults.pins.master },
-  { email: "admin@biss833.local", pin: defaults.pins.admin },
-  { email: "supervisor@biss833.local", pin: defaults.pins.supervisor }
+  { email: "master@biss833.local", pin: defaults.pins.master, global: true },
+  { email: "supervisor@biss833.local", pin: defaults.pins.supervisor, allianceScoped: true },
+  { email: "standard@biss833.local", pin: defaults.pins.standard, allianceScoped: true }
 ];
 
 function migrationIds() {
@@ -51,7 +51,9 @@ async function main() {
 
     for (const collectionName of collectionsWithAllianceId) {
       if (!(await collectionExists(db, collectionName))) continue;
-      const missing = await db.collection(collectionName).countDocuments({ allianceId: { $exists: false } });
+      const missingFilter = { allianceId: { $exists: false } };
+      if (collectionName === "users") missingFilter.email = { $ne: "master@biss833.local" };
+      const missing = await db.collection(collectionName).countDocuments(missingFilter);
       if (missing > 0) failures.push(`${collectionName} has ${missing} document(s) without allianceId`);
     }
 
@@ -63,8 +65,17 @@ async function main() {
       }
       if (!user.passwordHash || user.passwordHash === account.pin) failures.push(`${account.email} does not have a hashed PIN`);
       if (user.passwordHash && !(await bcrypt.compare(account.pin, user.passwordHash))) failures.push(`${account.email} PIN hash does not match expected production PIN`);
-      if (user.allianceId !== defaults.allianceId) failures.push(`${account.email} does not have allianceId=1`);
+      if (account.global) {
+        const globalFields = ["allianceId", "allianceCode", "serverNumber", "allianceKey"];
+        for (const field of globalFields) {
+          if (Object.prototype.hasOwnProperty.call(user, field)) failures.push(`${account.email} must be global and must not have ${field}`);
+        }
+      }
+      if (account.allianceScoped && user.allianceId !== defaults.allianceId) failures.push(`${account.email} does not have allianceId=1`);
     }
+
+    const obsoleteAdmin = await db.collection("users").findOne({ email: "admin@biss833.local" });
+    if (obsoleteAdmin) failures.push("obsolete account admin@biss833.local still exists");
 
     for (const id of migrationIds()) {
       const applied = await db.collection("schema_migrations").findOne({ id });

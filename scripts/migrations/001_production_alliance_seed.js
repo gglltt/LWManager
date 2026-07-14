@@ -4,32 +4,27 @@ const bcrypt = require("bcryptjs");
 const { defaults, collectionsWithAllianceId } = require("../migrationConfig");
 
 const now = () => new Date();
+const allianceKey = () => `${defaults.allianceCode}#${defaults.serverNumber}`;
 
-function accountDocs(passwordHashes) {
-  const base = {
+function allianceScopedFields() {
+  return {
     allianceId: defaults.allianceId,
     allianceCode: defaults.allianceCode,
     serverNumber: defaults.serverNumber,
-    allianceKey: `${defaults.allianceCode}#${defaults.serverNumber}`,
-    isVerified: true
+    allianceKey: allianceKey()
   };
+}
 
+function accountDocs(passwordHashes) {
   return [
     {
       email: "master@biss833.local",
-      nickname: "Master BISS",
+      nickname: "Master Global",
       passwordHash: passwordHashes.master,
       authLevel: 5,
       role: "master",
-      ...base
-    },
-    {
-      email: "admin@biss833.local",
-      nickname: "Admin BISS",
-      passwordHash: passwordHashes.admin,
-      authLevel: 5,
-      role: "admin",
-      ...base
+      isGlobal: true,
+      isVerified: true
     },
     {
       email: "supervisor@biss833.local",
@@ -37,19 +32,34 @@ function accountDocs(passwordHashes) {
       passwordHash: passwordHashes.supervisor,
       authLevel: 3,
       role: "supervisor",
-      ...base
+      ...allianceScopedFields(),
+      isVerified: true
+    },
+    {
+      email: "standard@biss833.local",
+      nickname: "Standard BISS",
+      passwordHash: passwordHashes.standard,
+      authLevel: 1,
+      role: "standard",
+      ...allianceScopedFields(),
+      isVerified: true
     }
   ];
+}
+
+function missingAllianceIdFilter(collectionName) {
+  const filter = { allianceId: { $exists: false } };
+  if (collectionName === "users") filter.email = { $ne: "master@biss833.local" };
+  return filter;
 }
 
 async function countMissingAllianceId(db, collectionName) {
   const exists = await db.listCollections({ name: collectionName }).hasNext();
   if (!exists) return 0;
-  return db.collection(collectionName).countDocuments({ allianceId: { $exists: false } });
+  return db.collection(collectionName).countDocuments(missingAllianceIdFilter(collectionName));
 }
 
 async function up(db, { dryRun, log }) {
-  const allianceKey = `${defaults.allianceCode}#${defaults.serverNumber}`;
   const summary = [];
 
   const alliance = {
@@ -58,7 +68,7 @@ async function up(db, { dryRun, log }) {
     server: defaults.serverNumber,
     allianceCode: defaults.allianceCode,
     serverNumber: defaults.serverNumber,
-    allianceKey,
+    allianceKey: allianceKey(),
     name: defaults.allianceCode,
     createdAt: now(),
     updatedAt: now()
@@ -91,7 +101,7 @@ async function up(db, { dryRun, log }) {
       summary.push(`would set allianceId=1 on ${missing} document(s) in ${collectionName}`);
     } else {
       await db.collection(collectionName).updateMany(
-        { allianceId: { $exists: false } },
+        missingAllianceIdFilter(collectionName),
         { $set: { allianceId: defaults.allianceId, updatedAt: now() } }
       );
       summary.push(`set allianceId=1 on ${missing} document(s) in ${collectionName}`);
@@ -99,12 +109,46 @@ async function up(db, { dryRun, log }) {
   }
 
   const passwordHashes = dryRun
-    ? { master: "<bcrypt hash>", admin: "<bcrypt hash>", supervisor: "<bcrypt hash>" }
+    ? { master: "<bcrypt hash>", supervisor: "<bcrypt hash>", standard: "<bcrypt hash>" }
     : {
         master: await bcrypt.hash(defaults.pins.master, 12),
-        admin: await bcrypt.hash(defaults.pins.admin, 12),
-        supervisor: await bcrypt.hash(defaults.pins.supervisor, 12)
+        supervisor: await bcrypt.hash(defaults.pins.supervisor, 12),
+        standard: await bcrypt.hash(defaults.pins.standard, 12)
       };
+
+  const masterWithAllianceFields = await db.collection("users").findOne({
+    email: "master@biss833.local",
+    $or: [
+      { allianceId: { $exists: true } },
+      { allianceCode: { $exists: true } },
+      { serverNumber: { $exists: true } },
+      { allianceKey: { $exists: true } }
+    ]
+  });
+  if (masterWithAllianceFields) {
+    if (dryRun) {
+      summary.push("would make master@biss833.local global by removing alliance/server fields");
+    } else {
+      await db.collection("users").updateOne(
+        { email: "master@biss833.local" },
+        {
+          $set: { isGlobal: true, role: "master", updatedAt: now() },
+          $unset: { allianceId: "", allianceCode: "", serverNumber: "", allianceKey: "" }
+        }
+      );
+      summary.push("made master@biss833.local global by removing alliance/server fields");
+    }
+  }
+
+  const adminAccount = await db.collection("users").findOne({ email: "admin@biss833.local" });
+  if (adminAccount) {
+    if (dryRun) {
+      summary.push("would remove obsolete account admin@biss833.local");
+    } else {
+      await db.collection("users").deleteOne({ email: "admin@biss833.local" });
+      summary.push("removed obsolete account admin@biss833.local");
+    }
+  }
 
   for (const account of accountDocs(passwordHashes)) {
     const existing = await db.collection("users").findOne({ email: account.email });
@@ -125,6 +169,6 @@ async function up(db, { dryRun, log }) {
 
 module.exports = {
   id: "001_production_alliance_seed",
-  description: "Seed production BISS#833 alliance, add default allianceId, and create required privileged accounts.",
+  description: "Seed production BISS#833 alliance, add default allianceId, and create master, supervisor, and standard accounts.",
   up
 };
