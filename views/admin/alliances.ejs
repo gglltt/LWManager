@@ -39,7 +39,11 @@
           </div>
         </div>
         <div class="allianceActions">
-          <form method="post" action="/admin/alliances/<%= a.allianceId %>/deactivate"><button class="button secondary" type="submit"><%= t('deactivate_alliance') %></button></form>
+          <% if (a.isActive) { %>
+            <form method="post" action="/admin/alliances/<%= a.allianceId %>/deactivate"><button class="button secondary" type="submit"><%= t('deactivate_alliance') %></button></form>
+          <% } else { %>
+            <form method="post" action="/admin/alliances/<%= a.allianceId %>/activate"><button class="button secondary" type="submit"><%= t('activate_alliance') %></button></form>
+          <% } %>
           <form method="post" action="/admin/alliances/<%= a.allianceId %>/delete"><button class="button button--danger" type="submit"><%= t('delete_alliance') %></button></form>
           <form method="post" action="/admin/alliances/<%= a.allianceId %>/update-pins" class="alliancePinForm">
             <input type="password" name="standardPin" pattern="\d{6}" inputmode="numeric" placeholder="<%= t('standard_pin') %>" />
