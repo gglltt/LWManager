@@ -1,0 +1,5 @@
+// Optional migration, intentionally disabled. Rename to .js only after a separate release/backup.
+// It removes legacy tenant fields allianceCode/serverNumber/allianceKey from application collections.
+const collections = require('../migrationLib/appCollections');
+const { getExistingCollectionNames, safeUpdateMany } = require('../migrationLib/db');
+module.exports = { name: '099_cleanup_legacy_tenant_fields', async up({ db, dryRun }) { const existing = await getExistingCollectionNames(db); const summary = {}; for (const name of collections) { if (!existing.has(name)) continue; const res = await safeUpdateMany(db, name, { $or: [{ allianceCode: { $exists: true } }, { serverNumber: { $exists: true } }, { allianceKey: { $exists: true } }] }, { $unset: { allianceCode: '', serverNumber: '', allianceKey: '' } }, { dryRun }); summary[name] = { matched: res.matchedCount, modified: res.modifiedCount }; } return summary; } };

@@ -9,7 +9,10 @@
     "dev": "nodemon server.js",
     "setup:tenants": "node scripts/setupTenants.js",
     "migrate:alliances": "node scripts/migrateAllianceStructure.js",
-    "i18n:check": "node scripts/checkI18n.js"
+    "i18n:check": "node scripts/checkI18n.js",
+    "migrate": "node scripts/runMigrations.js",
+    "migrate:dry-run": "node scripts/runMigrations.js --dry-run",
+    "migrate:check": "node scripts/runMigrations.js --check"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
