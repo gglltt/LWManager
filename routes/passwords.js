@@ -10,7 +10,7 @@ const MANAGED_ROLES = ["supervisor", "standard", "alliance_admin"];
 function requirePasswordManager(req, res, next) {
   if (!req.user) return res.redirect("/auth/login");
   if (req.user.isMaster || req.user.role === "supervisor") return next();
-  return res.status(403).send("403 - Forbidden");
+  return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
 }
 
 function cleanPin(value) {
@@ -60,24 +60,24 @@ router.post("/:id", requireAuth, requirePasswordManager, async (req, res) => {
   const confirmPin = cleanPin(req.body.confirmPin);
 
   if (!isValidPin(newPin) || newPin !== confirmPin) {
-    return renderIndex(req, res, 400, "", "Il nuovo PIN deve essere di 6 cifre e deve combaciare in entrambi i campi.");
+    return renderIndex(req, res, 400, "", (res.locals.t || ((k) => k))("err_new_pin_mismatch"));
   }
 
   if (!req.user.isMaster && !isValidPin(oldPin)) {
-    return renderIndex(req, res, 400, "", "Inserisci il vecchio PIN di 6 cifre.");
+    return renderIndex(req, res, 400, "", (res.locals.t || ((k) => k))("err_old_pin_required"));
   }
 
   const account = await Account.findById(req.params.id);
   if (!canManageAccount(req.user, account)) {
     await createEventLog(req, "password_change_denied", `target=${req.params.id}`);
-    return renderIndex(req, res, 403, "", "Non puoi modificare questo utente.");
+    return renderIndex(req, res, 403, "", (res.locals.t || ((k) => k))("err_cannot_edit_user"));
   }
 
   if (!req.user.isMaster) {
     const matchesOldPin = await bcrypt.compare(oldPin, account.pinHash);
     if (!matchesOldPin) {
       await createEventLog(req, "password_change_failed", `target=${account.username}|reason=old_pin`);
-      return renderIndex(req, res, 400, "", "Il vecchio PIN non è corretto.");
+      return renderIndex(req, res, 400, "", (res.locals.t || ((k) => k))("err_old_pin_wrong"));
     }
   }
 
@@ -86,7 +86,7 @@ router.post("/:id", requireAuth, requirePasswordManager, async (req, res) => {
 
   const eventType = req.user.isMaster ? "password_reset" : "password_change";
   await createEventLog(req, eventType, `target=${account.username}|targetRole=${account.role}|targetAllianceId=${account.allianceId}`);
-  return renderIndex(req, res, 200, req.user.isMaster ? "PIN resettato correttamente." : "PIN modificato correttamente.", "");
+  return renderIndex(req, res, 200, req.user.isMaster ? (res.locals.t || ((k) => k))("pin_reset_success") : (res.locals.t || ((k) => k))("pin_changed_success"), "");
 });
 
 module.exports = router;

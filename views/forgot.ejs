@@ -12,7 +12,7 @@
   <% } %>
 
   <form method="POST" action="/auth/forgot" class="form">
-    <label>Email</label>
+    <label><%= t('email') %></label>
     <input type="email" name="email" required placeholder="name@domain.com" />
     <button type="submit"><%= t('send_reset_link') %></button>
   </form>

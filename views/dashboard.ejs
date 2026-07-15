@@ -21,21 +21,21 @@
     </a>
 
 
-    <a class="menuCard" href="/stagione-6" title="Guida S6">
+    <a class="menuCard" href="/stagione-6" title="<%= t('season6_guide_short') %>">
       <div class="menuIcon">🧭</div>
       <div class="menuText">
-        <div class="menuTitle">Guida S6</div>
-        <div class="menuDesc">Priorità, edifici, War Merit, pesca e calendario iniziale</div>
+        <div class="menuTitle"><%= t('season6_guide_short') %></div>
+        <div class="menuDesc"><%= t('season6_dashboard_desc') %></div>
       </div>
     </a>
 
 
     <% if (user && (user.isMaster || user.role === 'supervisor')) { %>
-      <a class="menuCard" href="/passwords" title="Gestione PIN">
+      <a class="menuCard" href="/passwords" title="<%= t('password_management') %>">
         <div class="menuIcon">🔐</div>
         <div class="menuText">
-          <div class="menuTitle">Gestione PIN</div>
-          <div class="menuDesc"><%= user.isMaster ? 'Reset PIN standard e supervisori di tutte le alleanze' : 'Modifica PIN standard e supervisore della tua alleanza' %></div>
+          <div class="menuTitle"><%= t('password_management') %></div>
+          <div class="menuDesc"><%= user.isMaster ? t('password_management_master_desc') : t('password_management_supervisor_desc') %></div>
         </div>
       </a>
     <% } %>

@@ -80,7 +80,7 @@
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
       <% if (isAdmin) { %>
-        <a class="button secondary" href="/potenze/export">⬇️ Export Excel</a>
+        <a class="button secondary" href="/potenze/export">⬇️ <%= t("export_excel") %></a>
       <% } else { %>
         <span class="muted" title="<%= t('export_requires_admin_pin') %>"><%= t("export_admin_only") %></span>
       <% } %>
@@ -123,10 +123,10 @@
   <!-- MOBILE: quick sort bar -->
   <div class="sortBar">
     <span class="muted"><%= t("sort_by") %>:</span>
-    <a class="sortPill" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a>
+    <a class="sortPill" href="<%= sortLink('nickname') %>"><%= t("nickname") %><%= sortArrow('nickname') %></a>
     <a class="sortPill" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a>
-    <a class="sortPill" href="<%= sortLink('total') %>">Tot<%= sortArrow('total') %></a>
-    <a class="sortPill" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a>
+    <a class="sortPill" href="<%= sortLink('total') %>"><%= t("total") %><%= sortArrow('total') %></a>
+    <a class="sortPill" href="<%= sortLink('updatedAt') %>"><%= t("date") %><%= sortArrow('updatedAt') %></a>
   </div>
 
   <!-- MOBILE: cards -->
@@ -216,16 +216,16 @@
     <table class="table tableCompact">
       <thead>
         <tr>
-          <th class="colNick"><a class="thLink" href="<%= sortLink('nickname') %>">Nick<%= sortArrow('nickname') %></a></th>
-          <th class="colRole"><a class="thLink" href="<%= sortLink('role') %>"><%= sortArrow('role') %></a></th>
+          <th class="colNick"><a class="thLink" href="<%= sortLink('nickname') %>"><%= t("nickname") %><%= sortArrow('nickname') %></a></th>
+          <th class="colRole"><a class="thLink" href="<%= sortLink('role') %>"><%= t("role") %><%= sortArrow('role') %></a></th>
 
           <th class="colTier"><a class="thLink" href="<%= sortLink('powerT1') %>">T1<%= sortArrow('powerT1') %></a></th>
           <th class="colTier"><a class="thLink" href="<%= sortLink('powerT2') %>">T2<%= sortArrow('powerT2') %></a></th>
           <th class="colTier"><a class="thLink" href="<%= sortLink('powerT3') %>">T3<%= sortArrow('powerT3') %></a></th>
           <th class="colTier"><a class="thLink" href="<%= sortLink('powerT4') %>">T4<%= sortArrow('powerT4') %></a></th>
 
-          <th class="colTotal"><a class="thLink" href="<%= sortLink('total') %>" title="<%= t('total_t1_t2_t3_only') %>">Tot<%= sortArrow('total') %></a></th>
-          <th class="colDate"><a class="thLink" href="<%= sortLink('updatedAt') %>">Data<%= sortArrow('updatedAt') %></a></th>
+          <th class="colTotal"><a class="thLink" href="<%= sortLink('total') %>" title="<%= t('total_t1_t2_t3_only') %>"><%= t("total") %><%= sortArrow('total') %></a></th>
+          <th class="colDate"><a class="thLink" href="<%= sortLink('updatedAt') %>"><%= t("date") %><%= sortArrow('updatedAt') %></a></th>
 
           <th class="colActions"><%= t("actions_short") %></th>
         </tr>

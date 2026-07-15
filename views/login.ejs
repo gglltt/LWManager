@@ -4,14 +4,14 @@
   <% if (message) { %><div class="alert success"><%= message %></div><% } %>
   <% if (error) { %><div class="alert error"><%= error %></div><% } %>
   <form method="POST" action="/auth/login" class="form">
-    <label>Codice alleanza</label>
+    <label><%= t('alliance_code') %></label>
     <input type="text" name="allianceCode" required minlength="2" maxlength="12" pattern="[A-Za-z0-9#]+" value="<%= form?.allianceCode || '' %>" />
-    <label>Server</label>
+    <label><%= t('server') %></label>
     <input type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" value="<%= form?.serverNumber || '' %>" />
-    <label>PIN</label>
+    <label><%= t('pin') %></label>
     <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" />
     <button type="submit"><%= t('login_button') %></button>
   </form>
-  <p class="muted">Inserisci codice alleanza, server e PIN. Per l'accesso master usa codice alleanza <b>master</b> e lascia il server vuoto.</p>
+  <p class="muted"><%- t('login_tenant_hint') %></p>
 </section>
 <%- include("partials/footer") %>

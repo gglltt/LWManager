@@ -160,9 +160,9 @@ router.post("/events", async (req, res) => {
   if (existingPlayers.length !== playerIds.length) return await renderEdit(res, req, { error: t("perf_valid_player_required"), message: null, form, event: null, rows: [] });
 
   try {
-    if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+    if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
     const selectedAllianceId = req.user.isMaster ? Number(req.body.allianceId || selectedTenantFromRequest(req).allianceId) : req.user.allianceId;
-    if (!selectedAllianceId) return res.status(400).send("400 - Seleziona un tenant");
+    if (!selectedAllianceId) return res.status(400).send(`400 - ${(res.locals.t || ((k) => k))("select_alliance")}`);
     const tf = tenantFields(selectedAllianceId);
     const event = await PerformanceVsEvent.findOneAndUpdate(
       { ...tf, year: header.year, week: header.week, eventType: header.eventType },
@@ -194,7 +194,7 @@ router.post("/events/:eventId/delete", async (req, res) => {
   }
 
   try {
-    if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+    if (!canEdit(req.user)) return res.status(403).send(`403 - ${(res.locals.t || ((k) => k))("forbidden")}`);
     const event = await PerformanceVsEvent.findOne(tenantQuery(req, { _id: req.params.eventId, year: header.year, week: header.week, eventType: header.eventType })).lean();
     if (!event) return res.status(404).send(`404 - ${t("perf_event_not_found")}`);
     await PerformanceVsRow.deleteMany({ eventId: event._id });
