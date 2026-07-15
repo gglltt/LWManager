@@ -9,7 +9,7 @@
     <label>Server</label>
     <input type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" value="<%= form?.serverNumber || '' %>" />
     <label>PIN</label>
-    <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="6 cifre" />
+    <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" />
     <button type="submit"><%= t('login_button') %></button>
   </form>
   <p class="muted">Inserisci codice alleanza, server e PIN. Per l'accesso master usa codice alleanza <b>master</b> e lascia il server vuoto.</p>

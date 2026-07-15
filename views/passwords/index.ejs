@@ -1,7 +1,7 @@
 <%- include("../partials/header") %>
 
-<section class="card cardWide">
-  <div class="pageHeader">
+<section class="card cardWide passwordsPage">
+  <div class="pageHeader passwordsHeader">
     <div>
       <h1>Gestione PIN</h1>
       <p class="muted">
@@ -18,44 +18,52 @@
   <% if (message) { %><div class="alert success"><%= message %></div><% } %>
   <% if (error) { %><div class="alert error"><%= error %></div><% } %>
 
-  <div class="tableWrap">
-    <table class="table passwordsTable">
-      <thead>
-        <tr>
-          <th>Utente</th>
-          <th>Ruolo</th>
-          <% if (user && user.isMaster) { %><th>Alleanza</th><% } %>
-          <th>Nuovo PIN</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (!accounts.length) { %>
-          <tr><td colspan="<%= user && user.isMaster ? 4 : 3 %>">Nessun utente disponibile.</td></tr>
-        <% } %>
-        <% accounts.forEach((account) => { %>
-          <tr>
-            <td>
-              <div class="cell2">
-                <span class="cellTop"><%= account.username %></span>
-                <span class="cellSub"><%= account.updatedAt ? new Date(account.updatedAt).toLocaleString(localeTag || 'it-IT') : '' %></span>
-              </div>
-            </td>
-            <td><%= account.role %></td>
-            <% if (user && user.isMaster) { %><td><%= account.allianceKey || '-' %></td><% } %>
-            <td>
-              <form class="form passwordInlineForm" method="post" action="/passwords/<%= account._id %>">
-                <% if (!(user && user.isMaster)) { %>
-                  <input type="password" name="oldPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Vecchio PIN" autocomplete="current-password" />
-                <% } %>
-                <input type="password" name="newPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Nuovo PIN" autocomplete="new-password" />
-                <input type="password" name="confirmPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" placeholder="Ripeti PIN" autocomplete="new-password" />
-                <button type="submit"><%= user && user.isMaster ? 'Resetta' : 'Modifica' %></button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+  <div class="passwordList" role="list">
+    <% if (!accounts.length) { %>
+      <div class="passwordAccountCard passwordAccountCard--empty" role="listitem">Nessun utente disponibile.</div>
+    <% } %>
+
+    <% accounts.forEach((account) => { %>
+      <article class="passwordAccountCard" role="listitem">
+        <div class="passwordAccountInfo">
+          <div class="passwordAccountMeta">
+            <span class="passwordLabel">Utente</span>
+            <strong class="passwordAccountName"><%= account.username %></strong>
+            <span class="passwordAccountUpdated"><%= account.updatedAt ? new Date(account.updatedAt).toLocaleString(localeTag || 'it-IT') : '' %></span>
+          </div>
+
+          <div class="passwordAccountMeta">
+            <span class="passwordLabel">Ruolo</span>
+            <strong><%= account.role %></strong>
+          </div>
+
+          <% if (user && user.isMaster) { %>
+            <div class="passwordAccountMeta">
+              <span class="passwordLabel">Alleanza</span>
+              <strong><%= account.allianceKey || '-' %></strong>
+            </div>
+          <% } %>
+        </div>
+
+        <form class="passwordInlineForm" method="post" action="/passwords/<%= account._id %>">
+          <% if (!(user && user.isMaster)) { %>
+            <label>
+              <span>Vecchio PIN</span>
+              <input type="password" name="oldPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="current-password" />
+            </label>
+          <% } %>
+          <label>
+            <span>Nuovo PIN</span>
+            <input type="password" name="newPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="new-password" />
+          </label>
+          <label>
+            <span>Ripeti PIN</span>
+            <input type="password" name="confirmPin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="new-password" />
+          </label>
+          <button type="submit"><%= user && user.isMaster ? 'Resetta PIN' : 'Modifica PIN' %></button>
+        </form>
+      </article>
+    <% }) %>
   </div>
 </section>
 
