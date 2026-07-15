@@ -1,7 +1,6 @@
 "use strict";
 
 const bcrypt = require("bcryptjs");
-const { getMigrationConfig } = require("../migrationLib/config");
 const { ensureCollection } = require("../migrationLib/db");
 
 const DEFAULT_ROUNDS = 10;
@@ -86,10 +85,15 @@ async function warnUsers(db, log) {
 module.exports = {
   id: "006_fix_accounts_collection",
   description: "Ensure authentication uses accounts, seed default master/standard/supervisor accounts, and migrate useful legacy users without deleting users.",
-  async up(db, options = {}) {
-    const { dryRun = false, log = console.log } = options;
+  async up({ db, dryRun = false, log = console.log, config, options = {} }) {
+    if (!db || typeof db.collection !== "function") {
+      throw new Error("Invalid migration db context");
+    }
+    if (typeof db.listCollections !== "function") {
+      throw new Error("Invalid MongoDB db object: listCollections unavailable");
+    }
+
     const resetPins = hasResetFlag(options);
-    const config = getMigrationConfig();
     const summary = [];
 
     summary.push({ alliance: await ensureAlliance(db, config, dryRun) });
