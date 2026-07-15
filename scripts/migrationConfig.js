@@ -7,7 +7,6 @@ module.exports = {
     serverNumber: 833,
     pins: {
       standard: "111111",
-      admin: "111111",
       supervisor: "151515",
       master: "550130"
     }
