@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const { MongoClient } = require("mongodb");
 const { getMigrationConfig } = require("./migrationLib/config");
-const { normalizeSchemaMigrations, ensureUniqueNameIndex, successfulNamesFromNormalizedDocs } = require("./migrationLib/schemaMigrations");
+const { normalizeSchemaMigrations, dropLegacyIdIndex, ensureUniqueNameIndex, successfulNamesFromNormalizedDocs } = require("./migrationLib/schemaMigrations");
 
 const migrationsDir = path.join(__dirname, "migrations");
 
@@ -18,7 +18,6 @@ function log(message) { console.log(message); }
 function loadMigrations() {
   return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
     const migration = require(path.join(migrationsDir, file));
-    if (!migration.name && migration.id) migration.name = migration.id;
     migration.file = migration.file || file;
     return { file, migration };
   });
@@ -36,9 +35,12 @@ async function runMigrations(args = parseArgs()) {
     const db = client.db();
     const schemaMigrations = db.collection("schema_migrations");
     const normalization = await normalizeSchemaMigrations(db, { dryRun: args.dryRun });
+    const legacyIdIndex = await dropLegacyIdIndex(db, { dryRun: args.dryRun });
     if (args.dryRun) {
       log(`Dry-run schema_migrations normalization: would normalize ${normalization.normalized} of ${normalization.inspected} document(s).`);
+      log(`Dry-run schema_migrations legacy indexes: ${JSON.stringify(legacyIdIndex)}.`);
     } else {
+      if (legacyIdIndex.droppedIndexes?.length) log(`schema_migrations dropped indexes: ${JSON.stringify(legacyIdIndex.droppedIndexes)}.`);
       await ensureUniqueNameIndex(db);
     }
     const dryRunSuccessNames = successfulNamesFromNormalizedDocs(normalization.normalizedDocs);

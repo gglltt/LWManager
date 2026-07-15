@@ -20,7 +20,7 @@ const requiredAccounts = [
 function migrationNames() {
   return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
     const migration = require(path.join(migrationsDir, file));
-    return migration.name || migration.id;
+    return migration.name;
   });
 }
 async function collectionExists(db, name) { return db.listCollections({ name }, { nameOnly: true }).hasNext(); }
@@ -28,6 +28,16 @@ function authCodeUsesAccounts() {
   const authPath = path.join(__dirname, "..", "routes", "auth.js");
   const source = fs.readFileSync(authPath, "utf8");
   return source.includes('require("../models/account")') && !source.includes('require("../models/user') && !/collection\(["']users["']\)/.test(source);
+}
+
+function runnerUsesCanonicalNameOnly() {
+  const source = fs.readFileSync(path.join(__dirname, "runMigrations.js"), "utf8");
+  return source.includes("{ name: migration.name }")
+    && source.includes("findOne({ name: migration.name, status: \"success\" })")
+    && !/findOne\s*\(\s*\{\s*id\s*:/.test(source)
+    && !/updateOne\s*\(\s*\{\s*id\s*:/.test(source)
+    && !/createIndex\s*\(\s*\{\s*id\s*:/.test(source)
+    && !/migration\.id/.test(source);
 }
 
 async function main() {
@@ -73,6 +83,7 @@ async function main() {
     }
 
     if (!authCodeUsesAccounts()) failures.push("routes/auth.js must use accounts/Account and must not use users/User for login");
+    if (!runnerUsesCanonicalNameOnly()) failures.push("scripts/runMigrations.js must use canonical name tracking only and must not use id");
     if (await collectionExists(db, "users")) warnings.push("Collection users rilevata ma non usata dal sistema di autenticazione. Gli account ufficiali sono in accounts.");
 
     if (await collectionExists(db, "schema_migrations")) {
@@ -88,8 +99,10 @@ async function main() {
       ]).toArray();
       for (const duplicate of duplicateNames) failures.push(`schema_migrations duplicate name: ${duplicate._id} (${duplicate.count} records)`);
       const indexes = await schemaMigrations.indexes();
-      const uniqueNameIndex = indexes.find((index) => JSON.stringify(index.key) === JSON.stringify({ name: 1 }) && index.unique === true);
-      if (!uniqueNameIndex) failures.push("schema_migrations is missing a unique index on name");
+      const uniqueNameIndex = indexes.find((index) => index.name === "name_1" && JSON.stringify(index.key) === JSON.stringify({ name: 1 }) && index.unique === true);
+      if (!uniqueNameIndex) failures.push("schema_migrations is missing unique index name_1 on name");
+      const uniqueIdIndex = indexes.find((index) => index.name === "id_1" && JSON.stringify(index.key) === JSON.stringify({ id: 1 }) && index.unique === true);
+      if (uniqueIdIndex) failures.push("schema_migrations still has legacy unique index id_1");
       const fileNames = migrationNames();
       for (const name of fileNames) {
         const record = await schemaMigrations.findOne({ name, status: "success" });
