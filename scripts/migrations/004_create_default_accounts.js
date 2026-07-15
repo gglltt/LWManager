@@ -7,7 +7,7 @@ async function repairLegacyAccounts(accounts, config, dryRun) {
   for (const acc of legacy) {
     let username = null;
     if (acc.role === 'master' || acc.allianceId === null) username = config.masterUsername;
-    else if (['alliance_admin', 'admin', 'standard'].includes(acc.role) && Number(acc.allianceId) === config.allianceId) username = config.adminUsername;
+    else if (['alliance_admin', 'admin', 'standard'].includes(acc.role) && Number(acc.allianceId) === config.allianceId) username = config.standardUsername;
     else if (acc.role === 'supervisor' && Number(acc.allianceId) === config.allianceId) username = config.supervisorUsername;
     else username = `legacy-account-${acc._id}`;
     actions.push({ id: String(acc._id), username });
@@ -32,7 +32,7 @@ module.exports = {
     const repaired = await repairLegacyAccounts(accounts, config, dryRun);
     const specs = [
       [{ username: config.masterUsername, role: 'master', allianceId: null }, config.masterPin],
-      [{ username: config.adminUsername, role: 'alliance_admin', allianceId: config.allianceId }, config.standardPin],
+      [{ username: config.standardUsername, role: 'standard', allianceId: config.allianceId }, config.standardPin],
       [{ username: config.supervisorUsername, role: 'supervisor', allianceId: config.allianceId }, config.supervisorPin]
     ];
     const results = [];
