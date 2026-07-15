@@ -17,14 +17,13 @@ function log(message) { console.log(message); }
 function loadMigrations() {
   return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
     const migration = require(path.join(migrationsDir, file));
-    const hasExplicitId = Object.prototype.hasOwnProperty.call(migration, "id");
-    const id = migration.id || migration.name;
-    return { file, id, migration, usesDbSignature: hasExplicitId };
+    migration.id = migration.id || migration.name;
+    return { file, migration };
   });
 }
-async function invokeMigration(entry, db, options) {
-  if (entry.usesDbSignature || entry.migration.up.length >= 2) return entry.migration.up(db, options);
-  return entry.migration.up({ db, dryRun: options.dryRun, config: options.config, options, log: options.log });
+async function invokeMigration(migration, db, options) {
+  if (migration.up.length >= 2) return migration.up(db, options);
+  return migration.up({ db, dryRun: options.dryRun, config: options.config, options, log: options.log });
 }
 async function runMigrations(args = parseArgs()) {
   const uri = process.env.MONGO_URI;
@@ -37,15 +36,14 @@ async function runMigrations(args = parseArgs()) {
     if (!args.dryRun) await schemaMigrations.createIndex({ id: 1 }, { unique: true });
     log(args.dryRun ? "Running migrations in dry-run mode..." : "Running migrations...");
     let executed = 0;
-    for (const entry of loadMigrations()) {
-      const { file, id, migration } = entry;
-      if (!id || typeof migration.up !== "function") throw new Error(`Invalid migration file: ${file}`);
-      const alreadyApplied = await schemaMigrations.findOne({ id });
-      if (alreadyApplied) { log(`Skipping ${id}: already applied.`); continue; }
-      log(`${args.dryRun ? "Dry-run" : "Applying"} ${id}: ${migration.description || file}`);
-      const result = await invokeMigration(entry, db, { ...args, config: getMigrationConfig(), log });
+    for (const { file, migration } of loadMigrations()) {
+      if (!migration.id || typeof migration.up !== "function") throw new Error(`Invalid migration file: ${file}`);
+      const alreadyApplied = await schemaMigrations.findOne({ id: migration.id });
+      if (alreadyApplied) { log(`Skipping ${migration.id}: already applied.`); continue; }
+      log(`${args.dryRun ? "Dry-run" : "Applying"} ${migration.id}: ${migration.description || file}`);
+      const result = await invokeMigration(migration, db, { ...args, config: getMigrationConfig(), log });
       if (result) log(`  - result: ${JSON.stringify(result)}`);
-      if (!args.dryRun) await schemaMigrations.updateOne({ id }, { $setOnInsert: { id, file, description: migration.description || "", appliedAt: new Date() } }, { upsert: true });
+      if (!args.dryRun) await schemaMigrations.updateOne({ id: migration.id }, { $setOnInsert: { id: migration.id, file, description: migration.description || "", appliedAt: new Date() } }, { upsert: true });
       executed += 1;
     }
     log(args.dryRun ? `Dry-run complete. Pending migrations inspected: ${executed}.` : `Migrations complete. Applied: ${executed}.`);
@@ -53,4 +51,4 @@ async function runMigrations(args = parseArgs()) {
 }
 
 if (require.main === module) runMigrations().catch((err) => { console.error(`Migration failed: ${err.message}`); process.exit(1); });
-module.exports = { runMigrations, parseArgs, loadMigrations };
+module.exports = { runMigrations, parseArgs };
