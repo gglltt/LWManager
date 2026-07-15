@@ -1,5 +1,5 @@
 const express = require("express");
-const { requireAuth, requireAdmin } = require("../middleware/auth");
+const { requireAuth, requireMaster } = require("../middleware/auth");
 const { createEventLog } = require("../utils/eventLog");
 const { getConfig, validateConfig, syncProdToQa } = require("../services/syncProdToQa");
 
@@ -10,7 +10,7 @@ function statusKey(resultOrKey) {
   return key || "sync_failed";
 }
 
-router.get("/", requireAuth, requireAdmin, (req, res) => {
+router.get("/", requireAuth, requireMaster, (req, res) => {
   const config = getConfig();
   res.render("admin/index", {
     user: req.user,
@@ -21,7 +21,7 @@ router.get("/", requireAuth, requireAdmin, (req, res) => {
   });
 });
 
-router.post("/sync-prod-to-qa", requireAuth, requireAdmin, async (req, res) => {
+router.post("/sync-prod-to-qa", requireAuth, requireMaster, async (req, res) => {
   const t = res.locals.t || ((key) => key);
   const confirmation = String(req.body.confirmation || "").trim();
 

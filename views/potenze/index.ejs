@@ -84,7 +84,7 @@
       <% } else { %>
         <span class="muted" title="<%= t('export_requires_admin_pin') %>"><%= t("export_admin_only") %></span>
       <% } %>
-      <a class="button" href="/potenze/new"><%= t("new_player_button") %></a>
+      <% if (typeof canEdit !== "undefined" ? canEdit : isAdmin) { %><a class="button" href="/potenze/new"><%= t("new_player_button") %></a><% } %>
     </div>
   </div>
 
@@ -99,6 +99,10 @@
   <form method="GET" action="/potenze" class="filterBar">
     <input type="hidden" name="sort" value="<%= sort %>" />
     <input type="hidden" name="dir" value="<%= dir %>" />
+    <% if (user && user.isMaster) { %>
+      <input type="text" name="allianceCode" placeholder="BISS o BISS#833" value="<%= (tenantFilter && tenantFilter.allianceKey) ? tenantFilter.allianceKey : (query?.allianceCode || '') %>" />
+      <input type="text" name="serverNumber" placeholder="833" value="<%= query?.serverNumber || '' %>" />
+    <% } %>
     <input
       type="text"
       name="q"

@@ -124,7 +124,10 @@ app.use("/registro", registroRoutes);
 app.use("/season6-strategy", season6StrategyRoutes);
 app.use("/performance-vs", performanceVsRoutes);
 
-app.get("/logout", (req, res) => {
+app.get("/logout", requireAuth, async (req, res) => {
+  await cleanupOldEventLogs().catch(() => {});
+  const { createEventLog } = require("./utils/eventLog");
+  await createEventLog(req, "logout", `role=${req.user.role}`);
   res.clearCookie("lw_token");
   return res.redirect("/auth/login");
 });

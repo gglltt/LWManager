@@ -32,7 +32,14 @@ async function createEventLog(req, eventType, details = "") {
       console.log("REQUEST HEADERS DEBUG:", getDebugRequestHeaders(req));
     }
 
+    const user = req.user || {};
+    const allianceKey = user.allianceKey || (String(details || "").match(/allianceKey=([^|]+)/)?.[1]) || "GLOBAL";
     await EventLog.create({
+      allianceCode: user.allianceCode || null,
+      serverNumber: user.serverNumber || null,
+      allianceKey,
+      role: user.role || null,
+      accountId: user.accountId || user.userId || null,
       eventType,
       sourceIp: requestInfo.ip,
       browserType: requestInfo.browser,

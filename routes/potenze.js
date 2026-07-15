@@ -9,6 +9,7 @@ const { savePlayerPowerSnapshot } = require("../utils/playerPowerHistory");
 const { translateTextAuto } = require("../utils/translate");
 const { HISTORY_RETENTION_DAYS } = require("../config/history");
 const rateLimit = require("express-rate-limit");
+const { scopeFilter, tenantFields, selectedTenantFromRequest } = require("../utils/tenant");
 
 const router = express.Router();
 
@@ -70,9 +71,9 @@ function validateNickname(nickname, t) {
   return { ok: true, value: n };
 }
 
-function isAdmin(user) {
-  return user && user.authLevel >= 5;
-}
+function isAdmin(user) { return user && user.authLevel >= 5; }
+function canEdit(user) { return user && ["alliance_admin", "editor", "master"].includes(user.role); }
+function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
 
 function normalizeSortParams(req) {
   const sort = SORT_FIELDS.includes(String(req.query.sort || "")) ? String(req.query.sort) : "powerT1";
@@ -119,10 +120,11 @@ async function addAutoTranslatedNotes(players, targetLang) {
   return translatedPlayers;
 }
 
-async function existsNicknameInsensitive(nickname, excludeId = null) {
+async function existsNicknameInsensitive(nickname, excludeId = null, allianceKey = null) {
   const query = {
     nickname: { $regex: `^${escapeRegex(nickname)}$`, $options: "i" }
   };
+  if (allianceKey) query.allianceKey = allianceKey;
 
   if (excludeId) {
     query._id = { $ne: excludeId };
@@ -155,7 +157,7 @@ router.get("/", requireAuth, async (req, res) => {
     const secondary = sort === "nickname" ? { updatedAt: -1 } : { nickname: 1 };
 
     const q = String(req.query.q || "").trim();
-    const search = q ? { nickname: { $regex: escapeRegex(q), $options: "i" } } : {};
+    const search = tenantQuery(req, q ? { nickname: { $regex: escapeRegex(q), $options: "i" } } : {});
 
     let players = await Player.aggregate([
       { $match: search },
@@ -164,11 +166,13 @@ router.get("/", requireAuth, async (req, res) => {
     ]);
     players = await addAutoTranslatedNotes(players, res.locals.currentLang || "it");
 
-    const playerCount = await Player.countDocuments();
+    const playerCount = await Player.countDocuments(tenantQuery(req));
 
     return res.render("potenze/index", {
       user: req.user,
       isAdmin: isAdmin(req.user),
+      canEdit: canEdit(req.user),
+      tenantFilter: selectedTenantFromRequest(req),
       players,
       playerCount,
       types: TYPE_OPTIONS,
@@ -178,7 +182,8 @@ router.get("/", requireAuth, async (req, res) => {
       sort,
       dir,
       q,
-      historyRetentionDays: HISTORY_RETENTION_DAYS
+      historyRetentionDays: HISTORY_RETENTION_DAYS,
+      query: req.query
     });
   } catch (err) {
     console.error(err);
@@ -195,14 +200,16 @@ router.get("/", requireAuth, async (req, res) => {
       sort: "powerT1",
       dir: "desc",
       q: "",
-      historyRetentionDays: HISTORY_RETENTION_DAYS
+      historyRetentionDays: HISTORY_RETENTION_DAYS,
+      query: req.query
     });
   }
 });
 
 // NEW (FORM)
 router.get("/new", requireAuth, async (req, res) => {
-  const playerCount = await Player.countDocuments();
+  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
+  const playerCount = await Player.countDocuments(tenantQuery(req));
   return res.render("potenze/new", {
     user: req.user,
     isAdmin: isAdmin(req.user),
@@ -229,9 +236,10 @@ router.get("/new", requireAuth, async (req, res) => {
 
 // NEW (CREATE)
 router.post("/new", requireAuth, async (req, res) => {
+  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
   try {
     const t = res.locals.t;
-    const playerCount = await Player.countDocuments();
+    const playerCount = await Player.countDocuments(tenantQuery(req));
     const nickCheck = validateNickname(req.body.nickname, t);
     if (!nickCheck.ok) {
       return res.render("potenze/new", {
@@ -246,7 +254,9 @@ router.post("/new", requireAuth, async (req, res) => {
       });
     }
 
-    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value);
+    const currentTenant = req.user.isMaster ? selectedTenantFromRequest(req).allianceKey : req.user.allianceKey;
+    if (!currentTenant) return res.status(400).send("400 - Seleziona un tenant");
+    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, null, currentTenant);
     if (nicknameAlreadyExists) {
       return res.render("potenze/new", {
         user: req.user,
@@ -261,6 +271,7 @@ router.post("/new", requireAuth, async (req, res) => {
     }
 
     const createdPlayer = await Player.create({
+      ...tenantFields(currentTenant.split("#")[0], currentTenant.split("#")[1]),
       nickname: nickCheck.value,
       role: normalizeRole(req.body.role),
 
@@ -284,7 +295,7 @@ router.post("/new", requireAuth, async (req, res) => {
     return res.redirect("/potenze");
   } catch (err) {
     console.error(err);
-    const playerCount = await Player.countDocuments();
+    const playerCount = await Player.countDocuments(tenantQuery(req));
     return res.render("potenze/new", {
       user: req.user,
       isAdmin: isAdmin(req.user),
@@ -300,7 +311,7 @@ router.post("/new", requireAuth, async (req, res) => {
 
 router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
   try {
-    const players = await Player.find().sort({ nickname: 1 }).lean();
+    const players = await Player.find(tenantQuery(req)).sort({ allianceKey: 1, nickname: 1 }).lean();
 
     const rows = players.map((p) => ({
       Nickname: p.nickname || "",
@@ -373,8 +384,9 @@ router.post("/translate-note", requireAuth, translateNoteLimiter, async (req, re
 
 // EDIT (FORM)
 router.get("/:id/edit", requireAuth, async (req, res) => {
+  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id }));
     if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
 
     return res.render("potenze/edit", {
@@ -394,8 +406,9 @@ router.get("/:id/edit", requireAuth, async (req, res) => {
 
 // EDIT (UPDATE)
 router.post("/:id/edit", requireAuth, async (req, res) => {
+  if (!canEdit(req.user)) return res.status(403).send("403 - Forbidden");
   try {
-    const player = await Player.findById(req.params.id);
+    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id }));
     if (!player) return res.status(404).send(`404 - ${(res.locals.t || ((k) => k))("err_player_not_found")}`);
 
     const nickCheck = validateNickname(req.body.nickname, res.locals.t || ((k) => k));
@@ -412,7 +425,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
       });
     }
 
-    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, player._id);
+    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, player._id, player.allianceKey);
     if (nicknameAlreadyExists) {
       const fake = { ...player.toObject(), ...req.body };
       return res.render("potenze/edit", {
@@ -457,7 +470,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
 
 router.get("/:id/history-data", requireAuth, async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id).select("nickname").lean();
+    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id })).select("nickname allianceKey").lean();
     if (!player) {
       return res.status(404).json({ ok: false, error: (res.locals.t || ((k) => k))("err_player_not_found") });
     }
@@ -473,6 +486,7 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
 
     const records = await PlayerPowerHistory.find({
       player: player.nickname,
+      allianceKey: player.allianceKey,
       snapshotDate: { $gte: from, $lte: to }
     })
       .sort({ snapshotDate: 1 })
@@ -508,8 +522,8 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
 // DELETE
 router.post("/:id/delete", requireAuth, requireLevel(5), async (req, res) => {
   try {
-    const player = await Player.findById(req.params.id).lean();
-    await Player.deleteOne({ _id: req.params.id });
+    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id })).lean();
+    await Player.deleteOne(tenantQuery(req, { _id: req.params.id }));
     if (player) {
       await createEventLog(req, "cancellazione_player", buildPlayerDetails(player));
     }
