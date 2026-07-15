@@ -23,11 +23,13 @@ async function runCheck() {
       }
     }
     const accounts = db.collection('accounts');
-    for (const username of [config.masterUsername, config.adminUsername, config.supervisorUsername]) if (!(await accounts.findOne({ username }))) errors.push(`missing account ${username}`);
+    for (const username of [config.masterUsername, config.standardUsername, config.supervisorUsername]) if (!(await accounts.findOne({ username }))) errors.push(`missing account ${username}`);
     const nullAccounts = await accounts.countDocuments({ $or: [{ username: null }, { username: { $exists: false } }, { username: '' }] });
     if (nullAccounts) errors.push(`${nullAccounts} accounts without username`);
     const plainSecretFields = await accounts.countDocuments({ $or: [{ pin: { $exists: true } }, { password: { $exists: true } }, { plainPin: { $exists: true } }] });
     if (plainSecretFields) errors.push(`${plainSecretFields} accounts contain plain secret fields`);
+    const adminAccounts = await accounts.countDocuments({ role: { $in: ['admin', 'alliance_admin'] } });
+    if (adminAccounts) errors.push(`${adminAccounts} admin accounts found; only master, supervisor and standard are allowed`);
     if (!(await hasIndex(db.collection('alliances'), { allianceId: 1 }))) errors.push('missing alliances allianceId index');
     if (!(await hasIndex(db.collection('alliances'), { serverNumber: 1, codeNormalized: 1 }))) errors.push('missing alliances serverNumber/codeNormalized index');
     if (!(await hasIndex(accounts, { username: 1 }))) errors.push('missing accounts username index');
