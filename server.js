@@ -12,6 +12,7 @@ const registroRoutes = require("./routes/registro");
 const adminRoutes = require("./routes/admin");
 const passwordsRoutes = require("./routes/passwords");
 const performanceVsRoutes = require("./routes/performanceVs");
+const Alliance = require("./models/alliance");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
 const {
@@ -95,8 +96,17 @@ app.get("/", (req, res) => res.redirect("/auth/login"));
 app.use("/auth", authRoutes);
 
 // App routes
-app.get("/dashboard", requireAuth, (req, res) => {
-  res.render("dashboard", { user: req.user });
+app.get("/dashboard", requireAuth, async (req, res) => {
+  let allianceName = req.user?.isMaster ? "Master" : (req.user?.allianceCode || "");
+  if (!req.user?.isMaster && req.user?.allianceId) {
+    try {
+      const alliance = await Alliance.findOne({ allianceId: req.user.allianceId }).select("displayName code").lean();
+      allianceName = alliance?.displayName || alliance?.code || allianceName;
+    } catch (err) {
+      console.error("Dashboard alliance lookup failed:", err.message);
+    }
+  }
+  res.render("dashboard", { user: req.user, allianceName });
 });
 
 

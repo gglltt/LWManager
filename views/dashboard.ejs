@@ -1,7 +1,7 @@
 <%- include("partials/header") %>
 
 <section class="card">
-  <h1><%= t('dashboard_title') %></h1>
+  <h1><%= t('dashboard_title_named').replace('{alliance}', allianceName || t('unknown')) %></h1>
 
   <div class="kv">
     <div><b><%= t('access_mode') %>:</b> <%= user && user.isMaster ? t('admin') : (user && user.authLevel >= 3 ? t('supervisor') : t('standard')) %></div>
