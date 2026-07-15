@@ -6,7 +6,7 @@ const AccountSchema = new mongoose.Schema({
   allianceCode: { type: String, trim: true, uppercase: true, default: null },
   serverNumber: { type: Number, default: null },
   allianceKey: { type: String, trim: true, uppercase: true, default: null, index: true },
-  role: { type: String, enum: ["master", "alliance_admin", "editor", "supervisor"], required: true, index: true },
+  role: { type: String, enum: ["master", "alliance_admin", "editor", "supervisor", "standard"], required: true, index: true },
   pinHash: { type: String, required: true },
   isActive: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
