@@ -1,10 +1,54 @@
 <%- include("../partials/header") %>
-<section class="card cardWide">
-<h1><%= t('alliances_management') %></h1>
-<a class="button secondary" href="/admin">← <%= t('admin_title') %></a>
-<% if (message) { %><div class="alert success"><%= message %></div><% } %>
-<% if (error) { %><div class="alert error"><%= error %></div><% } %>
-<section class="adminSection"><h2><%= t('new_alliance') %></h2><form method="post" action="/admin/alliances" class="filterBar"><input name="code" required placeholder="<%= t('alliance_code') %>" /><input name="serverNumber" required inputmode="numeric" placeholder="<%= t('server') %>" /><input name="displayName" placeholder="<%= t('display_name') %>" /><input name="adminPin" required pattern="\d{6}" placeholder="<%= t('standard_pin') %>" /><input name="supervisorPin" required pattern="\d{6}" placeholder="<%= t('supervisor_pin') %>" /><button class="button" type="submit"><%= t('create_alliance') %></button></form></section>
-<div class="tableWrap"><table class="table"><thead><tr><th>ID</th><th><%= t('alliance_code') %></th><th><%= t('server') %></th><th><%= t('display_name') %></th><th><%= t('status') %></th><th><%= t('created_at') %></th><th><%= t('actions') %></th></tr></thead><tbody><% alliances.forEach(a=>{ %><tr><td><%= a.allianceId %></td><td><%= a.code %></td><td><%= a.serverNumber %></td><td><%= a.displayName || '-' %></td><td><%= a.isActive ? 'Active' : 'Inactive' %></td><td><%= a.createdAt ? new Date(a.createdAt).toLocaleString(localeTag) : '-' %></td><td><form method="post" action="/admin/alliances/<%= a.allianceId %>/deactivate" style="display:inline"><button class="button secondary" type="submit"><%= t('deactivate_alliance') %></button></form><form method="post" action="/admin/alliances/<%= a.allianceId %>/delete" style="display:inline"><button class="button button--danger" type="submit"><%= t('delete_alliance') %></button></form><form method="post" action="/admin/alliances/<%= a.allianceId %>/update-pins" class="filterBar"><input name="adminPin" pattern="\d{6}" placeholder="<%= t('standard_pin') %>" /><input name="supervisorPin" pattern="\d{6}" placeholder="<%= t('supervisor_pin') %>" /><button class="button secondary"><%= t('update_pin') %></button></form></td></tr><% }) %></tbody></table></div>
+<section class="card cardWide alliancesPage">
+  <div class="pageHeader">
+    <div>
+      <h1><%= t('alliances_management') %></h1>
+      <p class="muted">Crea alleanze e gestisci i PIN standard/supervisore senza assegnare permessi amministrativi agli utenti standard.</p>
+    </div>
+    <a class="button secondary" href="/admin">← <%= t('admin_title') %></a>
+  </div>
+
+  <% if (message) { %><div class="alert success"><%= message %></div><% } %>
+  <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+  <section class="adminSection allianceCreatePanel">
+    <h2><%= t('new_alliance') %></h2>
+    <form method="post" action="/admin/alliances" class="allianceCreateForm">
+      <label class="field"><span><%= t('alliance_code') %></span><input type="text" name="code" required placeholder="BISS" /></label>
+      <label class="field"><span><%= t('server') %></span><input type="text" name="serverNumber" required inputmode="numeric" placeholder="833" /></label>
+      <label class="field"><span><%= t('display_name') %></span><input type="text" name="displayName" placeholder="BISS" /></label>
+      <label class="field"><span><%= t('standard_pin') %></span><input type="password" name="standardPin" required pattern="\d{6}" inputmode="numeric" placeholder="000000" /></label>
+      <label class="field"><span><%= t('supervisor_pin') %></span><input type="password" name="supervisorPin" required pattern="\d{6}" inputmode="numeric" placeholder="000000" /></label>
+      <button class="button" type="submit"><%= t('create_alliance') %></button>
+    </form>
+  </section>
+
+  <div class="allianceList">
+    <% alliances.forEach(a=>{ %>
+      <article class="allianceCard">
+        <div class="allianceCard__main">
+          <div class="allianceBadge">#<%= a.allianceId %></div>
+          <div>
+            <h2><%= a.displayName || a.code %></h2>
+            <div class="allianceMeta">
+              <span><%= t('alliance_code') %>: <b><%= a.code %></b></span>
+              <span><%= t('server') %>: <b><%= a.serverNumber %></b></span>
+              <span class="statusPill <%= a.isActive ? 'statusPill--active' : 'statusPill--inactive' %>"><%= a.isActive ? 'Active' : 'Inactive' %></span>
+              <span><%= t('created_at') %>: <b><%= a.createdAt ? new Date(a.createdAt).toLocaleString(localeTag) : '-' %></b></span>
+            </div>
+          </div>
+        </div>
+        <div class="allianceActions">
+          <form method="post" action="/admin/alliances/<%= a.allianceId %>/deactivate"><button class="button secondary" type="submit"><%= t('deactivate_alliance') %></button></form>
+          <form method="post" action="/admin/alliances/<%= a.allianceId %>/delete"><button class="button button--danger" type="submit"><%= t('delete_alliance') %></button></form>
+          <form method="post" action="/admin/alliances/<%= a.allianceId %>/update-pins" class="alliancePinForm">
+            <input type="password" name="standardPin" pattern="\d{6}" inputmode="numeric" placeholder="<%= t('standard_pin') %>" />
+            <input type="password" name="supervisorPin" pattern="\d{6}" inputmode="numeric" placeholder="<%= t('supervisor_pin') %>" />
+            <button class="button secondary"><%= t('update_pin') %></button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+  </div>
 </section>
 <%- include("../partials/footer") %>
