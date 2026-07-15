@@ -27,6 +27,15 @@ function accountDocs(passwordHashes) {
       isVerified: true
     },
     {
+      email: "admin@biss833.local",
+      nickname: "Admin BISS",
+      passwordHash: passwordHashes.admin,
+      authLevel: 5,
+      role: "admin",
+      ...allianceScopedFields(),
+      isVerified: true
+    },
+    {
       email: "supervisor@biss833.local",
       nickname: "Supervisor BISS",
       passwordHash: passwordHashes.supervisor,
@@ -59,6 +68,15 @@ async function countMissingAllianceId(db, collectionName) {
   return db.collection(collectionName).countDocuments(missingAllianceIdFilter(collectionName));
 }
 
+function splitAccountForUpdate(account) {
+  const { email, passwordHash, createdAt, updatedAt, ...setFields } = account;
+  return {
+    email,
+    setFields,
+    insertFields: { email, passwordHash, createdAt }
+  };
+}
+
 async function up(db, { dryRun, log }) {
   const summary = [];
 
@@ -69,23 +87,22 @@ async function up(db, { dryRun, log }) {
     allianceCode: defaults.allianceCode,
     serverNumber: defaults.serverNumber,
     allianceKey: allianceKey(),
-    name: defaults.allianceCode,
-    createdAt: now(),
-    updatedAt: now()
+    name: defaults.allianceCode
   };
 
   if (dryRun) {
     const existingAlliance = await db.collection("alliances").findOne({ allianceId: defaults.allianceId });
-    summary.push(existingAlliance ? "alliance BISS#833 already exists" : "would create alliance BISS#833");
+    summary.push(existingAlliance ? "alliance BISS#833 already exists and would be refreshed" : "would create alliance BISS#833");
   } else {
     await db.createCollection("alliances").catch((err) => {
       if (err.codeName !== "NamespaceExists") throw err;
     });
+    const timestamp = now();
     await db.collection("alliances").updateOne(
       { allianceId: defaults.allianceId },
       {
-        $setOnInsert: alliance,
-        $set: { updatedAt: now() }
+        $set: { ...alliance, updatedAt: timestamp },
+        $setOnInsert: { createdAt: timestamp }
       },
       { upsert: true }
     );
@@ -109,9 +126,10 @@ async function up(db, { dryRun, log }) {
   }
 
   const passwordHashes = dryRun
-    ? { master: "<bcrypt hash>", supervisor: "<bcrypt hash>", standard: "<bcrypt hash>" }
+    ? { master: "<bcrypt hash>", admin: "<bcrypt hash>", supervisor: "<bcrypt hash>", standard: "<bcrypt hash>" }
     : {
         master: await bcrypt.hash(defaults.pins.master, 12),
+        admin: await bcrypt.hash(defaults.pins.admin, 12),
         supervisor: await bcrypt.hash(defaults.pins.supervisor, 12),
         standard: await bcrypt.hash(defaults.pins.standard, 12)
       };
@@ -140,28 +158,31 @@ async function up(db, { dryRun, log }) {
     }
   }
 
-  const adminAccount = await db.collection("users").findOne({ email: "admin@biss833.local" });
-  if (adminAccount) {
-    if (dryRun) {
-      summary.push("would remove obsolete account admin@biss833.local");
-    } else {
-      await db.collection("users").deleteOne({ email: "admin@biss833.local" });
-      summary.push("removed obsolete account admin@biss833.local");
-    }
-  }
-
   for (const account of accountDocs(passwordHashes)) {
-    const existing = await db.collection("users").findOne({ email: account.email });
-    if (existing) {
-      summary.push(`account ${account.email} already exists`);
+    const timestamp = now();
+    const { email, setFields, insertFields } = splitAccountForUpdate({ ...account, createdAt: timestamp });
+    if (dryRun) {
+      const existing = await db.collection("users").findOne({ email });
+      summary.push(existing ? `would refresh account ${email} without changing existing PIN hash` : `would create account ${email} with hashed PIN`);
       continue;
     }
-    if (dryRun) {
-      summary.push(`would create account ${account.email} with hashed PIN`);
-    } else {
-      await db.collection("users").insertOne({ ...account, createdAt: now(), updatedAt: now() });
-      summary.push(`created account ${account.email} with hashed PIN`);
-    }
+
+    await db.collection("users").updateOne(
+      { email },
+      {
+        $set: { ...setFields, updatedAt: timestamp },
+        $setOnInsert: insertFields
+      },
+      { upsert: true }
+    );
+    await db.collection("users").updateOne(
+      {
+        email,
+        $or: [{ passwordHash: { $exists: false } }, { passwordHash: null }, { passwordHash: "" }]
+      },
+      { $set: { passwordHash: account.passwordHash, updatedAt: now() } }
+    );
+    summary.push(`ensured account ${email} exists with hashed PIN`);
   }
 
   for (const item of summary) log(`  - ${item}`);
@@ -169,6 +190,6 @@ async function up(db, { dryRun, log }) {
 
 module.exports = {
   id: "001_production_alliance_seed",
-  description: "Seed production BISS#833 alliance, add default allianceId, and create master, supervisor, and standard accounts.",
+  description: "Seed production BISS#833 alliance, add default allianceId, and create master, admin, supervisor, and standard accounts.",
   up
 };
