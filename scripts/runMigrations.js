@@ -6,71 +6,51 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const { MongoClient } = require("mongodb");
+const { getMigrationConfig } = require("./migrationLib/config");
 
-const dryRun = process.argv.includes("--dry-run");
 const migrationsDir = path.join(__dirname, "migrations");
 
-function log(message) {
-  console.log(message);
+function parseArgs(argv = process.argv.slice(2)) {
+  return { dryRun: argv.includes("--dry-run"), resetDefaultPins: argv.includes("--reset-default-pins") };
 }
-
-async function loadMigrations() {
-  return fs
-    .readdirSync(migrationsDir)
-    .filter((file) => /^\d+_.*\.js$/.test(file))
-    .sort()
-    .map((file) => ({ file, migration: require(path.join(migrationsDir, file)) }));
+function log(message) { console.log(message); }
+function loadMigrations() {
+  return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
+    const migration = require(path.join(migrationsDir, file));
+    const hasExplicitId = Object.prototype.hasOwnProperty.call(migration, "id");
+    const id = migration.id || migration.name;
+    return { file, id, migration, usesDbSignature: hasExplicitId };
+  });
 }
-
-async function main() {
+async function invokeMigration(entry, db, options) {
+  if (entry.usesDbSignature || entry.migration.up.length >= 2) return entry.migration.up(db, options);
+  return entry.migration.up({ db, dryRun: options.dryRun, config: options.config, options, log: options.log });
+}
+async function runMigrations(args = parseArgs()) {
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("Missing MONGO_URI in environment variables.");
-
   const client = new MongoClient(uri);
   await client.connect();
-
   try {
     const db = client.db();
     const schemaMigrations = db.collection("schema_migrations");
-    if (!dryRun) {
-      await schemaMigrations.createIndex({ id: 1 }, { unique: true });
-    }
-
-    log(dryRun ? "Running migrations in dry-run mode..." : "Running migrations...");
-
+    if (!args.dryRun) await schemaMigrations.createIndex({ id: 1 }, { unique: true });
+    log(args.dryRun ? "Running migrations in dry-run mode..." : "Running migrations...");
     let executed = 0;
-    for (const { file, migration } of await loadMigrations()) {
-      if (!migration.id || typeof migration.up !== "function") {
-        throw new Error(`Invalid migration file: ${file}`);
-      }
-
-      const alreadyApplied = await schemaMigrations.findOne({ id: migration.id });
-      if (alreadyApplied) {
-        log(`Skipping ${migration.id}: already applied.`);
-        continue;
-      }
-
-      log(`${dryRun ? "Dry-run" : "Applying"} ${migration.id}: ${migration.description || file}`);
-      await migration.up(db, { dryRun, log });
-
-      if (!dryRun) {
-        await schemaMigrations.insertOne({
-          id: migration.id,
-          file,
-          description: migration.description || "",
-          appliedAt: new Date()
-        });
-      }
+    for (const entry of loadMigrations()) {
+      const { file, id, migration } = entry;
+      if (!id || typeof migration.up !== "function") throw new Error(`Invalid migration file: ${file}`);
+      const alreadyApplied = await schemaMigrations.findOne({ id });
+      if (alreadyApplied) { log(`Skipping ${id}: already applied.`); continue; }
+      log(`${args.dryRun ? "Dry-run" : "Applying"} ${id}: ${migration.description || file}`);
+      const result = await invokeMigration(entry, db, { ...args, config: getMigrationConfig(), log });
+      if (result) log(`  - result: ${JSON.stringify(result)}`);
+      if (!args.dryRun) await schemaMigrations.updateOne({ id }, { $setOnInsert: { id, file, description: migration.description || "", appliedAt: new Date() } }, { upsert: true });
       executed += 1;
     }
-
-    log(dryRun ? `Dry-run complete. Pending migrations inspected: ${executed}.` : `Migrations complete. Applied: ${executed}.`);
-  } finally {
-    await client.close();
-  }
+    log(args.dryRun ? `Dry-run complete. Pending migrations inspected: ${executed}.` : `Migrations complete. Applied: ${executed}.`);
+  } finally { await client.close(); }
 }
 
-main().catch((err) => {
-  console.error(`Migration failed: ${err.message}`);
-  process.exit(1);
-});
+if (require.main === module) runMigrations().catch((err) => { console.error(`Migration failed: ${err.message}`); process.exit(1); });
+module.exports = { runMigrations, parseArgs, loadMigrations };
