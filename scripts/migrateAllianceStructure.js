@@ -1,19 +1,10 @@
-require('dotenv').config();
+// Backward-compatible wrapper: use the versioned, safe migration runner.
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const Alliance = require('../models/alliance');
-const Account = require('../models/account');
-const { DEFAULT_ALLIANCE_CODE, DEFAULT_SERVER_NUMBER, DEFAULT_ALLIANCE_ID } = require('../utils/tenant');
-const dryRun = process.argv.includes('--dry-run');
-const appCollections = ['players','playerpowerhistories','performancevsevents','performancevsrows','eventlogs'];
-async function updateMany(col, filter, update){ if(dryRun) return {matchedCount: await col.countDocuments(filter), modifiedCount:0, dryRun:true}; return col.updateMany(filter, update); }
-async function upsertAccount(username, role, pin, allianceId){ const pinHash=await bcrypt.hash(pin,10); if(dryRun) return {username, dryRun:true}; return Account.updateOne({username},{$set:{role,pinHash,isActive:true,allianceId}}, {upsert:true}); }
-(async()=>{ if(!process.env.MONGO_URI) throw new Error('MONGO_URI mancante'); await mongoose.connect(process.env.MONGO_URI); const db=mongoose.connection.db; const summary={collections:{},accounts:[]};
- const allianceDoc={allianceId:DEFAULT_ALLIANCE_ID,code:DEFAULT_ALLIANCE_CODE,codeNormalized:DEFAULT_ALLIANCE_CODE,serverNumber:DEFAULT_SERVER_NUMBER,displayName:DEFAULT_ALLIANCE_CODE,isActive:true};
- if(dryRun) console.log('[dry-run] upsert alliance', allianceDoc); else await Alliance.updateOne({allianceId:DEFAULT_ALLIANCE_ID},{$set:allianceDoc},{upsert:true}); summary.alliance=allianceDoc;
- for(const name of appCollections){ const exists=await db.listCollections({name}).toArray(); if(!exists.length){ summary.collections[name]={warning:'missing'}; continue; } const col=db.collection(name); const setRes=await updateMany(col,{ $or:[{allianceId:{$exists:false}},{allianceId:null},{allianceKey:`${DEFAULT_ALLIANCE_CODE}#${DEFAULT_SERVER_NUMBER}`},{allianceCode:DEFAULT_ALLIANCE_CODE,serverNumber:DEFAULT_SERVER_NUMBER}]},{$set:{allianceId:DEFAULT_ALLIANCE_ID}}); const unsetRes=await updateMany(col,{allianceId:{$exists:true},$or:[{allianceCode:{$exists:true}},{serverNumber:{$exists:true}},{allianceKey:{$exists:true}}]},{$unset:{allianceCode:'',serverNumber:'',allianceKey:''}}); if(!dryRun){ for(const idx of await col.indexes()){ const keys=Object.keys(idx.key||{}); if(keys.some(k=>['allianceKey','allianceCode','serverNumber'].includes(k))){ try{ await col.dropIndex(idx.name); }catch(e){ summary.warnings=(summary.warnings||[]).concat(`dropIndex ${name}.${idx.name}: ${e.message}`); } } } } summary.collections[name]={allianceIdMatched:setRes.matchedCount,allianceIdModified:setRes.modifiedCount,unsetMatched:unsetRes.matchedCount,unsetModified:unsetRes.modifiedCount}; }
- if(!dryRun){ await db.collection('alliances').createIndex({allianceId:1},{unique:true}); await db.collection('alliances').createIndex({serverNumber:1,codeNormalized:1},{unique:true}); }
- await updateMany(db.collection('accounts'),{role:'master'},{$set:{allianceId:null},$unset:{allianceCode:'',serverNumber:'',allianceKey:''}});
- summary.accounts.push(await upsertAccount('master','master','550130',null)); summary.accounts.push(await upsertAccount(`${DEFAULT_ALLIANCE_CODE}#${DEFAULT_SERVER_NUMBER}:admin`,'alliance_admin','111111',DEFAULT_ALLIANCE_ID)); summary.accounts.push(await upsertAccount(`${DEFAULT_ALLIANCE_CODE}#${DEFAULT_SERVER_NUMBER}:supervisor`,'supervisor','151515',DEFAULT_ALLIANCE_ID));
- await updateMany(db.collection('accounts'),{role:{$ne:'master'},$or:[{allianceId:{$exists:false}},{allianceId:null},{allianceKey:`${DEFAULT_ALLIANCE_CODE}#${DEFAULT_SERVER_NUMBER}`}]},{$set:{allianceId:DEFAULT_ALLIANCE_ID}}); await updateMany(db.collection('accounts'),{allianceId:{$exists:true}},{$unset:{allianceCode:'',serverNumber:'',allianceKey:''}});
- console.log(JSON.stringify({dryRun,summary},null,2)); await mongoose.disconnect(); })().catch(async e=>{ console.error(e); try{await mongoose.disconnect()}catch{} process.exit(1); });
+const { runMigrations, parseArgs } = require('./runMigrations');
+
+runMigrations(parseArgs(process.argv.slice(2)))
+  .catch((err) => {
+    console.error(err.message);
+    process.exitCode = 1;
+  })
+  .finally(() => mongoose.disconnect().catch(() => {}));
