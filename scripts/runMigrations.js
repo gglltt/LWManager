@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const { MongoClient } = require("mongodb");
 const { getMigrationConfig } = require("./migrationLib/config");
+const { normalizeSchemaMigrations, ensureUniqueNameIndex, successfulNamesFromNormalizedDocs } = require("./migrationLib/schemaMigrations");
 
 const migrationsDir = path.join(__dirname, "migrations");
 
@@ -17,7 +18,8 @@ function log(message) { console.log(message); }
 function loadMigrations() {
   return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
     const migration = require(path.join(migrationsDir, file));
-    migration.id = migration.id || migration.name;
+    if (!migration.name && migration.id) migration.name = migration.id;
+    migration.file = migration.file || file;
     return { file, migration };
   });
 }
@@ -33,17 +35,41 @@ async function runMigrations(args = parseArgs()) {
   try {
     const db = client.db();
     const schemaMigrations = db.collection("schema_migrations");
-    if (!args.dryRun) await schemaMigrations.createIndex({ id: 1 }, { unique: true });
+    const normalization = await normalizeSchemaMigrations(db, { dryRun: args.dryRun });
+    if (args.dryRun) {
+      log(`Dry-run schema_migrations normalization: would normalize ${normalization.normalized} of ${normalization.inspected} document(s).`);
+    } else {
+      await ensureUniqueNameIndex(db);
+    }
+    const dryRunSuccessNames = successfulNamesFromNormalizedDocs(normalization.normalizedDocs);
     log(args.dryRun ? "Running migrations in dry-run mode..." : "Running migrations...");
     let executed = 0;
     for (const { file, migration } of loadMigrations()) {
-      if (!migration.id || typeof migration.up !== "function") throw new Error(`Invalid migration file: ${file}`);
-      const alreadyApplied = await schemaMigrations.findOne({ id: migration.id });
-      if (alreadyApplied) { log(`Skipping ${migration.id}: already applied.`); continue; }
-      log(`${args.dryRun ? "Dry-run" : "Applying"} ${migration.id}: ${migration.description || file}`);
-      const result = await invokeMigration(migration, db, { ...args, config: getMigrationConfig(), log });
-      if (result) log(`  - result: ${JSON.stringify(result)}`);
-      if (!args.dryRun) await schemaMigrations.updateOne({ id: migration.id }, { $setOnInsert: { id: migration.id, file, description: migration.description || "", appliedAt: new Date() } }, { upsert: true });
+      if (!migration.name || typeof migration.name !== "string" || typeof migration.up !== "function") throw new Error(`Invalid migration file: ${file}`);
+      const alreadyApplied = args.dryRun
+        ? dryRunSuccessNames.has(migration.name)
+        : await schemaMigrations.findOne({ name: migration.name, status: "success" });
+      if (alreadyApplied) { log(`Skipping ${migration.name}: already applied.`); continue; }
+      log(`${args.dryRun ? "Dry-run" : "Applying"} ${migration.name}: ${migration.description || file}`);
+      const started = Date.now();
+      try {
+        const result = await invokeMigration(migration, db, { ...args, config: getMigrationConfig(), log });
+        const durationMs = Date.now() - started;
+        if (result) log(`  - result: ${JSON.stringify(result)}`);
+        if (!args.dryRun) await schemaMigrations.updateOne(
+          { name: migration.name },
+          { $set: { name: migration.name, file, description: migration.description || "", status: "success", executedAt: new Date(), summary: result || null, durationMs }, $unset: { error: "", appliedAt: "" } },
+          { upsert: true }
+        );
+      } catch (err) {
+        const durationMs = Date.now() - started;
+        if (!args.dryRun) await schemaMigrations.updateOne(
+          { name: migration.name },
+          { $set: { name: migration.name, file, description: migration.description || "", status: "failed", executedAt: new Date(), error: err.message, durationMs } },
+          { upsert: true }
+        );
+        throw err;
+      }
       executed += 1;
     }
     log(args.dryRun ? `Dry-run complete. Pending migrations inspected: ${executed}.` : `Migrations complete. Applied: ${executed}.`);

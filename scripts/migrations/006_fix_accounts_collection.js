@@ -83,7 +83,7 @@ async function warnUsers(db, log) {
 }
 
 module.exports = {
-  id: "006_fix_accounts_collection",
+  name: "006_fix_accounts_collection",
   description: "Ensure authentication uses accounts, seed default master/standard/supervisor accounts, and migrate useful legacy users without deleting users.",
   async up({ db, dryRun = false, log = console.log, config, options = {} }) {
     if (!db || typeof db.collection !== "function") {
