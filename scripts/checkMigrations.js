@@ -17,8 +17,11 @@ const requiredAccounts = [
   { username: config.supervisorUsername, pin: config.supervisorPin, role: "supervisor", allianceId: config.allianceId }
 ];
 
-function migrationIds() {
-  return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => (require(path.join(migrationsDir, file)).id || require(path.join(migrationsDir, file)).name));
+function migrationNames() {
+  return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
+    const migration = require(path.join(migrationsDir, file));
+    return migration.name || migration.id;
+  });
 }
 async function collectionExists(db, name) { return db.listCollections({ name }, { nameOnly: true }).hasNext(); }
 function authCodeUsesAccounts() {
@@ -73,8 +76,29 @@ async function main() {
     if (await collectionExists(db, "users")) warnings.push("Collection users rilevata ma non usata dal sistema di autenticazione. Gli account ufficiali sono in accounts.");
 
     if (await collectionExists(db, "schema_migrations")) {
-      for (const id of migrationIds()) if (!(await db.collection("schema_migrations").findOne({ id }))) warnings.push(`migration ${id} is not recorded in schema_migrations`);
-    } else warnings.push("schema_migrations collection does not exist yet");
+      const schemaMigrations = db.collection("schema_migrations");
+      const missingNames = await schemaMigrations.countDocuments({ $or: [{ name: null }, { name: { $exists: false } }, { name: "" }] });
+      if (missingNames) failures.push(`${missingNames} schema_migrations document(s) have null/missing/empty name`);
+      const idOnly = await schemaMigrations.countDocuments({ id: { $exists: true }, $or: [{ name: null }, { name: { $exists: false } }, { name: "" }] });
+      if (idOnly) failures.push(`${idOnly} schema_migrations document(s) have id but no canonical name`);
+      const duplicateNames = await schemaMigrations.aggregate([
+        { $match: { name: { $type: "string", $ne: "" } } },
+        { $group: { _id: "$name", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } }
+      ]).toArray();
+      for (const duplicate of duplicateNames) failures.push(`schema_migrations duplicate name: ${duplicate._id} (${duplicate.count} records)`);
+      const indexes = await schemaMigrations.indexes();
+      const uniqueNameIndex = indexes.find((index) => JSON.stringify(index.key) === JSON.stringify({ name: 1 }) && index.unique === true);
+      if (!uniqueNameIndex) failures.push("schema_migrations is missing a unique index on name");
+      const fileNames = migrationNames();
+      for (const name of fileNames) {
+        const record = await schemaMigrations.findOne({ name, status: "success" });
+        if (!record) warnings.push(`migration ${name} is not recorded as success in schema_migrations`);
+      }
+      const known = new Set(fileNames);
+      const applied = await schemaMigrations.find({ status: "success", name: { $type: "string" } }).project({ name: 1 }).toArray();
+      for (const record of applied) if (!known.has(record.name)) warnings.push(`applied migration ${record.name} has no matching file in scripts/migrations`);
+    } else failures.push("schema_migrations collection does not exist");
 
     for (const warning of warnings) console.warn(`Warning: ${warning}`);
     if (failures.length) {

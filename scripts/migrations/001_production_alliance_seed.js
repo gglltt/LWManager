@@ -4,7 +4,7 @@ const { defaults } = require("../migrationConfig");
 
 const now = () => new Date();
 
-async function up(db, { dryRun, log }) {
+async function up({ db, dryRun, log }) {
   const alliance = {
     allianceId: defaults.allianceId,
     code: defaults.allianceCode,
@@ -29,7 +29,7 @@ async function up(db, { dryRun, log }) {
 }
 
 module.exports = {
-  id: "001_production_alliance_seed",
+  name: "001_production_alliance_seed",
   description: "Legacy production seed retained for migration history; users account seeding disabled in favor of accounts.",
   up
 };
