@@ -17,13 +17,12 @@ function log(message) { console.log(message); }
 function loadMigrations() {
   return fs.readdirSync(migrationsDir).filter((file) => /^\d+_.*\.js$/.test(file)).sort().map((file) => {
     const migration = require(path.join(migrationsDir, file));
-    migration.usesDbSignature = Object.prototype.hasOwnProperty.call(migration, 'id');
     migration.id = migration.id || migration.name;
     return { file, migration };
   });
 }
 async function invokeMigration(migration, db, options) {
-  if (migration.usesDbSignature || migration.up.length >= 2) return migration.up(db, options);
+  if (migration.up.length >= 2) return migration.up(db, options);
   return migration.up({ db, dryRun: options.dryRun, config: options.config, options, log: options.log });
 }
 async function runMigrations(args = parseArgs()) {
