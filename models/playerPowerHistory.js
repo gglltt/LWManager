@@ -14,9 +14,7 @@ const decimalField = {
 
 const PlayerPowerHistorySchema = new mongoose.Schema(
   {
-    allianceCode: { type: String, required: true, uppercase: true, trim: true, index: true },
-    serverNumber: { type: Number, required: true, index: true },
-    allianceKey: { type: String, required: true, uppercase: true, trim: true, index: true },
+    allianceId: { type: Number, required: true, index: true },
     seqId: { type: Number, unique: true, index: true },
     player: { type: String, required: true, trim: true, index: true },
     snapshotDate: { type: Date, required: true, index: true },
@@ -29,9 +27,9 @@ const PlayerPowerHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-PlayerPowerHistorySchema.index({ allianceKey: 1, player: 1, snapshotDay: 1 }, { unique: true });
-PlayerPowerHistorySchema.index({ allianceKey: 1, player: 1, createdAt: -1 });
-PlayerPowerHistorySchema.index({ allianceKey: 1, createdAt: -1 });
+PlayerPowerHistorySchema.index({ allianceId: 1, player: 1, snapshotDay: 1 }, { unique: true });
+PlayerPowerHistorySchema.index({ allianceId: 1, player: 1, createdAt: -1 });
+PlayerPowerHistorySchema.index({ allianceId: 1, createdAt: -1 });
 
 PlayerPowerHistorySchema.pre("save", async function assignSeqId(next) {
   if (!this.isNew || this.seqId) return next();

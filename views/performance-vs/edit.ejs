@@ -6,6 +6,7 @@
   <div class="alert success" data-load-message hidden></div>
   <div class="alert error" data-load-error hidden></div>
   <form class="form" method="post" action="/performance-vs/events" data-performance-form data-autoload-event>
+    <% if (user && user.isMaster) { %><div class="field"><label><%= t("select_alliance") %></label><select name="allianceId" required><option value=""><%= t("select_alliance") %></option><% (alliances || []).forEach(a => { %><option value="<%= a.allianceId %>" <%= Number(selectedAllianceId || form.allianceId) === Number(a.allianceId) ? "selected" : "" %>><%= a.displayName || a.code %>#<%= a.serverNumber %></option><% }) %></select></div><% } %>
     <div class="perfHeaderGrid">
       <div class="field perfFieldYear"><label><%= t('perf_year') %></label><input class="noSpinner perfInputYear" name="year" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" required value="<%= form.year || '' %>" data-week-year /></div>
       <div class="field perfFieldWeek"><label><%= t('perf_week') %></label><div class="weekInline"><input class="noSpinner perfInputWeek" name="week" type="text" inputmode="numeric" pattern="([1-9]|[1-4][0-9]|5[0-3])" maxlength="2" required value="<%= form.week || '' %>" data-week-number /><span class="help weekRangeInline" data-week-range><%= event ? `${new Date(event.weekStartDate).toLocaleDateString(localeTag)} - ${new Date(event.weekEndDate).toLocaleDateString(localeTag)}` : '' %></span></div></div>

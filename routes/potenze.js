@@ -10,6 +10,7 @@ const { translateTextAuto } = require("../utils/translate");
 const { HISTORY_RETENTION_DAYS } = require("../config/history");
 const rateLimit = require("express-rate-limit");
 const { scopeFilter, tenantFields, selectedTenantFromRequest } = require("../utils/tenant");
+const Alliance = require("../models/alliance");
 
 const router = express.Router();
 
@@ -72,7 +73,7 @@ function validateNickname(nickname, t) {
 }
 
 function isAdmin(user) { return user && user.authLevel >= 5; }
-function canEdit(user) { return user && ["editor", "master"].includes(user.role); }
+function canEdit(user) { return user && ["editor", "alliance_admin", "master"].includes(user.role); }
 function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
 
 function normalizeSortParams(req) {
@@ -120,11 +121,11 @@ async function addAutoTranslatedNotes(players, targetLang) {
   return translatedPlayers;
 }
 
-async function existsNicknameInsensitive(nickname, excludeId = null, allianceKey = null) {
+async function existsNicknameInsensitive(nickname, excludeId = null, allianceId = null) {
   const query = {
     nickname: { $regex: `^${escapeRegex(nickname)}$`, $options: "i" }
   };
-  if (allianceKey) query.allianceKey = allianceKey;
+  if (allianceId) query.allianceId = Number(allianceId);
 
   if (excludeId) {
     query._id = { $ne: excludeId };
@@ -173,6 +174,7 @@ router.get("/", requireAuth, async (req, res) => {
       isAdmin: isAdmin(req.user),
       canEdit: canEdit(req.user),
       tenantFilter: selectedTenantFromRequest(req),
+      alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
       players,
       playerCount,
       types: TYPE_OPTIONS,
@@ -201,7 +203,8 @@ router.get("/", requireAuth, async (req, res) => {
       dir: "desc",
       q: "",
       historyRetentionDays: HISTORY_RETENTION_DAYS,
-      query: req.query
+      query: req.query,
+      alliances: []
     });
   }
 });
@@ -214,6 +217,8 @@ router.get("/new", requireAuth, async (req, res) => {
     user: req.user,
     isAdmin: isAdmin(req.user),
     playerCount,
+    alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
+    selectedAllianceId: selectedTenantFromRequest(req).allianceId || "",
     types: TYPE_OPTIONS,
     roles: ROLE_OPTIONS,
     error: null,
@@ -246,6 +251,8 @@ router.post("/new", requireAuth, async (req, res) => {
         user: req.user,
         isAdmin: isAdmin(req.user),
         playerCount,
+        alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
+        selectedAllianceId: req.body.allianceId || "",
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: nickCheck.msg,
@@ -254,7 +261,7 @@ router.post("/new", requireAuth, async (req, res) => {
       });
     }
 
-    const currentTenant = req.user.isMaster ? selectedTenantFromRequest(req).allianceKey : req.user.allianceKey;
+    const currentTenant = req.user.isMaster ? Number(req.body.allianceId || selectedTenantFromRequest(req).allianceId) : req.user.allianceId;
     if (!currentTenant) return res.status(400).send("400 - Seleziona un tenant");
     const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, null, currentTenant);
     if (nicknameAlreadyExists) {
@@ -262,6 +269,8 @@ router.post("/new", requireAuth, async (req, res) => {
         user: req.user,
         isAdmin: isAdmin(req.user),
         playerCount,
+        alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
+        selectedAllianceId: req.body.allianceId || "",
         types: TYPE_OPTIONS,
         roles: ROLE_OPTIONS,
         error: t("err_nickname_exists"),
@@ -271,7 +280,7 @@ router.post("/new", requireAuth, async (req, res) => {
     }
 
     const createdPlayer = await Player.create({
-      ...tenantFields(currentTenant.split("#")[0], currentTenant.split("#")[1]),
+      ...tenantFields(currentTenant),
       nickname: nickCheck.value,
       role: normalizeRole(req.body.role),
 
@@ -300,6 +309,8 @@ router.post("/new", requireAuth, async (req, res) => {
       user: req.user,
       isAdmin: isAdmin(req.user),
       playerCount,
+      alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
+      selectedAllianceId: req.body.allianceId || "",
       types: TYPE_OPTIONS,
       roles: ROLE_OPTIONS,
       error: (res.locals.t || ((k) => k))("err_internal_create_player"),
@@ -311,7 +322,7 @@ router.post("/new", requireAuth, async (req, res) => {
 
 router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
   try {
-    const players = await Player.find(tenantQuery(req)).sort({ allianceKey: 1, nickname: 1 }).lean();
+    const players = await Player.find(tenantQuery(req)).sort({ allianceId: 1, nickname: 1 }).lean();
 
     const rows = players.map((p) => ({
       Nickname: p.nickname || "",
@@ -425,7 +436,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
       });
     }
 
-    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, player._id, player.allianceKey);
+    const nicknameAlreadyExists = await existsNicknameInsensitive(nickCheck.value, player._id, player.allianceId);
     if (nicknameAlreadyExists) {
       const fake = { ...player.toObject(), ...req.body };
       return res.render("potenze/edit", {
@@ -470,7 +481,7 @@ router.post("/:id/edit", requireAuth, async (req, res) => {
 
 router.get("/:id/history-data", requireAuth, async (req, res) => {
   try {
-    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id })).select("nickname allianceKey").lean();
+    const player = await Player.findOne(tenantQuery(req, { _id: req.params.id })).select("nickname allianceId").lean();
     if (!player) {
       return res.status(404).json({ ok: false, error: (res.locals.t || ((k) => k))("err_player_not_found") });
     }
@@ -486,7 +497,7 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
 
     const records = await PlayerPowerHistory.find({
       player: player.nickname,
-      allianceKey: player.allianceKey,
+      allianceId: player.allianceId,
       snapshotDate: { $gte: from, $lte: to }
     })
       .sort({ snapshotDate: 1 })

@@ -33,11 +33,8 @@ async function createEventLog(req, eventType, details = "") {
     }
 
     const user = req.user || {};
-    const allianceKey = user.allianceKey || (String(details || "").match(/allianceKey=([^|]+)/)?.[1]) || "GLOBAL";
     await EventLog.create({
-      allianceCode: user.allianceCode || null,
-      serverNumber: user.serverNumber || null,
-      allianceKey,
+      allianceId: user.allianceId ?? null,
       role: user.role || null,
       accountId: user.accountId || user.userId || null,
       eventType,

@@ -22,6 +22,7 @@
   <% } %>
 
   <form class="form" method="POST" action="/potenze/new">
+    <% if (user && user.isMaster) { %><div class="field"><label><%= t("select_alliance") %></label><select name="allianceId" required><option value=""><%= t("select_alliance") %></option><% (alliances || []).forEach(a => { %><option value="<%= a.allianceId %>" <%= Number(selectedAllianceId || form.allianceId) === Number(a.allianceId) ? "selected" : "" %>><%= a.displayName || a.code %>#<%= a.serverNumber %></option><% }) %></select></div><% } %>
     <div class="formGrid2">
       <div class="field">
         <label for="nickname"><%= t("nickname_required") %></label>
