@@ -76,6 +76,17 @@ async function normalizeSchemaMigrations(db, { dryRun = false } = {}) {
   return { created, inspected: docs.length, normalized: actions.length, actions, normalizedDocs };
 }
 
+async function dropLegacyIdIndex(db, { dryRun = false } = {}) {
+  if (!(await collectionExists(db))) return dryRun ? { wouldDropIndexes: [] } : { droppedIndexes: [] };
+  const collection = db.collection(COLLECTION);
+  const indexes = await collection.indexes();
+  const legacyIdIndex = indexes.find((index) => index.name === "id_1");
+  if (!legacyIdIndex) return dryRun ? { wouldDropIndexes: [] } : { droppedIndexes: [] };
+  if (dryRun) return { wouldDropIndexes: ["id_1"] };
+  await collection.dropIndex("id_1");
+  return { droppedIndexes: ["id_1"] };
+}
+
 async function ensureUniqueNameIndex(db, { dryRun = false } = {}) {
   if (dryRun) return { collection: COLLECTION, keys: { name: 1 }, options: { unique: true }, dryRun: true };
   const collection = db.collection(COLLECTION);
@@ -100,6 +111,7 @@ module.exports = {
   COLLECTION,
   normalizeSchemaMigrations,
   ensureSchemaMigrationsCollection,
+  dropLegacyIdIndex,
   ensureUniqueNameIndex,
   successfulNamesFromNormalizedDocs
 };
