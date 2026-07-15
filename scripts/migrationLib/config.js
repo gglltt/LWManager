@@ -12,6 +12,7 @@ function getMigrationConfig() {
     supervisorPin: String(process.env.DEFAULT_SUPERVISOR_PIN || '151515'),
     masterPin: String(process.env.DEFAULT_MASTER_PIN || '550130'),
     adminUsername: `${allianceCode}#${serverNumber}:admin`,
+    standardUsername: `${allianceCode}#${serverNumber}:standard`,
     supervisorUsername: `${allianceCode}#${serverNumber}:supervisor`,
     masterUsername: 'master'
   };

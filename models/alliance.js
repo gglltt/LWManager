@@ -18,4 +18,4 @@ AllianceSchema.pre("validate", function normalize(next) {
 });
 AllianceSchema.index({ serverNumber: 1, codeNormalized: 1 }, { unique: true });
 
-module.exports = mongoose.model("Alliance", AllianceSchema);
+module.exports = mongoose.model("Alliance", AllianceSchema, "alliances");
