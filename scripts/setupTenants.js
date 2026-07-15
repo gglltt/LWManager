@@ -15,7 +15,7 @@ function masterUsername() {
 }
 
 function accountUsername(allianceKey, role) {
-  return `${allianceKey}:${role === "alliance_admin" ? "admin" : role}`;
+  return `${allianceKey}:${role}`;
 }
 
 async function pinHash(pin) {
@@ -29,7 +29,7 @@ async function accountExists(username, excludeId) {
 function expectedUsername(account, tf) {
   if (account.role === "master") return masterUsername();
   const allianceKey = account.allianceKey || (account.allianceCode && account.serverNumber ? `${account.allianceCode}#${account.serverNumber}` : null);
-  if (allianceKey === tf.allianceKey && ["alliance_admin", "supervisor", "standard"].includes(account.role)) {
+  if (allianceKey === tf.allianceKey && ["supervisor", "standard"].includes(account.role)) {
     return accountUsername(tf.allianceKey, account.role);
   }
   return null;
@@ -66,28 +66,22 @@ async function upsertAccount({ username, doc, pin }) {
     { username },
     {
       $setOnInsert: {
-        pinHash: await pinHash(pin),
         createdAt: now
       },
       $set: {
         ...doc,
         username,
+        pinHash: await pinHash(pin),
         updatedAt: now
       }
     },
     { upsert: true }
   );
 
-  let pinUpdated = false;
-  if (existing && !existing.pinHash) {
-    await Account.updateOne({ _id: existing._id }, { $set: { pinHash: await pinHash(pin), updatedAt: new Date() } });
-    pinUpdated = true;
-  }
-
   return {
     username,
     status: result.upsertedCount ? "created" : "existing",
-    pinUpdated
+    pinUpdated: Boolean(existing)
   };
 }
 
@@ -109,26 +103,23 @@ async function main() {
   accountSummary.push(await upsertAccount({
     username: masterUsername(),
     doc: { role: "master", allianceKey: GLOBAL_ALLIANCE_KEY, isActive: true },
-    pin: process.env.MASTER_PIN || "550130"
+    pin: "550130"
   }));
-  accountSummary.push(await upsertAccount({
-    username: accountUsername(tf.allianceKey, "alliance_admin"),
-    doc: { ...tf, role: "alliance_admin", isActive: true },
-    pin: process.env.DEFAULT_ALLIANCE_ADMIN_PIN || "111111"
-  }));
+  const removedAdmins = await Account.deleteMany({ ...tf, role: "alliance_admin" });
   accountSummary.push(await upsertAccount({
     username: accountUsername(tf.allianceKey, "supervisor"),
     doc: { ...tf, role: "supervisor", isActive: true },
-    pin: process.env.DEFAULT_ALLIANCE_SUPERVISOR_PIN || "151515"
+    pin: "151515"
   }));
   accountSummary.push(await upsertAccount({
     username: accountUsername(tf.allianceKey, "standard"),
     doc: { ...tf, role: "standard", isActive: true },
-    pin: process.env.DEFAULT_ALLIANCE_STANDARD_PIN || process.env.APP_PIN_STANDARD || "000000"
+    pin: "111111"
   }));
 
   console.log("setup_tenants_summary:");
   console.log(`tenant_updates=${tenantSummary.join("; ")}`);
+  console.log(`alliance_admin_removed=${removedAdmins.deletedCount}`);
   for (const account of accountSummary) {
     console.log(`account ${account.username}: ${account.status}${account.pinUpdated ? ", pinHash updated" : ""}`);
   }

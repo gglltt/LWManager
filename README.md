@@ -19,4 +19,4 @@ npm install
 
 ## Supervisor / Performance VS
 
-Set `SUPERVISOR_PIN` (or legacy-compatible `APP_PIN_SUPERVISOR`) to a dedicated 6-digit PIN to enable the supervisor role. Supervisors receive access level 3 and can use Performance VS; admins (level 5) can use it too. Standard users cannot access the Performance VS routes.
+Tenant setup creates only the required PIN accounts: `master` (PIN `550130`), `supervisor` (PIN `151515`), and `standard` (PIN `111111`). Supervisors receive access level 3 and can use Performance VS; standard users cannot access the Performance VS routes. Global administration remains reserved to `master`.
