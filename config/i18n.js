@@ -1541,82 +1541,46 @@ for (const lang of SUPPORTED_LANGS) {
 
 const NEWS_TRANSLATIONS = {
   it: {
-    nav_news: "Novità",
-    news_desc: "Guide e fogli utili della stagione",
-    news_title: "Novità",
-    news_intro: "Apri rapidamente i documenti aggiornati e i fogli di supporto.",
     season_guide: "Guida Stagione 6",
     guide_document: "Documento guida",
     guide_spreadsheet: "Foglio calcolo guida"
   },
   en: {
-    nav_news: "News",
-    news_desc: "Season guides and useful sheets",
-    news_title: "News",
-    news_intro: "Quickly open the updated documents and support sheets.",
     season_guide: "Season 6 Guide",
     guide_document: "Guide document",
     guide_spreadsheet: "Guide spreadsheet"
   },
   fr: {
-    nav_news: "Nouveautés",
-    news_desc: "Guides et feuilles utiles de la saison",
-    news_title: "Nouveautés",
-    news_intro: "Ouvrez rapidement les documents mis à jour et les feuilles de support.",
     season_guide: "Guide Saison 6",
     guide_document: "Document guide",
     guide_spreadsheet: "Feuille de calcul guide"
   },
   es: {
-    nav_news: "Novedades",
-    news_desc: "Guías y hojas útiles de la temporada",
-    news_title: "Novedades",
-    news_intro: "Abre rápidamente los documentos actualizados y las hojas de apoyo.",
     season_guide: "Guía Temporada 6",
     guide_document: "Documento guía",
     guide_spreadsheet: "Hoja de cálculo guía"
   },
   de: {
-    nav_news: "Neuigkeiten",
-    news_desc: "Saisonleitfäden und nützliche Tabellen",
-    news_title: "Neuigkeiten",
-    news_intro: "Öffne schnell die aktualisierten Dokumente und unterstützenden Tabellen.",
     season_guide: "Leitfaden Saison 6",
     guide_document: "Leitfaden-Dokument",
     guide_spreadsheet: "Leitfaden-Tabelle"
   },
   ar: {
-    nav_news: "المستجدات",
-    news_desc: "أدلة الموسم والجداول المفيدة",
-    news_title: "المستجدات",
-    news_intro: "افتح بسرعة المستندات المحدّثة وجداول الدعم.",
     season_guide: "دليل الموسم 6",
     guide_document: "مستند الدليل",
     guide_spreadsheet: "جدول الدليل"
   },
   pl: {
-    nav_news: "Nowości",
-    news_desc: "Przewodniki sezonowe i przydatne arkusze",
-    news_title: "Nowości",
-    news_intro: "Szybko otwieraj zaktualizowane dokumenty i arkusze pomocnicze.",
     season_guide: "Przewodnik sezonu 6",
     guide_document: "Dokument przewodnika",
     guide_spreadsheet: "Arkusz przewodnika"
   },
   sv: {
-    nav_news: "Nyheter",
-    news_desc: "Säsongsguider och användbara kalkylblad",
-    news_title: "Nyheter",
-    news_intro: "Öppna snabbt uppdaterade dokument och stödark.",
     season_guide: "Säsong 6-guide",
     guide_document: "Guidedokument",
     guide_spreadsheet: "Guidekalkylblad"
   },
   da: {
-    nav_news: "Nyheder",
-    news_desc: "Sæsongguider og nyttige ark",
-    news_title: "Nyheder",
-    news_intro: "Åbn hurtigt de opdaterede dokumenter og støtteark.",
     season_guide: "Sæson 6-guide",
     guide_document: "Guidedokument",
     guide_spreadsheet: "Guideark"
