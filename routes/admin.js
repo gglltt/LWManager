@@ -17,7 +17,43 @@ function username(code, server, role){ return `${normalizeAllianceCode(code)}#${
 async function upsertAllianceAccounts(alliance, standardPin, supervisorPin){ const specs=[{role:"standard",pin:standardPin},{role:"supervisor",pin:supervisorPin}]; for(const spec of specs){ if(!spec.pin) continue; const pinHash=await bcrypt.hash(String(spec.pin),10); await Account.updateOne({username:username(alliance.code,alliance.serverNumber,spec.role)},{$set:{allianceId:alliance.allianceId,role:spec.role,pinHash,isActive:true}}, {upsert:true}); } }
 router.get("/", requireAuth, requireMaster, (req, res) => { const config = getConfig(); res.render("admin/index", { user: req.user, syncEnabled: config.enabled, syncConfigError: validateConfig(config), syncMessage: req.query.syncMessage || "", syncStatus: req.query.syncStatus || "" }); });
 router.get("/alliances", requireAuth, requireMaster, async (req,res)=>{ const alliances=await Alliance.find({}).sort({allianceId:1}).lean(); res.render("admin/alliances",{user:req.user,alliances,message:req.query.message||"",error:req.query.error||"",credentials:null}); });
-router.post("/alliances", requireAuth, requireMaster, async (req,res)=>{ const t=res.locals.t||((k)=>k); const code=normalizeAllianceCode(req.body.code); const serverNumber=normalizeServerNumber(req.body.serverNumber); const standardPin=String(req.body.standardPin||req.body.adminPin||"").trim(); const supervisorPin=String(req.body.supervisorPin||"").trim(); const displayName=String(req.body.displayName||"").trim()||code; if(!isValidAllianceCode(code)||!isValidServerNumber(serverNumber)||!pinOk(standardPin)||!pinOk(supervisorPin)) return res.redirect(`/admin/alliances?error=${encodeURIComponent(t("err_invalid_input") || "Dati non validi")}`); const exists=await Alliance.findOne({codeNormalized:code,serverNumber}).lean(); if(exists) return res.redirect(`/admin/alliances?error=${encodeURIComponent(t("alliance_exists"))}`); const alliance=await Alliance.create({allianceId:await nextAllianceId(),code,codeNormalized:code,serverNumber,displayName,isActive:true}); await upsertAllianceAccounts(alliance,standardPin,supervisorPin); await createEventLog(req,"alliance_create",`allianceId=${alliance.allianceId}`); return res.redirect(`/admin/alliances?message=${encodeURIComponent(`${t("alliance_created")}. ${t("credentials_to_share")}: ${code}/${serverNumber} ${t("standard")} ${standardPin}, ${t("supervisor")} ${supervisorPin}`)}`); });
+router.post("/alliances", requireAuth, requireMaster, async (req, res, next) => {
+  const t = res.locals.t || ((k) => k);
+  const duplicateMessage = "Alleanza già esistente per questo server.";
+  try {
+    const code = String(req.body.code || "").trim();
+    const codeNormalized = code.toUpperCase();
+    const serverNumber = Number(req.body.serverNumber);
+    const standardPin = String(req.body.standardPin || req.body.adminPin || "").trim();
+    const supervisorPin = String(req.body.supervisorPin || "").trim();
+    const displayName = String(req.body.displayName || "").trim() || code;
+
+    if (!isValidAllianceCode(codeNormalized) || !isValidServerNumber(serverNumber) || !pinOk(standardPin) || !pinOk(supervisorPin)) {
+      return res.redirect(`/admin/alliances?error=${encodeURIComponent(t("err_invalid_input") || "Dati non validi")}`);
+    }
+
+    const exists = await Alliance.findOne({ serverNumber, codeNormalized }).lean();
+    if (exists) return res.redirect(`/admin/alliances?error=${encodeURIComponent(duplicateMessage)}`);
+
+    const alliance = await Alliance.create({
+      allianceId: await nextAllianceId(),
+      code,
+      codeNormalized,
+      serverNumber,
+      displayName,
+      isActive: true
+    });
+    await upsertAllianceAccounts(alliance, standardPin, supervisorPin);
+    await createEventLog(req, "alliance_create", `allianceId=${alliance.allianceId}`);
+    return res.redirect(`/admin/alliances?message=${encodeURIComponent(`${t("alliance_created")}. ${t("credentials_to_share")}: ${codeNormalized}/${serverNumber} ${t("standard")} ${standardPin}, ${t("supervisor")} ${supervisorPin}`)}`);
+  } catch (err) {
+    if (err && err.code === 11000) {
+      console.error("Duplicate alliance creation rejected", { keyPattern: err.keyPattern, keyValue: err.keyValue });
+      return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent(duplicateMessage)}`);
+    }
+    return next(err);
+  }
+});
 router.post("/alliances/:id/deactivate", requireAuth, requireMaster, async (req,res)=>{ const t=res.locals.t||((k)=>k); const allianceId=Number(req.params.id); await Alliance.updateOne({allianceId},{$set:{isActive:false}}); await createEventLog(req,"alliance_deactivate",`allianceId=${allianceId}`); res.redirect(`/admin/alliances?message=${encodeURIComponent(t("alliance_deactivated"))}`); });
 router.post("/alliances/:id/activate", requireAuth, requireMaster, async (req,res)=>{ const t=res.locals.t||((k)=>k); const allianceId=Number(req.params.id); await Alliance.updateOne({allianceId},{$set:{isActive:true}}); await createEventLog(req,"alliance_activate",`allianceId=${allianceId}`); res.redirect(`/admin/alliances?message=${encodeURIComponent(t("alliance_activated"))}`); });
 router.post("/alliances/:id/update-pins", requireAuth, requireMaster, async (req,res)=>{ const t=res.locals.t||((k)=>k); const alliance=await Alliance.findOne({allianceId:Number(req.params.id)}).lean(); if(!alliance) return res.redirect(`/admin/alliances?error=${encodeURIComponent(t("not_found"))}`); const standardPin=pinOk(req.body.standardPin||req.body.adminPin)?String(req.body.standardPin||req.body.adminPin).trim():null; const supervisorPin=pinOk(req.body.supervisorPin)?String(req.body.supervisorPin).trim():null; if(!standardPin&&!supervisorPin) return res.redirect(`/admin/alliances?error=${encodeURIComponent(t("err_invalid_input") || "PIN non validi")}`); await upsertAllianceAccounts(alliance,standardPin,supervisorPin); res.redirect(`/admin/alliances?message=${encodeURIComponent(t("update_pin"))}`); });
