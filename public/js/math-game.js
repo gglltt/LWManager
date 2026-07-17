@@ -3,7 +3,8 @@
   const i18n = JSON.parse($("mathGameTranslations")?.textContent || "{}");
   const getAudioPreference = () => { try { return localStorage.getItem("mathGameAudio") !== "off"; } catch (_) { return true; } };
   const setAudioPreference = (enabled) => { try { localStorage.setItem("mathGameAudio", enabled ? "on" : "off"); } catch (_) {} };
-  const state = { level: 1, levelsCompleted: 0, streak: 0, currentChallenge: null, answerInput: "", levelStartTime: 0, totalTimeMs: 0, remainingSeconds: 10, isGameOver: false, timerId: null, scoreSaved: false, audioReady: false, audioEnabled: getAudioPreference(), audioContext: null, lowTimeBeepedAt: null, toastId: null };
+  const BASE_TIME_SECONDS = 10;
+  const state = { level: 1, levelsCompleted: 0, streak: 0, currentChallenge: null, answerInput: "", levelStartTime: 0, totalTimeMs: 0, remainingSeconds: BASE_TIME_SECONDS, currentTimeLimit: BASE_TIME_SECONDS, isGameOver: false, timerId: null, scoreSaved: false, audioReady: false, audioEnabled: getAudioPreference(), audioContext: null, lowTimeBeepedAt: null, toastId: null };
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const pick = (items) => items[rand(0, items.length - 1)];
   const formatSeconds = (ms) => `${(ms / 1000).toFixed(1)}s`;
@@ -41,7 +42,8 @@
   function playErrorSound() { tone(160, 170, "sawtooth", 0.025); vibrate(40); }
   function playGameOverSound() { tone(260, 120, "triangle", 0.03); tone(180, 220, "triangle", 0.025, 0.13); }
 
-  function getTimeLimitForLevel(level) { return Math.max(5, 11 - Math.ceil(level / 10)); }
+  function getComboBonus() { return state.streak >= 2 ? state.streak : 0; }
+  function getTimeLimitForLevel(level) { return BASE_TIME_SECONDS + getComboBonus(); }
   function challenge(text, answer) { return { text, answer }; }
   function oneDigitMultiplyPair(level) {
     const single = rand(2, 9);
@@ -72,10 +74,10 @@
     $("challengeText").textContent = state.currentChallenge?.text || "—"; $("remainingValue").textContent = state.remainingSeconds;
     $("answerDisplay").textContent = state.answerInput || "0"; $("levelBadge").textContent = levelBadge(state.level);
     $("mathTimer").classList.toggle("is-low", state.remainingSeconds <= 3 && !state.isGameOver);
-    $("comboBadge").textContent = state.streak > 1 ? `Combo x${state.streak}` : "";
+    $("comboBadge").textContent = state.streak >= 2 ? `Combo x${state.streak} · Bonus +${getComboBonus()}s` : "";
   }
-  function startLevel() { clearInterval(state.timerId); state.currentChallenge = generateMathChallenge(state.level); state.answerInput = ""; state.remainingSeconds = getTimeLimitForLevel(state.level); state.lowTimeBeepedAt = null; state.levelStartTime = Date.now(); state.isGameOver = false; render(); state.timerId = setInterval(tick, 250); }
-  function tick() { const limit = getTimeLimitForLevel(state.level) * 1000; const elapsed = Date.now() - state.levelStartTime; state.remainingSeconds = Math.max(0, Math.ceil((limit - elapsed) / 1000)); if (state.remainingSeconds <= 3 && state.remainingSeconds > 0 && state.lowTimeBeepedAt !== state.remainingSeconds) { state.lowTimeBeepedAt = state.remainingSeconds; tone(740, 35, "sine", 0.012); } render(); if (elapsed >= limit) endGame(); }
+  function startLevel() { clearInterval(state.timerId); state.currentChallenge = generateMathChallenge(state.level); state.answerInput = ""; state.currentTimeLimit = getTimeLimitForLevel(state.level); state.remainingSeconds = state.currentTimeLimit; state.lowTimeBeepedAt = null; state.levelStartTime = Date.now(); state.isGameOver = false; render(); state.timerId = setInterval(tick, 250); }
+  function tick() { const limit = state.currentTimeLimit * 1000; const elapsed = Date.now() - state.levelStartTime; state.remainingSeconds = Math.max(0, Math.ceil((limit - elapsed) / 1000)); if (state.remainingSeconds <= 3 && state.remainingSeconds > 0 && state.lowTimeBeepedAt !== state.remainingSeconds) { state.lowTimeBeepedAt = state.remainingSeconds; tone(740, 35, "sine", 0.012); } render(); if (elapsed >= limit) endGame(); }
   function flash(kind, msg) { const zone = $("answerZone"); $("answerFeedback").textContent = msg; zone.classList.remove("correct", "wrong"); void zone.offsetWidth; zone.classList.add(kind); }
   function confetti() { const card = document.querySelector(".mathPhoneCard"); for (let i = 0; i < 10; i += 1) { const p = document.createElement("i"); p.className = "confettiBit"; p.style.left = `${rand(20, 80)}%`; p.style.setProperty("--x", `${rand(-50, 50)}px`); p.style.background = pick(["#2ecc71", "#ffd166", "#2c7be5", "#ffffff"]); card.appendChild(p); setTimeout(() => p.remove(), 650); } }
   function confirmAnswer() { playMainSound(); if (state.isGameOver || !state.currentChallenge || !state.answerInput) return; if (Number(state.answerInput) === state.currentChallenge.answer) { playSuccessSound(); state.totalTimeMs += Date.now() - state.levelStartTime; state.levelsCompleted += 1; state.level += 1; state.streak += 1; flash("correct", `${i18n.correct || "Correct!"} +1 livello`); confetti(); setTimeout(startLevel, 420); } else { playErrorSound(); state.answerInput = ""; state.streak = 0; flash("wrong", i18n.wrong || "Try again"); render(); } }
@@ -83,18 +85,20 @@
   function openModal(id) { const modal = $(id); modal.classList.add("is-open"); modal.setAttribute("aria-hidden", "false"); document.body.classList.add("mathModalOpen"); }
   function closeModal(id) { const modal = $(id); modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true"); if (!document.querySelector(".math-game-modal-overlay.is-open")) document.body.classList.remove("mathModalOpen"); }
   function openGameOverModal() { renderGameOverStats(); $("scoreMessage").textContent = ""; $("playerName").value = ""; $("confirmScoreBtn").disabled = false; openModal("gameOverModal"); setTimeout(() => $("playerName").focus(), 60); }
-  function endGame() { if (state.isGameOver) return; clearInterval(state.timerId); state.isGameOver = true; state.streak = 0; state.scoreSaved = false; playGameOverSound(); openGameOverModal(); render(); }
-  function resetGame() { closeModal("gameOverModal"); Object.assign(state, { level: 1, levelsCompleted: 0, streak: 0, answerInput: "", totalTimeMs: 0, isGameOver: false, scoreSaved: false }); $("answerFeedback").textContent = ""; startLevel(); }
+  function endGame() { if (state.isGameOver) return; clearInterval(state.timerId); state.timerId = null; state.isGameOver = true; state.streak = 0; state.answerInput = ""; state.scoreSaved = false; playGameOverSound(); openGameOverModal(); render(); }
+  function resetToStart() { clearInterval(state.timerId); state.timerId = null; Object.assign(state, { level: 1, levelsCompleted: 0, streak: 0, currentChallenge: null, answerInput: "", levelStartTime: 0, totalTimeMs: 0, remainingSeconds: BASE_TIME_SECONDS, currentTimeLimit: BASE_TIME_SECONDS, isGameOver: false, scoreSaved: false, lowTimeBeepedAt: null }); $("answerFeedback").textContent = ""; render(); }
+  function startNewGame() { closeModal("gameOverModal"); resetToStart(); startLevel(); }
+  function closeGameOverModal() { closeModal("gameOverModal"); resetToStart(); }
   function showToast(msg) { const toast = $("mathToast"); toast.textContent = msg; toast.classList.add("is-visible"); clearTimeout(state.toastId); state.toastId = setTimeout(() => toast.classList.remove("is-visible"), 2200); }
-  async function loadLeaderboard(rows) { if (!rows) { const res = await fetch("/math-game/leaderboard"); rows = (await res.json()).leaderboard || []; } const list = $("leaderboardList"); if (!rows.length) { list.innerHTML = `<div class="leaderboardEmpty">${i18n.noScores || "No scores yet"}</div>`; return; } list.innerHTML = rows.slice(0, 20).map((r, idx) => `<div class="leaderboardRow rank-${idx + 1}"><b>#${idx + 1}</b><span>${escapeHtml(r.playerName)}</span><small>${r.levelsCompleted} ${i18n.levels || "levels"}</small><small>${formatSeconds(r.totalTimeMs)}</small><time>${new Date(r.createdAt).toLocaleDateString()}</time></div>`).join(""); }
-  async function saveScore() { playMainSound(); const playerName = $("playerName").value.trim(); if (!/^[\p{L}\p{N} _-]{1,30}$/u.test(playerName)) { $("scoreMessage").textContent = i18n.invalidName; playErrorSound(); return; } const res = await fetch("/math-game/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerName, levelsCompleted: state.levelsCompleted, reachedLevel: state.level, totalTimeMs: Math.max(1, Math.round(state.totalTimeMs)) }) }); const data = await res.json(); if (!res.ok) { $("scoreMessage").textContent = i18n.saveError; playErrorSound(); return; } state.scoreSaved = true; $("confirmScoreBtn").disabled = true; await loadLeaderboard(data.leaderboard); closeModal("gameOverModal"); showToast(i18n.scoreSaved || "Punteggio salvato in classifica"); Object.assign(state, { level: 1, levelsCompleted: 0, streak: 0, answerInput: "", totalTimeMs: 0, currentChallenge: null, isGameOver: false }); render(); }
+  async function loadLeaderboard(rows) { if (!rows) { const res = await fetch("/math-game/leaderboard"); rows = (await res.json()).leaderboard || []; } const list = $("leaderboardList"); const topRows = (rows || []).slice(0, 20); if (!topRows.length) { list.innerHTML = `<div class="leaderboardEmpty">${i18n.noScores || "No scores yet"}</div>`; return; } list.innerHTML = topRows.map((r, idx) => `<div class="leaderboardRow rank-${idx + 1}"><b>#${idx + 1}</b><span class="leaderboardName">${escapeHtml(r.playerName)}</span><small class="leaderboardLevels">${i18n.levels || "Levels"}: ${r.levelsCompleted}</small><small class="leaderboardTime">${i18n.time || "Time"}: ${formatSeconds(r.totalTimeMs)}</small><time>${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ""}</time></div>`).join(""); }
+  async function saveScore() { playMainSound(); const playerName = $("playerName").value.trim(); if (!/^[\p{L}\p{N} _-]{1,30}$/u.test(playerName)) { $("scoreMessage").textContent = i18n.invalidName; playErrorSound(); return; } const res = await fetch("/math-game/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerName, levelsCompleted: state.levelsCompleted, reachedLevel: state.level, totalTimeMs: Math.max(1, Math.round(state.totalTimeMs)) }) }); const data = await res.json(); if (!res.ok) { $("scoreMessage").textContent = i18n.saveError; playErrorSound(); return; } state.scoreSaved = true; $("confirmScoreBtn").disabled = true; await loadLeaderboard(data.leaderboard); closeModal("gameOverModal"); showToast("Risultato salvato"); resetToStart(); }
 
   document.addEventListener("pointerdown", initAudio, { once: true });
   document.querySelectorAll("[data-number]").forEach((btn) => btn.addEventListener("click", () => { playTapSound(); if (!state.isGameOver && state.currentChallenge && state.answerInput.length < 6) { state.answerInput += btn.dataset.number; render(); } }));
   $("clearBtn").addEventListener("click", () => { playMainSound(); if (state.isGameOver) return; state.answerInput = ""; render(); });
   $("confirmBtn").addEventListener("click", confirmAnswer);
-  $("startGameBtn").addEventListener("click", resetGame);
-  $("playAgainBtn").addEventListener("click", resetGame);
+  $("startGameBtn").addEventListener("click", startNewGame);
+  $("closeGameOverBtn").addEventListener("click", closeGameOverModal);
   $("confirmScoreBtn").addEventListener("click", saveScore);
   $("playerName").addEventListener("keydown", (e) => { if (e.key === "Enter") saveScore(); });
   $("leaderboardBtn").addEventListener("click", () => { playMainSound(); openModal("leaderboardModal"); loadLeaderboard().catch(() => { $("leaderboardList").innerHTML = `<div class="leaderboardEmpty">${i18n.saveError || "Unavailable"}</div>`; }); });
