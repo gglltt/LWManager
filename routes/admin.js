@@ -48,8 +48,21 @@ router.post("/alliances", requireAuth, requireMaster, async (req, res, next) => 
     return res.redirect(`/admin/alliances?message=${encodeURIComponent(`${t("alliance_created")}. ${t("credentials_to_share")}: ${codeNormalized}/${serverNumber} ${t("standard")} ${standardPin}, ${t("supervisor")} ${supervisorPin}`)}`);
   } catch (err) {
     if (err && err.code === 11000) {
-      console.error("Duplicate alliance creation rejected", { keyPattern: err.keyPattern, keyValue: err.keyValue });
-      return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent(duplicateMessage)}`);
+      const keyPattern = err.keyPattern || {};
+      if (keyPattern.serverNumber && keyPattern.codeNormalized) {
+        console.error("Duplicate alliance rejected by canonical key", { keyPattern, keyValue: err.keyValue });
+        return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent(duplicateMessage)}`);
+      }
+      if (keyPattern.allianceKey) {
+        console.error("Legacy allianceKey index is still present and is blocking alliance creation. Run migrations to drop allianceKey_1.", { keyPattern, keyValue: err.keyValue });
+        return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent("Configurazione database da aggiornare. Eseguire le migrazioni e riprovare.")}`);
+      }
+      if (keyPattern.allianceId) {
+        console.error("Duplicate allianceId detected", { keyPattern, keyValue: err.keyValue });
+        return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent("Errore nella generazione dell'ID alleanza. Riprova.")}`);
+      }
+      console.error("Unhandled duplicate key while creating alliance", { keyPattern, keyValue: err.keyValue });
+      return res.status(409).redirect(`/admin/alliances?error=${encodeURIComponent("Errore tecnico durante la creazione dell'alleanza.")}`);
     }
     return next(err);
   }
