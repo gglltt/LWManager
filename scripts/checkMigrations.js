@@ -46,7 +46,19 @@ function allianceCreateRouteUsesCanonicalKey() {
   const adminPath = path.join(__dirname, "..", "routes", "admin.js");
   const source = fs.readFileSync(adminPath, "utf8");
   const createRoute = source.match(/router\.post\("\/alliances"[\s\S]*?\n\}\);/);
-  return Boolean(createRoute && createRoute[0].includes("codeNormalized") && createRoute[0].includes("serverNumber") && !createRoute[0].includes("allianceKey"));
+  if (!createRoute) return false;
+  const route = createRoute[0];
+  const beforeCatch = route.split("} catch (err)")[0] || route;
+  return beforeCatch.includes("Alliance.findOne({ serverNumber, codeNormalized })")
+    && beforeCatch.includes("codeNormalized")
+    && beforeCatch.includes("serverNumber")
+    && !beforeCatch.includes("allianceKey");
+}
+function allianceModelDoesNotDefineAllianceKeyUnique() {
+  const modelPath = path.join(__dirname, "..", "models", "alliance.js");
+  const source = fs.readFileSync(modelPath, "utf8");
+  return !/allianceKey\s*:[\s\S]*?unique\s*:\s*true/.test(source)
+    && !/index\s*\(\s*\{\s*allianceKey\s*:\s*1\s*\}\s*,\s*\{[\s\S]*?unique\s*:\s*true/.test(source);
 }
 
 async function main() {
@@ -70,7 +82,7 @@ async function main() {
       }
 
       const allianceIndexes = await alliances.indexes();
-      if (allianceIndexes.some((index) => index.name === "allianceKey_1")) failures.push("alliances still has legacy unique index allianceKey_1");
+      if (allianceIndexes.some((index) => index.name === "allianceKey_1")) failures.push("Legacy index alliances.allianceKey_1 still exists and must be dropped.");
       if (!hasUniqueIndex(allianceIndexes, { allianceId: 1 })) failures.push("missing alliances unique allianceId index");
       if (!hasUniqueIndex(allianceIndexes, { serverNumber: 1, codeNormalized: 1 })) failures.push("missing alliances unique serverNumber/codeNormalized index");
       const nullAllianceIds = await alliances.countDocuments({ $or: [{ allianceId: null }, { allianceId: { $exists: false } }] });
@@ -86,6 +98,7 @@ async function main() {
       ]).toArray();
       for (const duplicate of duplicateAllianceKeys) failures.push(`duplicate alliance key: serverNumber=${duplicate._id.serverNumber}, codeNormalized=${duplicate._id.codeNormalized} (${duplicate.count} records)`);
       if (!allianceCreateRouteUsesCanonicalKey()) failures.push("admin alliance creation route must use serverNumber/codeNormalized and must not depend on allianceKey");
+      if (!allianceModelDoesNotDefineAllianceKeyUnique()) failures.push("Alliance model must not define allianceKey as unique");
     }
 
     if (!(await collectionExists(db, "accounts"))) failures.push("collection accounts does not exist");
