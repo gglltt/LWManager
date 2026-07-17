@@ -1,6 +1,7 @@
 <%- include("partials/header") %>
 
-<section class="mathGameShell" data-locale="<%= localeTag %>">
+<section class="math-game-page mathGameShell" data-locale="<%= localeTag %>">
+  <div class="math-game-shell">
   <div class="mathHero">
     <div>
       <p class="eyebrow">Math Challenge</p>
@@ -38,8 +39,11 @@
     </div>
   </div>
 
-  <div class="gameOverPanel" id="gameOverPanel" hidden>
-    <h2><%= t('mathGame.gameOver') %></h2>
+  </div>
+
+  <div class="math-game-modal-overlay" id="gameOverModal" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" aria-hidden="true">
+    <div class="math-game-modal">
+    <h2 id="gameOverTitle"><%= t('mathGame.gameOver') %></h2>
     <div class="gameOverStats">
       <span><%= t('mathGame.reachedLevel') %>: <b id="overReached">1</b></span>
       <span><%= t('mathGame.completedLevels') %>: <b id="overCompleted">0</b></span>
@@ -51,6 +55,7 @@
     <div class="gameOverActions">
       <button id="saveScoreBtn" class="button" type="button"><%= t('mathGame.saveScore') %></button>
       <button id="playAgainBtn" class="button secondary" type="button"><%= t('mathGame.playAgain') %></button>
+    </div>
     </div>
   </div>
 

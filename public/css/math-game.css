@@ -1,2 +1,96 @@
-.mathGameShell{max-width:520px;margin:0 auto 36px;padding:8px 0 24px;background:radial-gradient(circle at 50% 0,rgba(44,123,229,.16),transparent 34%)}
-.mathHero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 14px}.mathHero h1{margin:0}.eyebrow{margin:0;color:#2c7be5;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.mathStart{white-space:nowrap}.mathPhoneCard,.gameOverPanel,.leaderboardCard{border:1px solid rgba(44,123,229,.18);border-radius:28px;background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(239,246,255,.92));box-shadow:0 22px 54px rgba(20,35,70,.18);padding:18px;overflow:hidden}.mathDashboard{display:grid;grid-template-columns:1fr;gap:14px;position:relative}.mathStats{display:grid;grid-template-columns:1fr;gap:5px;font-size:.86rem;color:#52647a}.mathStats b{color:#102a43}.mathProblem{text-align:center;font-size:clamp(2.4rem,14vw,4.6rem);font-weight:900;line-height:1.05;color:#13294b;text-shadow:0 8px 24px rgba(44,123,229,.18);padding:10px 76px 8px 0;min-height:92px;display:flex;align-items:center;justify-content:center}.mathTimer{position:absolute;right:0;top:4px;width:70px;height:70px;border-radius:22px;background:linear-gradient(145deg,#ffebee,#fff);box-shadow:0 12px 28px rgba(225,45,57,.22),inset 0 0 0 2px rgba(225,45,57,.12);display:flex;align-items:center;justify-content:center;color:#d62839;font-weight:900}.mathTimer span{font-size:2rem}.mathTimer small{margin-left:2px}.answerZone{margin:16px 0;padding:14px;border-radius:22px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.12);text-align:center}.answerLabel{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:#66788a;font-weight:800}.answerDisplay{font-size:2.25rem;font-weight:900;color:#13294b;min-height:54px}.answerFeedback{min-height:22px;font-weight:800}.answerZone.correct{animation:correctPulse .42s ease}.answerZone.wrong{animation:wrongShake .34s ease;color:#d62839}.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.numKey{min-height:72px;border:0;border-radius:22px;background:linear-gradient(145deg,#fff,#eaf3ff);box-shadow:0 12px 22px rgba(32,74,130,.18),inset 0 1px 0 rgba(255,255,255,.9);font-size:1.55rem;font-weight:900;color:#16365f;transition:transform .14s ease,box-shadow .14s ease,filter .14s ease}.numKey:active{transform:translateY(4px) scale(.97);box-shadow:0 5px 10px rgba(32,74,130,.20);filter:brightness(.98)}.numKey.command{font-size:.98rem;text-transform:uppercase;letter-spacing:.04em}.numKey.confirm{background:linear-gradient(145deg,#2c7be5,#1c5fc0);color:white;box-shadow:0 14px 28px rgba(44,123,229,.32)}.numKey.clear{background:linear-gradient(145deg,#fff7e8,#ffe7b8);color:#9a5b00}.gameOverPanel{margin-top:16px;text-align:center;animation:overIn .32s ease}.gameOverPanel h2{font-size:2.3rem;margin:.2rem 0;color:#d62839}.gameOverStats{display:grid;gap:7px;margin:12px 0;color:#52647a}.playerNameLabel{display:block;text-align:left;font-weight:800;margin-top:12px}.gameOverPanel input{width:100%;box-sizing:border-box;border:1px solid rgba(44,123,229,.26);border-radius:16px;padding:13px 14px;font-size:1rem;margin-top:6px}.gameOverActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.button.secondary{background:#eef4fb;color:#17324d}.formMessage{min-height:22px;font-weight:800;color:#2c7be5}.leaderboardCard{margin-top:16px}.leaderboardCard h2{margin-top:0}.leaderboardList{display:grid;gap:9px}.leaderboardRow{display:grid;grid-template-columns:42px 1fr auto;gap:8px;align-items:center;padding:12px;border-radius:16px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.09)}.leaderboardRow small,.leaderboardRow time{color:#66788a}.leaderboardRow time{grid-column:2/4;font-size:.78rem}.leaderboardEmpty{text-align:center;color:#66788a;padding:14px}@keyframes correctPulse{50%{transform:scale(1.035);box-shadow:0 0 34px rgba(41,171,135,.38)}}@keyframes wrongShake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}@keyframes overIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}@media (min-width:680px){.mathGameShell{padding-top:18px}.mathPhoneCard,.gameOverPanel,.leaderboardCard{padding:22px}.mathStats{grid-template-columns:repeat(3,1fr);text-align:center}.mathProblem{padding-right:86px}}
+html:has(.math-game-page),body:has(.math-game-page){height:100%;max-height:100dvh;overflow:hidden}
+body:has(.math-game-page){margin:0}
+.footer:has(+ .math-game-page),body:has(.math-game-page) .footer{display:none}
+body:has(.math-game-page) main.container{height:var(--math-game-available-height,calc(100dvh - 76px));max-height:var(--math-game-available-height,calc(100dvh - 76px));overflow:hidden;padding-inline:10px}
+.math-game-page{height:100%;max-height:100%;overflow:hidden;display:flex;flex-direction:column;max-width:520px;margin:0 auto;background:radial-gradient(circle at 50% 0,rgba(44,123,229,.16),transparent 34%)}
+.math-game-shell{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;padding:6px 0}
+.mathHero{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto}
+.mathHero h1{margin:0;font-size:clamp(1.35rem,5vw,2rem);line-height:1}
+.eyebrow{margin:0;color:#2c7be5;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.mathStart{white-space:nowrap;padding:8px 12px}
+.mathPhoneCard,.leaderboardCard{border:1px solid rgba(44,123,229,.18);border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(239,246,255,.92));box-shadow:0 14px 34px rgba(20,35,70,.16);padding:12px;overflow:hidden}
+.mathPhoneCard{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.mathDashboard{flex:0 0 auto;display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:start}
+.mathStats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;font-size:.74rem;color:#52647a}
+.mathStats span{padding:6px;border-radius:12px;background:rgba(255,255,255,.65);text-align:center}
+.mathStats b{display:block;color:#102a43;font-size:.98rem}
+.mathProblem{grid-column:1/2;text-align:center;font-size:clamp(2rem,12vw,3.6rem);font-weight:900;line-height:1;color:#13294b;text-shadow:0 8px 24px rgba(44,123,229,.18);min-height:56px;display:flex;align-items:center;justify-content:center}
+.mathTimer{grid-column:2;grid-row:1/3;align-self:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#ffebee,#fff);box-shadow:0 10px 22px rgba(225,45,57,.20),inset 0 0 0 2px rgba(225,45,57,.12);display:flex;align-items:center;justify-content:center;color:#d62839;font-weight:900}
+.mathTimer span{font-size:1.7rem}
+.mathTimer small{margin-left:2px}
+.answerZone{flex:0 0 auto;margin:8px 0;padding:8px;border-radius:18px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.12);text-align:center}
+.answerLabel{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:#66788a;font-weight:800}
+.answerDisplay{font-size:1.8rem;font-weight:900;line-height:1.05;color:#13294b;min-height:34px}
+.answerFeedback{min-height:18px;font-size:.88rem;font-weight:800}
+.answerZone.correct{animation:correctPulse .42s ease}
+.answerZone.wrong{animation:wrongShake .34s ease;color:#d62839}
+.keypad{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.numKey{width:100%;aspect-ratio:1.6/1;min-height:44px;max-height:64px;border:0;border-radius:18px;background:linear-gradient(145deg,#fff,#eaf3ff);box-shadow:0 9px 16px rgba(32,74,130,.18),inset 0 1px 0 rgba(255,255,255,.9);font-size:clamp(1.05rem,5vw,1.45rem);font-weight:900;line-height:1;color:#16365f;text-align:center;display:flex;align-items:center;justify-content:center;transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;touch-action:manipulation}
+.numKey:active{transform:translateY(3px) scale(.97);box-shadow:0 4px 9px rgba(32,74,130,.20);filter:brightness(.98)}
+.numKey.command{font-size:clamp(.76rem,3.2vw,.95rem);text-transform:uppercase;letter-spacing:.02em}
+.numKey.confirm{background:linear-gradient(145deg,#2c7be5,#1c5fc0);color:white;box-shadow:0 10px 22px rgba(44,123,229,.30)}
+.numKey.clear{background:linear-gradient(145deg,#fff7e8,#ffe7b8);color:#9a5b00}
+.leaderboardCard{flex:0 1 auto;max-height:130px;padding:10px}
+.leaderboardCard h2{margin:0 0 6px;font-size:1rem}
+.leaderboardList{display:grid;gap:5px}
+.leaderboardRow{display:grid;grid-template-columns:34px 1fr auto;gap:6px;align-items:center;padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.09);font-size:.82rem}
+.leaderboardRow:nth-child(n+4){display:none}
+.leaderboardRow small,.leaderboardRow time{color:#66788a}
+.leaderboardRow time{display:none}
+.leaderboardEmpty{text-align:center;color:#66788a;padding:8px}
+.math-game-modal-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+.math-game-modal-overlay.is-open{display:flex}
+.math-game-modal{width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:hidden;border:1px solid rgba(44,123,229,.20);border-radius:24px;background:linear-gradient(160deg,#fff,#eff6ff);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:18px;text-align:center}
+.math-game-modal h2{font-size:2rem;margin:.1rem 0 .4rem;color:#d62839}
+.gameOverStats{display:grid;gap:6px;margin:10px 0;color:#52647a}
+.playerNameLabel{display:block;text-align:left;font-weight:800;margin-top:10px}
+.math-game-modal input{width:100%;box-sizing:border-box;border:1px solid rgba(44,123,229,.26);border-radius:16px;padding:12px 14px;font-size:1rem;margin-top:6px}
+.gameOverActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.button.secondary{background:#eef4fb;color:#17324d}
+.formMessage{min-height:22px;margin:8px 0 0;font-weight:800;color:#2c7be5}
+@keyframes correctPulse{50%{transform:scale(1.025);box-shadow:0 0 28px rgba(41,171,135,.34)}
+}
+@keyframes wrongShake{25%{transform:translateX(-6px)}
+75%{transform:translateX(6px)}
+}
+
+@media (max-height:760px){body:has(.math-game-page) main.container{padding-inline:8px}
+.math-game-shell{gap:6px;padding:4px 0}
+.mathHero h1{font-size:1.3rem}
+.mathPhoneCard{padding:10px}
+.mathStats{font-size:.68rem}
+.mathStats span{padding:4px}
+.mathStats b{font-size:.9rem}
+.mathProblem{font-size:clamp(1.85rem,10vw,3rem);min-height:48px}
+.mathTimer{width:52px;height:52px;border-radius:16px}
+.mathTimer span{font-size:1.5rem}
+.answerZone{margin:6px 0;padding:6px}
+.answerDisplay{font-size:1.55rem;min-height:30px}
+.answerFeedback{min-height:16px}
+.keypad{gap:6px}
+.numKey{min-height:40px;max-height:56px;border-radius:16px}
+.leaderboardCard{max-height:104px}
+.leaderboardRow{padding:5px 8px}
+.math-game-modal{padding:14px}
+.math-game-modal h2{font-size:1.7rem}
+}
+
+@media (max-height:680px){.mathHero{display:none}
+.math-game-shell{padding:3px 0}
+.mathPhoneCard{padding:8px;border-radius:18px}
+.mathDashboard{grid-template-columns:1fr 48px;gap:5px}
+.mathStats{font-size:.62rem}
+.mathStats span{padding:3px}
+.mathStats b{font-size:.82rem}
+.mathProblem{font-size:clamp(1.65rem,9vw,2.55rem);min-height:40px}
+.mathTimer{width:46px;height:46px;border-radius:14px}
+.mathTimer span{font-size:1.3rem}
+.answerZone{margin:5px 0;padding:5px}
+.answerLabel{font-size:.6rem}
+.answerDisplay{font-size:1.35rem;min-height:26px}
+.answerFeedback{min-height:14px;font-size:.76rem}
+.numKey{min-height:36px;max-height:48px;border-radius:14px}
+.leaderboardCard{display:none}
+.math-game-modal{max-height:calc(100dvh - 20px);overflow:auto}
+.gameOverActions{grid-template-columns:1fr}
+}
