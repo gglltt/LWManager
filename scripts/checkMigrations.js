@@ -40,6 +40,15 @@ function runnerUsesCanonicalNameOnly() {
     && !/migration\.id/.test(source);
 }
 
+function sameKeys(actual, expected) { return JSON.stringify(actual) === JSON.stringify(expected); }
+function hasUniqueIndex(indexes, keys) { return indexes.some((index) => sameKeys(index.key, keys) && index.unique === true); }
+function allianceCreateRouteUsesCanonicalKey() {
+  const adminPath = path.join(__dirname, "..", "routes", "admin.js");
+  const source = fs.readFileSync(adminPath, "utf8");
+  const createRoute = source.match(/router\.post\("\/alliances"[\s\S]*?\n\}\);/);
+  return Boolean(createRoute && createRoute[0].includes("codeNormalized") && createRoute[0].includes("serverNumber") && !createRoute[0].includes("allianceKey"));
+}
+
 async function main() {
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("Missing MONGO_URI in environment variables.");
@@ -52,12 +61,31 @@ async function main() {
 
     if (!(await collectionExists(db, "alliances"))) failures.push("collection alliances does not exist");
     else {
-      const alliance = await db.collection("alliances").findOne({ allianceId: config.allianceId });
+      const alliances = db.collection("alliances");
+      const alliance = await alliances.findOne({ allianceId: config.allianceId });
       if (!alliance) failures.push("allianceId=1 is missing");
       else {
         if (alliance.code !== config.allianceCode || alliance.codeNormalized !== config.codeNormalized || Number(alliance.serverNumber) !== config.serverNumber) failures.push("allianceId=1 is not BISS#833 with codeNormalized/serverNumber");
         if (alliance.isActive !== true) failures.push("allianceId=1 is not active");
       }
+
+      const allianceIndexes = await alliances.indexes();
+      if (allianceIndexes.some((index) => index.name === "allianceKey_1")) failures.push("alliances still has legacy unique index allianceKey_1");
+      if (!hasUniqueIndex(allianceIndexes, { allianceId: 1 })) failures.push("missing alliances unique allianceId index");
+      if (!hasUniqueIndex(allianceIndexes, { serverNumber: 1, codeNormalized: 1 })) failures.push("missing alliances unique serverNumber/codeNormalized index");
+      const nullAllianceIds = await alliances.countDocuments({ $or: [{ allianceId: null }, { allianceId: { $exists: false } }] });
+      if (nullAllianceIds) failures.push(`${nullAllianceIds} alliance(s) have null/missing allianceId`);
+      const missingCodeNormalized = await alliances.countDocuments({ $or: [{ codeNormalized: null }, { codeNormalized: { $exists: false } }, { codeNormalized: "" }] });
+      if (missingCodeNormalized) failures.push(`${missingCodeNormalized} alliance(s) have missing codeNormalized`);
+      const missingServerNumber = await alliances.countDocuments({ $or: [{ serverNumber: null }, { serverNumber: { $exists: false } }] });
+      if (missingServerNumber) failures.push(`${missingServerNumber} alliance(s) have missing serverNumber`);
+      const duplicateAllianceKeys = await alliances.aggregate([
+        { $match: { serverNumber: { $ne: null, $exists: true }, codeNormalized: { $type: "string", $ne: "" } } },
+        { $group: { _id: { serverNumber: "$serverNumber", codeNormalized: "$codeNormalized" }, count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } }
+      ]).toArray();
+      for (const duplicate of duplicateAllianceKeys) failures.push(`duplicate alliance key: serverNumber=${duplicate._id.serverNumber}, codeNormalized=${duplicate._id.codeNormalized} (${duplicate.count} records)`);
+      if (!allianceCreateRouteUsesCanonicalKey()) failures.push("admin alliance creation route must use serverNumber/codeNormalized and must not depend on allianceKey");
     }
 
     if (!(await collectionExists(db, "accounts"))) failures.push("collection accounts does not exist");
