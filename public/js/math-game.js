@@ -1,10 +1,16 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const i18n = JSON.parse($("mathGameTranslations")?.textContent || "{}");
-  const state = { level: 1, levelsCompleted: 0, currentChallenge: null, answerInput: "", levelStartTime: 0, totalTimeMs: 0, remainingSeconds: 10, isGameOver: false, timerId: null };
+  const state = { level: 1, levelsCompleted: 0, currentChallenge: null, answerInput: "", levelStartTime: 0, totalTimeMs: 0, remainingSeconds: 10, isGameOver: false, timerId: null, scoreSaved: false };
   const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   const pick = (items) => items[rand(0, items.length - 1)];
   const formatSeconds = (ms) => `${(ms / 1000).toFixed(1)}s`;
+  const escapeHtml = (v) => String(v).replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[c]));
+
+  function syncViewportHeight() {
+    const topbarHeight = document.querySelector(".topbar")?.getBoundingClientRect().height || 0;
+    document.documentElement.style.setProperty("--math-game-available-height", `${Math.max(0, window.innerHeight - topbarHeight)}px`);
+  }
 
   function getTimeLimitForLevel(level) { return Math.max(5, 11 - Math.ceil(level / 10)); }
   function challenge(text, answer) { return { text, answer }; }
@@ -31,13 +37,21 @@
   function tick() { const limit = getTimeLimitForLevel(state.level) * 1000; const elapsed = Date.now() - state.levelStartTime; state.remainingSeconds = Math.max(0, Math.ceil((limit - elapsed) / 1000)); render(); if (elapsed >= limit) endGame(); }
   function flash(kind, msg) { const zone = $("answerZone"); $("answerFeedback").textContent = msg; zone.classList.remove("correct", "wrong"); void zone.offsetWidth; zone.classList.add(kind); }
   function confirmAnswer() { if (state.isGameOver || !state.currentChallenge || !state.answerInput) return; if (Number(state.answerInput) === state.currentChallenge.answer) { state.totalTimeMs += Date.now() - state.levelStartTime; state.levelsCompleted += 1; state.level += 1; flash("correct", i18n.correct || "Correct!"); setTimeout(startLevel, 420); } else { flash("wrong", i18n.wrong || "Try again"); } }
-  function endGame() { if (state.isGameOver) return; clearInterval(state.timerId); state.isGameOver = true; $("overReached").textContent = state.level; $("overCompleted").textContent = state.levelsCompleted; $("overTime").textContent = formatSeconds(state.totalTimeMs); $("gameOverPanel").hidden = false; }
-  function resetGame() { $("gameOverPanel").hidden = true; Object.assign(state, { level: 1, levelsCompleted: 0, answerInput: "", totalTimeMs: 0, isGameOver: false }); startLevel(); }
-  async function loadLeaderboard(rows) { if (!rows) { const res = await fetch("/math-game/leaderboard"); rows = (await res.json()).leaderboard || []; } const list = $("leaderboardList"); if (!rows.length) { list.innerHTML = `<div class="leaderboardEmpty">${i18n.noScores || "No scores yet"}</div>`; return; } list.innerHTML = rows.map((r, idx) => `<div class="leaderboardRow"><b>#${idx + 1}</b><span>${escapeHtml(r.playerName)}</span><small>${r.levelsCompleted} ${i18n.levels || "levels"}</small><small>${formatSeconds(r.totalTimeMs)}</small><time>${new Date(r.createdAt).toLocaleDateString()}</time></div>`).join(""); }
-  const escapeHtml = (v) => String(v).replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[c]));
-  async function saveScore() { const playerName = $("playerName").value.trim(); if (!/^[\p{L}\p{N} _-]{1,30}$/u.test(playerName)) { $("scoreMessage").textContent = i18n.invalidName; return; } const res = await fetch("/math-game/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerName, levelsCompleted: state.levelsCompleted, reachedLevel: state.level, totalTimeMs: Math.max(1, Math.round(state.totalTimeMs)) }) }); const data = await res.json(); if (!res.ok) { $("scoreMessage").textContent = i18n.saveError; return; } $("scoreMessage").textContent = i18n.scoreSaved; loadLeaderboard(data.leaderboard); }
+  function renderGameOverStats() { $("overReached").textContent = state.level; $("overCompleted").textContent = state.levelsCompleted; $("overTime").textContent = formatSeconds(state.totalTimeMs); }
+  function openGameOverModal() { renderGameOverStats(); $("scoreMessage").textContent = ""; $("playerName").value = ""; $("saveScoreBtn").disabled = false; const modal = $("gameOverModal"); modal.classList.add("is-open"); modal.setAttribute("aria-hidden", "false"); setTimeout(() => $("playerName").focus(), 60); }
+  function closeGameOverModal() { const modal = $("gameOverModal"); modal.classList.remove("is-open"); modal.setAttribute("aria-hidden", "true"); }
+  function endGame() { if (state.isGameOver) return; clearInterval(state.timerId); state.isGameOver = true; state.scoreSaved = false; openGameOverModal(); }
+  function resetGame() { closeGameOverModal(); Object.assign(state, { level: 1, levelsCompleted: 0, answerInput: "", totalTimeMs: 0, isGameOver: false, scoreSaved: false }); $("answerFeedback").textContent = ""; startLevel(); }
+  async function loadLeaderboard(rows) { if (!rows) { const res = await fetch("/math-game/leaderboard"); rows = (await res.json()).leaderboard || []; } const list = $("leaderboardList"); if (!rows.length) { list.innerHTML = `<div class="leaderboardEmpty">${i18n.noScores || "No scores yet"}</div>`; return; } list.innerHTML = rows.slice(0, 3).map((r, idx) => `<div class="leaderboardRow"><b>#${idx + 1}</b><span>${escapeHtml(r.playerName)}</span><small>${r.levelsCompleted} ${i18n.levels || "levels"}</small><small>${formatSeconds(r.totalTimeMs)}</small><time>${new Date(r.createdAt).toLocaleDateString()}</time></div>`).join(""); }
+  async function saveScore() { const playerName = $("playerName").value.trim(); if (!/^[\p{L}\p{N} _-]{1,30}$/u.test(playerName)) { $("scoreMessage").textContent = i18n.invalidName; return; } const res = await fetch("/math-game/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerName, levelsCompleted: state.levelsCompleted, reachedLevel: state.level, totalTimeMs: Math.max(1, Math.round(state.totalTimeMs)) }) }); const data = await res.json(); if (!res.ok) { $("scoreMessage").textContent = i18n.saveError; return; } state.scoreSaved = true; $("scoreMessage").textContent = i18n.scoreSaved; $("saveScoreBtn").disabled = true; loadLeaderboard(data.leaderboard); }
 
   document.querySelectorAll("[data-number]").forEach((btn) => btn.addEventListener("click", () => { if (!state.isGameOver && state.currentChallenge && state.answerInput.length < 6) { state.answerInput += btn.dataset.number; render(); } }));
-  $("clearBtn").addEventListener("click", () => { state.answerInput = ""; render(); }); $("confirmBtn").addEventListener("click", confirmAnswer); $("startGameBtn").addEventListener("click", resetGame); $("playAgainBtn").addEventListener("click", resetGame); $("saveScoreBtn").addEventListener("click", saveScore);
-  render(); loadLeaderboard().catch(() => { $("leaderboardList").innerHTML = `<div class="leaderboardEmpty">${i18n.saveError || "Unavailable"}</div>`; });
+  $("clearBtn").addEventListener("click", () => { if (state.isGameOver) return; state.answerInput = ""; render(); });
+  $("confirmBtn").addEventListener("click", confirmAnswer);
+  $("startGameBtn").addEventListener("click", resetGame);
+  $("playAgainBtn").addEventListener("click", resetGame);
+  $("saveScoreBtn").addEventListener("click", saveScore);
+  window.addEventListener("resize", syncViewportHeight);
+  window.addEventListener("orientationchange", syncViewportHeight);
+  syncViewportHeight(); render(); loadLeaderboard().catch(() => { $("leaderboardList").innerHTML = `<div class="leaderboardEmpty">${i18n.saveError || "Unavailable"}</div>`; });
 })();
