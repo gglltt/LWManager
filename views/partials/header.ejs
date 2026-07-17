@@ -53,6 +53,7 @@
           <a href="mailto:info@bisslastwar.com"><%= t('contact_us') %> |</a>
           <a href="/dashboard"><%= t('nav_dashboard') %> |</a>
           <a href="/potenze"><%= t('nav_powers') %> |</a>
+          <a href="/tetris">Tetris |</a>
           <!--<% if (typeof user !== "undefined" && user && user.authLevel >= 3) { %><a href="/performance-vs"><%= t('perf_title') %> |</a><% } %>-->
           <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords"><%= t('password_management') %> |</a><% } %>
           <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %> |</a><% } %>

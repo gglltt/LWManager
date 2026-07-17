@@ -110,6 +110,10 @@ app.get("/dashboard", requireAuth, async (req, res) => {
 });
 
 
+app.get("/tetris", requireAuth, (req, res) => {
+  res.render("tetris", { user: req.user, title: "Tetris" });
+});
+
 app.get("/stagione-6", requireAuth, (req, res) => {
   const seasonContentLang = req.resolvedSeason6Lang || (["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en");
   res.render("stagione6", { user: req.user, seasonContentLang, extraJs: ["/js/stagione6-guides.js"] });

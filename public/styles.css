@@ -2233,3 +2233,73 @@ button:disabled,.button:disabled{ opacity:.55; cursor:not-allowed; transform:non
   .allianceActions{ grid-template-columns:1fr; }
   .alliancePinForm button{ grid-column:auto; }
 }
+
+/* ========================= */
+/* TETRIS EMBED              */
+/* ========================= */
+
+.tetrisPage{
+  max-width:none;
+  width:min(1400px, calc(100vw - 32px));
+  min-height:calc(100vh - 130px);
+}
+
+.tetrisHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:14px;
+}
+
+.tetrisHeader .button{
+  flex:0 0 auto;
+}
+
+.tetrisFrameWrap{
+  overflow:hidden;
+  border:1px solid rgba(34,48,77,.85);
+  border-radius:16px;
+  background:#05070c;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+
+.tetris-frame{
+  display:block;
+  width:100%;
+  height:calc(100vh - 220px);
+  min-height:640px;
+  border:0;
+  background:#05070c;
+}
+
+@media (max-width: 820px){
+  .tetrisPage{
+    width:calc(100vw - 20px);
+    margin:10px auto;
+    padding:12px;
+    min-height:calc(100vh - 100px);
+  }
+
+  .tetrisHeader{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .tetrisHeader .button{
+    width:100%;
+    text-align:center;
+  }
+
+  .tetris-frame{
+    height:calc(100vh - 210px);
+    min-height:520px;
+  }
+}
+
+@media (max-width: 420px){
+  .tetris-frame{
+    height:calc(100vh - 190px);
+    min-height:480px;
+  }
+}
