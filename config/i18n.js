@@ -1951,6 +1951,73 @@ for (const lang of SUPPORTED_LANGS) {
   Object.assign(translations[lang], FORM_AND_ALLIANCE_TRANSLATIONS.en, FORM_AND_ALLIANCE_TRANSLATIONS[lang] || {});
 }
 
+
+const MATH_GAME_TRANSLATIONS = {
+  en: {
+    "mathGame.title": "Math Challenge",
+    "mathGame.menu": "Math Game",
+    "mathGame.dashboardDesc": "A fast vertical arithmetic challenge with countdown and leaderboard.",
+    "mathGame.start": "Start",
+    "mathGame.level": "Level",
+    "mathGame.completedLevels": "Completed",
+    "mathGame.totalTime": "Total time",
+    "mathGame.remainingTime": "Remaining time",
+    "mathGame.answer": "Answer",
+    "mathGame.clear": "Clear",
+    "mathGame.confirm": "Confirm",
+    "mathGame.gameOver": "Game Over",
+    "mathGame.reachedLevel": "Reached level",
+    "mathGame.saveScore": "Save score",
+    "mathGame.playAgain": "Play again",
+    "mathGame.leaderboard": "Leaderboard",
+    "mathGame.playerName": "Player name",
+    "mathGame.rank": "Rank",
+    "mathGame.levels": "levels",
+    "mathGame.time": "Time",
+    "mathGame.date": "Date",
+    "mathGame.invalidName": "Use 1-30 letters, numbers, spaces, hyphens or underscores.",
+    "mathGame.scoreSaved": "Score saved!",
+    "mathGame.correct": "Correct!",
+    "mathGame.wrong": "Try again",
+    "mathGame.loading": "Loading leaderboard...",
+    "mathGame.noScores": "No scores yet. Be the first champion!",
+    "mathGame.saveError": "Unable to save score. Check the data and try again."
+  },
+  it: {
+    "mathGame.title": "Sfida Matematica",
+    "mathGame.menu": "Gioco Matematico",
+    "mathGame.dashboardDesc": "Una sfida aritmetica verticale con countdown e classifica.",
+    "mathGame.start": "Start",
+    "mathGame.level": "Livello",
+    "mathGame.completedLevels": "Superati",
+    "mathGame.totalTime": "Tempo totale",
+    "mathGame.remainingTime": "Tempo rimasto",
+    "mathGame.answer": "Risposta",
+    "mathGame.clear": "Cancella",
+    "mathGame.confirm": "Conferma",
+    "mathGame.gameOver": "Game Over",
+    "mathGame.reachedLevel": "Livello raggiunto",
+    "mathGame.saveScore": "Salva in classifica",
+    "mathGame.playAgain": "Rigioca",
+    "mathGame.leaderboard": "Classifica",
+    "mathGame.playerName": "Nome giocatore",
+    "mathGame.rank": "Posizione",
+    "mathGame.levels": "livelli",
+    "mathGame.time": "Tempo",
+    "mathGame.date": "Data",
+    "mathGame.invalidName": "Usa 1-30 lettere, numeri, spazi, trattini o underscore.",
+    "mathGame.scoreSaved": "Risultato salvato!",
+    "mathGame.correct": "Corretto!",
+    "mathGame.wrong": "Riprova",
+    "mathGame.loading": "Caricamento classifica...",
+    "mathGame.noScores": "Nessun punteggio. Diventa il primo campione!",
+    "mathGame.saveError": "Impossibile salvare il risultato. Controlla i dati e riprova."
+  }
+};
+for (const lang of SUPPORTED_LANGS) {
+  Object.assign(translations[lang], MATH_GAME_TRANSLATIONS.en, MATH_GAME_TRANSLATIONS[lang] || {});
+}
+
 function resolveLang(candidate) {
   return SUPPORTED_LANGS.includes(candidate) ? candidate : "it";
 }
