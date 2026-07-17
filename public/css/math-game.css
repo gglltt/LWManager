@@ -1,27 +1,35 @@
 html:has(.math-game-page),body:has(.math-game-page){height:100%;max-height:100dvh;overflow:hidden}
+body.mathModalOpen{overflow:hidden!important}
 body:has(.math-game-page){margin:0}
 .footer:has(+ .math-game-page),body:has(.math-game-page) .footer{display:none}
 body:has(.math-game-page) main.container{height:var(--math-game-available-height,calc(100dvh - 76px));max-height:var(--math-game-available-height,calc(100dvh - 76px));overflow:hidden;padding-inline:10px}
 .math-game-page{height:100%;max-height:100%;overflow:hidden;display:flex;flex-direction:column;max-width:520px;margin:0 auto;background:radial-gradient(circle at 50% 0,rgba(44,123,229,.16),transparent 34%)}
 .math-game-shell{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;padding:6px 0}
 .mathHero{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto}
-.mathHero h1{margin:0;font-size:clamp(1.35rem,5vw,2rem);line-height:1}
+.mathHero h1{margin:0;font-size:clamp(1.25rem,4.5vw,2rem);line-height:1}
 .eyebrow{margin:0;color:#2c7be5;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-.mathStart{white-space:nowrap;padding:8px 12px}
-.mathPhoneCard,.leaderboardCard{border:1px solid rgba(44,123,229,.18);border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(239,246,255,.92));box-shadow:0 14px 34px rgba(20,35,70,.16);padding:12px;overflow:hidden}
-.mathPhoneCard{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.mathHeroActions{display:grid;grid-template-columns:auto auto 42px;gap:8px;align-items:center}
+.mathAction,.mathAudioToggle{white-space:nowrap;border:0;border-radius:18px;box-shadow:0 10px 22px rgba(32,74,130,.22),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;touch-action:manipulation}
+.mathAction:active,.mathAudioToggle:active{transform:translateY(3px) scale(.97);box-shadow:0 4px 10px rgba(32,74,130,.22);filter:brightness(.98)}
+.mathLeaderboardBtn{padding:9px 12px;background:linear-gradient(145deg,#1f2f55,#314a82);color:#fff}
+.mathStart{padding:9px 12px;background:linear-gradient(145deg,#2c7be5,#1c5fc0);color:#fff}
+.mathAudioToggle{height:40px;width:42px;padding:0;background:linear-gradient(145deg,#fff,#eaf3ff);font-size:1.1rem}
+.mathPhoneCard{border:1px solid rgba(44,123,229,.18);border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.97),rgba(239,246,255,.92));box-shadow:0 14px 34px rgba(20,35,70,.16);padding:12px;overflow:hidden;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;position:relative}
 .mathDashboard{flex:0 0 auto;display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:start}
 .mathStats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;font-size:.74rem;color:#52647a}
 .mathStats span{padding:6px;border-radius:12px;background:rgba(255,255,255,.65);text-align:center}
 .mathStats b{display:block;color:#102a43;font-size:.98rem}
+.levelBadge{grid-column:1/2;justify-self:center;margin-top:-1px;padding:4px 10px;border-radius:999px;background:rgba(19,41,75,.9);color:#fff;font-size:.68rem;font-weight:900;letter-spacing:.04em}
 .mathProblem{grid-column:1/2;text-align:center;font-size:clamp(2rem,12vw,3.6rem);font-weight:900;line-height:1;color:#13294b;text-shadow:0 8px 24px rgba(44,123,229,.18);min-height:56px;display:flex;align-items:center;justify-content:center}
-.mathTimer{grid-column:2;grid-row:1/3;align-self:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#ffebee,#fff);box-shadow:0 10px 22px rgba(225,45,57,.20),inset 0 0 0 2px rgba(225,45,57,.12);display:flex;align-items:center;justify-content:center;color:#d62839;font-weight:900}
+.mathTimer{grid-column:2;grid-row:1/4;align-self:center;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#ffebee,#fff);box-shadow:0 10px 22px rgba(225,45,57,.20),inset 0 0 0 2px rgba(225,45,57,.12);display:flex;align-items:center;justify-content:center;color:#d62839;font-weight:900}
+.mathTimer.is-low{animation:timerPulse .55s ease-in-out infinite;background:linear-gradient(145deg,#d62839,#ff7b7b);color:#fff}
 .mathTimer span{font-size:1.7rem}
 .mathTimer small{margin-left:2px}
-.answerZone{flex:0 0 auto;margin:8px 0;padding:8px;border-radius:18px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.12);text-align:center}
+.answerZone{flex:0 0 auto;margin:8px 0;padding:8px;border-radius:18px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.12);text-align:center;position:relative}
 .answerLabel{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:#66788a;font-weight:800}
 .answerDisplay{font-size:1.8rem;font-weight:900;line-height:1.05;color:#13294b;min-height:34px}
 .answerFeedback{min-height:18px;font-size:.88rem;font-weight:800}
+.comboBadge{position:absolute;right:10px;top:8px;color:#1b8f6a;font-size:.78rem;font-weight:900}
 .answerZone.correct{animation:correctPulse .42s ease}
 .answerZone.wrong{animation:wrongShake .34s ease;color:#d62839}
 .keypad{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -30,29 +38,58 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .numKey.command{font-size:clamp(.76rem,3.2vw,.95rem);text-transform:uppercase;letter-spacing:.02em}
 .numKey.confirm{background:linear-gradient(145deg,#2c7be5,#1c5fc0);color:white;box-shadow:0 10px 22px rgba(44,123,229,.30)}
 .numKey.clear{background:linear-gradient(145deg,#fff7e8,#ffe7b8);color:#9a5b00}
-.leaderboardCard{flex:0 1 auto;max-height:130px;padding:10px}
-.leaderboardCard h2{margin:0 0 6px;font-size:1rem}
-.leaderboardList{display:grid;gap:5px}
-.leaderboardRow{display:grid;grid-template-columns:34px 1fr auto;gap:6px;align-items:center;padding:7px 9px;border-radius:12px;background:rgba(255,255,255,.74);box-shadow:inset 0 0 0 1px rgba(44,123,229,.09);font-size:.82rem}
-.leaderboardRow:nth-child(n+4){display:none}
-.leaderboardRow small,.leaderboardRow time{color:#66788a}
-.leaderboardRow time{display:none}
-.leaderboardEmpty{text-align:center;color:#66788a;padding:8px}
-.math-game-modal-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px)}
+.toast{position:fixed;left:50%;bottom:22px;z-index:10001;transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:10px 14px;border-radius:999px;background:#102a43;color:#fff;font-weight:900;box-shadow:0 16px 36px rgba(0,0,0,.28);transition:opacity .2s ease,transform .2s ease}
+.toast.is-visible{opacity:1;transform:translate(-50%,0)}
+.math-game-modal-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(5,10,24,.72);backdrop-filter:blur(8px);overflow:hidden}
 .math-game-modal-overlay.is-open{display:flex}
-.math-game-modal{width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:hidden;border:1px solid rgba(44,123,229,.20);border-radius:24px;background:linear-gradient(160deg,#fff,#eff6ff);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:18px;text-align:center}
-.math-game-modal h2{font-size:2rem;margin:.1rem 0 .4rem;color:#d62839}
+.math-game-modal{width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:hidden;border:1px solid rgba(148,180,255,.28);border-radius:24px;background:linear-gradient(160deg,rgba(16,31,59,.97),rgba(22,44,82,.95));box-shadow:0 24px 70px rgba(0,0,0,.45);padding:18px;text-align:center;color:#f7fbff}
+.game-over-dialog{background:linear-gradient(160deg,#fff,#eff6ff);color:#13294b}
+.math-game-modal h2{font-size:2rem;margin:.1rem 0 .4rem;color:#fff}
+.game-over-dialog h2{color:#d62839}
 .gameOverStats{display:grid;gap:6px;margin:10px 0;color:#52647a}
 .playerNameLabel{display:block;text-align:left;font-weight:800;margin-top:10px}
 .math-game-modal input{width:100%;box-sizing:border-box;border:1px solid rgba(44,123,229,.26);border-radius:16px;padding:12px 14px;font-size:1rem;margin-top:6px}
 .gameOverActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .button.secondary{background:#eef4fb;color:#17324d}
 .formMessage{min-height:22px;margin:8px 0 0;font-weight:800;color:#2c7be5}
+.modalHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.modalHeader h2{font-size:1.55rem;margin:0}
+.modalClose{border:0;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;width:38px;height:38px;font-size:1.6rem;line-height:1}
+.leaderboardModal{display:flex;flex-direction:column}
+.leaderboardList{min-height:0;overflow-y:auto;display:grid;gap:8px;padding:2px 4px 2px 0;overscroll-behavior:contain}
+.leaderboardRow{display:grid;grid-template-columns:42px minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);color:#f7fbff;font-size:.84rem;text-align:left}
+.leaderboardRow b{font-size:1rem}
+.leaderboardRow span{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leaderboardRow small,.leaderboardRow time{color:#d6e4ff;white-space:nowrap}
+.leaderboardRow.rank-1{background:linear-gradient(145deg,rgba(255,207,64,.28),rgba(255,255,255,.08));box-shadow:0 0 18px rgba(255,207,64,.22);border-color:rgba(255,207,64,.42)}
+.leaderboardRow.rank-2{background:linear-gradient(145deg,rgba(210,220,235,.22),rgba(255,255,255,.08));border-color:rgba(220,230,245,.36)}
+.leaderboardRow.rank-3{background:linear-gradient(145deg,rgba(205,127,50,.24),rgba(255,255,255,.08));border-color:rgba(205,127,50,.38)}
+.leaderboardEmpty{text-align:center;color:#f7fbff;padding:20px}
+.confettiBit{position:absolute;top:45%;width:6px;height:9px;border-radius:2px;pointer-events:none;animation:confettiPop .65s ease-out forwards}
+
 @keyframes correctPulse{50%{transform:scale(1.025);box-shadow:0 0 28px rgba(41,171,135,.34)}
 }
+
 @keyframes wrongShake{25%{transform:translateX(-6px)}
 75%{transform:translateX(6px)}
 }
+
+@keyframes timerPulse{50%{transform:scale(1.08);box-shadow:0 0 26px rgba(214,40,57,.42)}
+}
+
+@keyframes confettiPop{to{transform:translate(var(--x),-70px) rotate(220deg);opacity:0}
+}
+
+
+@media (max-width:430px){.mathHero{align-items:flex-start}
+.mathHeroActions{grid-template-columns:1fr 1fr 38px;gap:6px}
+.mathAction{padding:8px 9px;font-size:.85rem}
+.mathAudioToggle{width:38px;height:38px}
+.leaderboardRow{grid-template-columns:36px minmax(0,1fr) auto;gap:6px}
+.leaderboardRow time{grid-column:2/4}
+.leaderboardRow small:nth-of-type(2){display:none}
+}
+
 
 @media (max-height:760px){body:has(.math-game-page) main.container{padding-inline:8px}
 .math-game-shell{gap:6px;padding:4px 0}
@@ -69,13 +106,12 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .answerFeedback{min-height:16px}
 .keypad{gap:6px}
 .numKey{min-height:40px;max-height:56px;border-radius:16px}
-.leaderboardCard{max-height:104px}
-.leaderboardRow{padding:5px 8px}
 .math-game-modal{padding:14px}
 .math-game-modal h2{font-size:1.7rem}
 }
 
-@media (max-height:680px){.mathHero{display:none}
+
+@media (max-height:680px){.mathHero h1,.eyebrow{display:none}
 .math-game-shell{padding:3px 0}
 .mathPhoneCard{padding:8px;border-radius:18px}
 .mathDashboard{grid-template-columns:1fr 48px;gap:5px}
@@ -90,7 +126,6 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .answerDisplay{font-size:1.35rem;min-height:26px}
 .answerFeedback{min-height:14px;font-size:.76rem}
 .numKey{min-height:36px;max-height:48px;border-radius:14px}
-.leaderboardCard{display:none}
-.math-game-modal{max-height:calc(100dvh - 20px);overflow:auto}
+.math-game-modal{max-height:calc(100dvh - 20px)}
 .gameOverActions{grid-template-columns:1fr}
 }

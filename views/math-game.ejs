@@ -7,7 +7,11 @@
       <p class="eyebrow">Math Challenge</p>
       <h1><%= t('mathGame.title') %></h1>
     </div>
-    <button id="startGameBtn" class="button mathStart" type="button"><%= t('mathGame.start') %></button>
+    <div class="mathHeroActions" aria-label="Math game actions">
+      <button id="leaderboardBtn" class="button mathAction mathLeaderboardBtn" type="button">🏆 <span><%= t('mathGame.leaderboard') %></span></button>
+      <button id="startGameBtn" class="button mathAction mathStart" type="button"><span>▶</span> <%= t('mathGame.start') %></button>
+      <button id="audioToggleBtn" class="button mathAudioToggle" type="button" aria-label="Audio">🔊</button>
+    </div>
   </div>
 
   <div class="mathPhoneCard" aria-live="polite">
@@ -17,8 +21,9 @@
         <span><%= t('mathGame.completedLevels') %> <b id="completedValue">0</b></span>
         <span><%= t('mathGame.totalTime') %> <b id="totalTimeValue">0.0s</b></span>
       </div>
+      <div class="levelBadge" id="levelBadge">Riscaldamento</div>
       <div class="mathProblem" id="challengeText">—</div>
-      <div class="mathTimer" title="<%= t('mathGame.remainingTime') %>">
+      <div class="mathTimer" id="mathTimer" title="<%= t('mathGame.remainingTime') %>">
         <span id="remainingValue">10</span><small>s</small>
       </div>
     </div>
@@ -27,6 +32,7 @@
       <span class="answerLabel"><%= t('mathGame.answer') %></span>
       <div class="answerDisplay" id="answerDisplay">0</div>
       <div class="answerFeedback" id="answerFeedback"></div>
+      <div class="comboBadge" id="comboBadge" aria-live="polite"></div>
     </div>
 
     <div class="keypad" aria-label="<%= t('mathGame.answer') %>">
@@ -41,8 +47,10 @@
 
   </div>
 
+  <div class="toast" id="mathToast" role="status" aria-live="polite"></div>
+
   <div class="math-game-modal-overlay" id="gameOverModal" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" aria-hidden="true">
-    <div class="math-game-modal">
+    <div class="math-game-modal game-over-dialog">
     <h2 id="gameOverTitle"><%= t('mathGame.gameOver') %></h2>
     <div class="gameOverStats">
       <span><%= t('mathGame.reachedLevel') %>: <b id="overReached">1</b></span>
@@ -53,18 +61,23 @@
     <input id="playerName" maxlength="30" pattern="[A-Za-z0-9 _-]{1,30}" autocomplete="nickname" placeholder="Biss_Player" />
     <p class="formMessage" id="scoreMessage"></p>
     <div class="gameOverActions">
-      <button id="saveScoreBtn" class="button" type="button"><%= t('mathGame.saveScore') %></button>
+      <button id="confirmScoreBtn" class="button" type="button"><%= t('mathGame.confirm') %></button>
       <button id="playAgainBtn" class="button secondary" type="button"><%= t('mathGame.playAgain') %></button>
     </div>
     </div>
   </div>
 
-  <section class="leaderboardCard">
-    <h2><%= t('mathGame.leaderboard') %></h2>
-    <div class="leaderboardList" id="leaderboardList">
-      <div class="leaderboardEmpty"><%= t('mathGame.loading') %></div>
+  <div class="math-game-modal-overlay" id="leaderboardModal" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle" aria-hidden="true">
+    <div class="math-game-modal leaderboardModal">
+      <div class="modalHeader">
+        <h2 id="leaderboardTitle">🏆 <%= t('mathGame.leaderboard') %></h2>
+        <button id="closeLeaderboardBtn" class="modalClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="leaderboardList" id="leaderboardList">
+        <div class="leaderboardEmpty"><%= t('mathGame.loading') %></div>
+      </div>
     </div>
-  </section>
+  </div>
 </section>
 
 <script id="mathGameTranslations" type="application/json"><%- JSON.stringify({
