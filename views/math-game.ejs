@@ -1,0 +1,78 @@
+<%- include("partials/header") %>
+
+<section class="mathGameShell" data-locale="<%= localeTag %>">
+  <div class="mathHero">
+    <div>
+      <p class="eyebrow">Math Challenge</p>
+      <h1><%= t('mathGame.title') %></h1>
+    </div>
+    <button id="startGameBtn" class="button mathStart" type="button"><%= t('mathGame.start') %></button>
+  </div>
+
+  <div class="mathPhoneCard" aria-live="polite">
+    <div class="mathDashboard">
+      <div class="mathStats">
+        <span><%= t('mathGame.level') %> <b id="levelValue">1</b></span>
+        <span><%= t('mathGame.completedLevels') %> <b id="completedValue">0</b></span>
+        <span><%= t('mathGame.totalTime') %> <b id="totalTimeValue">0.0s</b></span>
+      </div>
+      <div class="mathProblem" id="challengeText">—</div>
+      <div class="mathTimer" title="<%= t('mathGame.remainingTime') %>">
+        <span id="remainingValue">10</span><small>s</small>
+      </div>
+    </div>
+
+    <div class="answerZone" id="answerZone">
+      <span class="answerLabel"><%= t('mathGame.answer') %></span>
+      <div class="answerDisplay" id="answerDisplay">0</div>
+      <div class="answerFeedback" id="answerFeedback"></div>
+    </div>
+
+    <div class="keypad" aria-label="<%= t('mathGame.answer') %>">
+      <% [1,2,3,4,5,6,7,8,9].forEach((n) => { %>
+        <button class="numKey" type="button" data-number="<%= n %>"><%= n %></button>
+      <% }) %>
+      <button class="numKey command clear" type="button" id="clearBtn"><%= t('mathGame.clear') %></button>
+      <button class="numKey" type="button" data-number="0">0</button>
+      <button class="numKey command confirm" type="button" id="confirmBtn"><%= t('mathGame.confirm') %></button>
+    </div>
+  </div>
+
+  <div class="gameOverPanel" id="gameOverPanel" hidden>
+    <h2><%= t('mathGame.gameOver') %></h2>
+    <div class="gameOverStats">
+      <span><%= t('mathGame.reachedLevel') %>: <b id="overReached">1</b></span>
+      <span><%= t('mathGame.completedLevels') %>: <b id="overCompleted">0</b></span>
+      <span><%= t('mathGame.totalTime') %>: <b id="overTime">0.0s</b></span>
+    </div>
+    <label class="playerNameLabel" for="playerName"><%= t('mathGame.playerName') %></label>
+    <input id="playerName" maxlength="30" pattern="[A-Za-z0-9 _-]{1,30}" autocomplete="nickname" placeholder="Biss_Player" />
+    <p class="formMessage" id="scoreMessage"></p>
+    <div class="gameOverActions">
+      <button id="saveScoreBtn" class="button" type="button"><%= t('mathGame.saveScore') %></button>
+      <button id="playAgainBtn" class="button secondary" type="button"><%= t('mathGame.playAgain') %></button>
+    </div>
+  </div>
+
+  <section class="leaderboardCard">
+    <h2><%= t('mathGame.leaderboard') %></h2>
+    <div class="leaderboardList" id="leaderboardList">
+      <div class="leaderboardEmpty"><%= t('mathGame.loading') %></div>
+    </div>
+  </section>
+</section>
+
+<script id="mathGameTranslations" type="application/json"><%- JSON.stringify({
+  correct: t('mathGame.correct'),
+  wrong: t('mathGame.wrong'),
+  invalidName: t('mathGame.invalidName'),
+  scoreSaved: t('mathGame.scoreSaved'),
+  rank: t('mathGame.rank'),
+  levels: t('mathGame.levels'),
+  time: t('mathGame.time'),
+  date: t('mathGame.date'),
+  noScores: t('mathGame.noScores'),
+  saveError: t('mathGame.saveError')
+}) %></script>
+
+<%- include("partials/footer") %>
