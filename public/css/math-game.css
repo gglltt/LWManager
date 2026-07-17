@@ -55,8 +55,8 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .modalHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .modalHeader h2{font-size:1.55rem;margin:0}
 .modalClose{border:0;border-radius:14px;background:rgba(255,255,255,.12);color:#fff;width:38px;height:38px;font-size:1.6rem;line-height:1}
-.leaderboardModal{display:flex;flex-direction:column}
-.leaderboardList{min-height:0;overflow-y:auto;display:grid;gap:8px;padding:2px 4px 2px 0;overscroll-behavior:contain}
+.leaderboardModal{display:flex;flex-direction:column;min-height:0}
+.leaderboardList{min-height:0;overflow-y:auto;display:grid;gap:8px;padding:2px 4px 2px 0;overscroll-behavior:contain;max-height:calc(100dvh - 150px);scrollbar-gutter:stable}
 .leaderboardRow{display:grid;grid-template-columns:42px minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);color:#f7fbff;font-size:.84rem;text-align:left}
 .leaderboardRow b{font-size:1rem}
 .leaderboardRow span{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -85,9 +85,16 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .mathHeroActions{grid-template-columns:1fr 1fr 38px;gap:6px}
 .mathAction{padding:8px 9px;font-size:.85rem}
 .mathAudioToggle{width:38px;height:38px}
-.leaderboardRow{grid-template-columns:36px minmax(0,1fr) auto;gap:6px}
-.leaderboardRow time{grid-column:2/4}
-.leaderboardRow small:nth-of-type(2){display:none}
+.leaderboardModal{width:min(390px,100%);padding:14px;background:linear-gradient(160deg,#10213f,#173b68)}
+.leaderboardList{max-height:calc(100dvh - 132px);padding-right:2px}
+.leaderboardRow{grid-template-columns:auto minmax(0,1fr);gap:4px 8px;padding:11px 12px;background:#f7fbff;color:#13294b;border-color:rgba(44,123,229,.24);box-shadow:0 8px 18px rgba(5,10,24,.18)}
+.leaderboardRow b{grid-row:1/span 2;color:#102a43}
+.leaderboardRow .leaderboardName{font-size:.98rem;color:#102a43}
+.leaderboardRow .leaderboardLevels,.leaderboardRow .leaderboardTime{grid-column:2;color:#244b73;font-weight:800}
+.leaderboardRow time{grid-column:2;color:#48627d;font-weight:700}
+.leaderboardRow.rank-1{background:linear-gradient(145deg,#fff4c2,#fffdf5);border-color:#c28a00}
+.leaderboardRow.rank-2{background:linear-gradient(145deg,#eef3f9,#ffffff);border-color:#8797aa}
+.leaderboardRow.rank-3{background:linear-gradient(145deg,#ffe3c4,#fffaf5);border-color:#a65f1a}
 }
 
 
