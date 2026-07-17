@@ -13,7 +13,7 @@ function leaderboardFilter(user) {
 async function loadLeaderboard(user) {
   return MathGameScore.find(leaderboardFilter(user))
     .sort({ levelsCompleted: -1, totalTimeMs: 1, createdAt: 1 })
-    .limit(10)
+    .limit(20)
     .select("playerName levelsCompleted reachedLevel totalTimeMs totalTimeSeconds createdAt")
     .lean();
 }
