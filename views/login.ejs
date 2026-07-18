@@ -1,17 +1,23 @@
 <%- include("partials/header") %>
-<section class="card">
-  <h1><%= t('login_title') %></h1>
+<section class="card login-card">
+  <h1 class="login-title"><%= t('login_title') %></h1>
   <% if (message) { %><div class="alert success"><%= message %></div><% } %>
   <% if (error) { %><div class="alert error"><%= error %></div><% } %>
-  <form method="POST" action="/auth/login" class="form">
-    <label><%= t('alliance_code') %></label>
-    <input type="text" name="allianceCode" required minlength="2" maxlength="12" pattern="[A-Za-z0-9#]+" value="<%= form?.allianceCode || '' %>" />
-    <label><%= t('server') %></label>
-    <input type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" value="<%= form?.serverNumber || '' %>" />
-    <label><%= t('pin') %></label>
-    <input type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" pattern="\d{6}" />
+  <form method="POST" action="/auth/login" class="form login-form">
+    <div class="field login-field">
+      <label for="allianceCode"><%= t('alliance_code') %></label>
+      <input id="allianceCode" type="text" name="allianceCode" required minlength="2" maxlength="12" pattern="[A-Za-z0-9#]+" autocomplete="username" value="<%= form?.allianceCode || '' %>" />
+    </div>
+    <div class="field login-field">
+      <label for="serverNumber"><%= t('server') %></label>
+      <input id="serverNumber" type="text" name="serverNumber" inputmode="numeric" pattern="\d{1,4}" value="<%= form?.serverNumber || '' %>" />
+    </div>
+    <div class="field login-field">
+      <label for="pin"><%= t('pin') %></label>
+      <input id="pin" type="password" name="pin" required minlength="6" maxlength="6" inputmode="numeric" autocomplete="current-password" pattern="\d{6}" />
+    </div>
     <button type="submit"><%= t('login_button') %></button>
   </form>
-  <p class="muted"><%- t('login_tenant_hint') %></p>
+  <p class="muted login-hint"><%- t('login_tenant_hint') %></p>
 </section>
 <%- include("partials/footer") %>

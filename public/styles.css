@@ -164,6 +164,99 @@ body{
   background:rgba(58,103,255,.15);
 }
 
+/* Compact authentication layout */
+.login-page{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+.login-page .topbar__inner{ padding:10px 0; }
+
+.login-page .topbarRight{ margin-left:auto; }
+
+.login-shell{
+  width:min(100%, 440px);
+  min-height:0;
+  flex:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:12px 16px;
+}
+
+.login-page .login-card{
+  width:100%;
+  max-width:420px;
+  margin:0;
+  padding:14px;
+}
+
+.login-title{
+  margin:0 0 8px;
+  font-size:1.25rem;
+  line-height:1.2;
+}
+
+.login-form{ gap:8px; }
+
+.login-field{ gap:4px; }
+
+.login-field label{ font-size:13px; }
+
+.login-field input{
+  min-height:40px;
+  padding:9px 11px;
+  border-radius:11px;
+}
+
+.login-form button{
+  width:100%;
+  min-height:40px;
+  margin-top:2px;
+  padding:9px 12px;
+}
+
+.login-card .alert{
+  margin-bottom:8px;
+  padding:8px 10px;
+}
+
+.login-hint{
+  margin:8px 0 0;
+  line-height:1.35;
+}
+
+.login-page .footer{ display:none; }
+
+@media (min-width: 481px) and (min-height: 600px){
+  .login-shell{ align-items:center; }
+  .login-page .login-card{ padding:18px; }
+}
+
+@media (max-width: 480px){
+  .login-page .container{ width:calc(100% - 24px); }
+  .login-page .topbar__inner{ padding:8px 0; }
+  .login-page .langPicker__summary{ padding:5px 8px; }
+  .login-shell{
+    width:100%;
+    padding:10px 0;
+  }
+}
+
+@media (max-height: 560px){
+  .login-page .topbar__inner{ padding:6px 0; }
+  .login-shell{ padding-top:6px; }
+  .login-page .login-card{ padding:10px 12px; }
+  .login-title{ margin-bottom:6px; font-size:1.15rem; }
+  .login-form{ gap:6px; }
+  .login-field{ gap:2px; }
+  .login-field input,
+  .login-form button{ min-height:36px; padding-top:7px; padding-bottom:7px; }
+  .login-hint{ margin-top:6px; font-size:12px; }
+}
+
 
 /* ========================= */
 /* CARD + TYPO               */
