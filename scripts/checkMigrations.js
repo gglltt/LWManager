@@ -42,6 +42,9 @@ function runnerUsesCanonicalNameOnly() {
 
 function sameKeys(actual, expected) { return JSON.stringify(actual) === JSON.stringify(expected); }
 function hasUniqueIndex(indexes, keys) { return indexes.some((index) => sameKeys(index.key, keys) && index.unique === true); }
+function hasNamedOrEquivalentUniqueIndex(indexes, name, keys) {
+  return indexes.some((index) => (index.name === name || sameKeys(index.key, keys)) && sameKeys(index.key, keys) && index.unique === true);
+}
 function allianceCreateRouteUsesCanonicalKey() {
   const adminPath = path.join(__dirname, "..", "routes", "admin.js");
   const source = fs.readFileSync(adminPath, "utf8");
@@ -104,8 +107,20 @@ async function main() {
     if (!(await collectionExists(db, "accounts"))) failures.push("collection accounts does not exist");
     else {
       const accounts = db.collection("accounts");
-      const nullUsernames = await accounts.countDocuments({ $or: [{ username: null }, { username: { $exists: false } }, { username: "" }] });
-      if (nullUsernames) failures.push(`${nullUsernames} account(s) have null/missing/empty username`);
+      const accountIndexes = await accounts.indexes();
+      if (!hasNamedOrEquivalentUniqueIndex(accountIndexes, "username_1", { username: 1 })) failures.push("missing accounts unique username index");
+      const nullUsernames = await accounts.countDocuments({ username: null });
+      if (nullUsernames) failures.push(`${nullUsernames} account(s) have null username`);
+      const missingUsernames = await accounts.countDocuments({ username: { $exists: false } });
+      if (missingUsernames) failures.push(`${missingUsernames} account(s) have missing username`);
+      const emptyUsernames = await accounts.countDocuments({ username: "" });
+      if (emptyUsernames) failures.push(`${emptyUsernames} account(s) have empty username`);
+      const duplicateUsernames = await accounts.aggregate([
+        { $match: { username: { $type: "string", $ne: "" } } },
+        { $group: { _id: "$username", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } }
+      ]).toArray();
+      for (const duplicate of duplicateUsernames) failures.push(`duplicate username: ${duplicate._id} (${duplicate.count} records)`);
       const plainSecrets = await accounts.countDocuments({ $or: [{ pin: { $exists: true } }, { password: { $exists: true } }, { plainPin: { $exists: true } }] });
       if (plainSecrets) failures.push(`${plainSecrets} account(s) contain plain PIN/password fields`);
       const adminAccounts = await accounts.countDocuments({ role: { $in: ["admin", "alliance_admin"] } });

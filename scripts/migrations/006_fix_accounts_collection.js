@@ -1,7 +1,7 @@
 "use strict";
 
 const bcrypt = require("bcryptjs");
-const { ensureCollection } = require("../migrationLib/db");
+const { ensureCollection, ensureCompatibleIndex } = require("../migrationLib/db");
 
 const DEFAULT_ROUNDS = 10;
 
@@ -52,8 +52,8 @@ async function ensureAlliance(db, config, dryRun) {
     { $set: { ...doc, updatedAt: new Date() }, $setOnInsert: { createdAt: new Date() } },
     { upsert: true }
   );
-  await alliances.createIndex({ allianceId: 1 }, { unique: true });
-  await alliances.createIndex({ serverNumber: 1, codeNormalized: 1 }, { unique: true });
+  await ensureCompatibleIndex(alliances, { allianceId: 1 }, { unique: true }, { dryRun, log: console.log });
+  await ensureCompatibleIndex(alliances, { serverNumber: 1, codeNormalized: 1 }, { unique: true }, { dryRun, log: console.log });
   return { action: "ensured", doc };
 }
 
@@ -100,10 +100,11 @@ module.exports = {
     await ensureCollection(db, "accounts", { dryRun });
     for (const spec of requiredSpecs(config)) summary.push(await ensureAccount(db, spec, config, dryRun, resetPins));
 
+    const accounts = db.collection("accounts");
+    await ensureCompatibleIndex(accounts, { username: 1 }, { unique: true }, { dryRun, log });
+    await ensureCompatibleIndex(accounts, { allianceId: 1, role: 1 }, {}, { dryRun, log });
+
     if (!dryRun) {
-      const accounts = db.collection("accounts");
-      await accounts.createIndex({ username: 1 }, { unique: true });
-      await accounts.createIndex({ allianceId: 1, role: 1 });
       await accounts.updateMany({ role: { $in: ["admin", "alliance_admin"] } }, { $set: { role: "standard", isActive: false, updatedAt: new Date() } });
     }
 

@@ -1,4 +1,4 @@
-const { ensureCollection } = require('../migrationLib/db');
+const { ensureCollection, ensureCompatibleIndex } = require('../migrationLib/db');
 
 const ALLIANCES = 'alliances';
 const LEGACY_ALLIANCE_KEY_INDEX = 'allianceKey_1';
@@ -14,6 +14,10 @@ function numericOrNull(value) {
   return Number.isFinite(number) ? number : null;
 }
 function valuesEqual(a, b) { return a === b || (a instanceof Date && b instanceof Date && a.getTime() === b.getTime()); }
+function sameKeys(actual, expected) { return JSON.stringify(actual) === JSON.stringify(expected); }
+function hasCompatibleUniqueIndex(indexes, keys, name) {
+  return indexes.some((index) => (index.name === name || sameKeys(index.key, keys)) && sameKeys(index.key, keys) && index.unique === true);
+}
 function buildNormalization(doc, nextAllianceId) {
   const set = {};
   let code = doc.code;
@@ -63,7 +67,7 @@ async function fixAllianceKeyLegacyIndex({ db, dryRun }) {
 
   if (dryRun) {
     const wouldCreateIndexes = REQUIRED_INDEXES
-      .filter(({ name }) => !existingIndexNames.has(name))
+      .filter(({ keys, name }) => !hasCompatibleUniqueIndex(indexes, keys, name))
       .map(({ keys, options, name }) => ({ name, keys, options }));
     return { wouldDropIndexes, wouldNormalizeAlliances: normalization.normalized, wouldCreateIndexes };
   }
@@ -75,7 +79,9 @@ async function fixAllianceKeyLegacyIndex({ db, dryRun }) {
   }
 
   const ensuredIndexes = [];
-  for (const { keys, options } of REQUIRED_INDEXES) ensuredIndexes.push(await alliances.createIndex(keys, options));
+  for (const { keys, options } of REQUIRED_INDEXES) {
+    ensuredIndexes.push(await ensureCompatibleIndex(alliances, keys, options, { dryRun: false }));
+  }
 
   return { droppedIndexes, normalizedAlliances: normalization.normalized, ensuredIndexes };
 }
