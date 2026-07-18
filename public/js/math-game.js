@@ -44,28 +44,194 @@
 
   function getComboBonus() { return state.streak >= 2 ? state.streak : 0; }
   function getTimeLimitForLevel(level) { return BASE_TIME_SECONDS + getComboBonus(); }
-  function challenge(text, answer) { return { text, answer }; }
-  function oneDigitMultiplyPair(level) {
-    const single = rand(2, 9);
-    const other = level <= 15 ? rand(2, 10) : rand(10, Math.min(99, 20 + level * 2));
+  function challenge(expression, answer, difficultyLabel) { return { expression, text: expression, answer, difficultyLabel }; }
+  function randomInt(min, max) { return rand(min, max); }
+
+  function generateAddition(min, max, difficultyLabel) {
+    const a = randomInt(min, max);
+    const b = randomInt(min, max);
+    return challenge(`${a} + ${b}`, a + b, difficultyLabel);
+  }
+
+  function generateSubtraction(min, max, difficultyLabel) {
+    let a = randomInt(min, max);
+    let b = randomInt(min, max);
+    if (b > a) [a, b] = [b, a];
+    if (a === b) {
+      if (a < max) a += 1;
+      else b -= 1;
+    }
+    return challenge(`${a} - ${b}`, a - b, difficultyLabel);
+  }
+
+  function generateSingleStepAddSub(min, max, difficultyLabel) {
+    return pick([
+      () => generateAddition(min, max, difficultyLabel),
+      () => generateSubtraction(min, max, difficultyLabel)
+    ])();
+  }
+
+  function oneDigitMultiplyPair(otherMin, otherMax) {
+    const single = randomInt(2, 9);
+    const other = randomInt(otherMin, otherMax);
     return Math.random() < 0.5 ? [single, other] : [other, single];
   }
-  function generateMathChallenge(level) {
-    if (level <= 3) { const a = rand(1, 10), b = rand(1, 10); return challenge(`${a} + ${b}`, a + b); }
-    if (level <= 6) { const op = pick(["+", "-"]); let a = rand(1, 20), b = rand(1, 20); if (op === "-" && b > a) [a, b] = [b, a]; return challenge(`${a} ${op} ${b}`, op === "+" ? a + b : a - b); }
-    if (level <= 10) { const op = pick(["+", "-"]); let a = rand(10, 50), b = rand(10, 50); if (op === "-" && b > a) [a, b] = [b, a]; return challenge(`${a} ${op} ${b}`, op === "+" ? a + b : a - b); }
-    if (level <= 20) { const op = level <= 15 ? "×" : pick(["+", "-", "×"]); let a = rand(10, 80), b = rand(2, 30); if (op === "×") [a, b] = oneDigitMultiplyPair(level); if (op === "-" && b > a) [a, b] = [b, a]; return challenge(`${a} ${op} ${b}`, op === "+" ? a + b : op === "-" ? a - b : a * b); }
-    if (level <= 30) { const answer = rand(2, 15), divisor = rand(2, 12); return challenge(`${answer * divisor} / ${divisor}`, answer); }
-    const ops = ["+", "-", "×"]; const op1 = pick(ops), op2 = pick(ops); let a = rand(8, 120), b = rand(2, 30), c = rand(2, 30);
-    if (level <= 50) {
-      if (op1 === "×" && op2 === "×") { b = rand(2, 9); a = rand(10, 99); c = rand(10, 99); }
-      else if (op1 === "×") [a, b] = oneDigitMultiplyPair(level);
-      else if (op2 === "×") [b, c] = oneDigitMultiplyPair(level);
+
+  function generateMultiplication(level, difficultyLabel) {
+    let a;
+    let b;
+    if (level <= 25) {
+      a = randomInt(2, 9);
+      b = randomInt(2, 10);
+    } else if (level <= 30) {
+      [a, b] = oneDigitMultiplyPair(11, 24);
+    } else if (level <= 40) {
+      [a, b] = oneDigitMultiplyPair(2, 12);
+    } else if (level <= 50) {
+      [a, b] = oneDigitMultiplyPair(12, 30);
+    } else if (level <= 80) {
+      [a, b] = oneDigitMultiplyPair(8, 18);
+    } else {
+      a = randomInt(6, 16);
+      b = randomInt(8, 24);
     }
-    let answer = op1 === "×" ? a * b : op1 === "+" ? a + b : a - b;
-    answer = op2 === "×" ? answer * c : op2 === "+" ? answer + c : answer - c;
-    if (answer < 0) return generateMathChallenge(20);
-    return challenge(`${a} ${op1} ${b} ${op2} ${c}`, answer);
+    return challenge(`${a} × ${b}`, a * b, difficultyLabel);
+  }
+
+  function generateDivision(level, difficultyLabel) {
+    const resultMax = level <= 35 ? 12 : level <= 40 ? 15 : level <= 50 ? 18 : level <= 80 ? 24 : 36;
+    const divisorMax = level <= 50 ? 12 : level <= 80 ? 16 : 24;
+    const result = randomInt(2, resultMax);
+    const divisor = randomInt(2, divisorMax);
+    const dividend = result * divisor;
+    return challenge(`${dividend} ÷ ${divisor}`, result, difficultyLabel);
+  }
+
+  function generateSingleStepMixed(level, difficultyLabel) {
+    const generators = level <= 40
+      ? [
+          () => generateAddition(10, 30, difficultyLabel),
+          () => generateSubtraction(10, 30, difficultyLabel),
+          () => generateMultiplication(level, difficultyLabel),
+          () => generateDivision(level, difficultyLabel)
+        ]
+      : [
+          () => generateAddition(35, 90, difficultyLabel),
+          () => generateSubtraction(35, 140, difficultyLabel),
+          () => generateMultiplication(level, difficultyLabel),
+          () => generateDivision(level, difficultyLabel)
+        ];
+    return pick(generators)();
+  }
+
+  function positiveTwoStep(forms) {
+    const options = forms.map((fn) => fn()).filter((item) => item.answer >= 0);
+    return pick(options.length ? options : forms.map((fn) => fn()));
+  }
+
+  function generateTwoStepChallenge(level, difficultyLabel) {
+    if (level <= 60) {
+      return positiveTwoStep([
+        () => { const a = randomInt(8, 24), b = randomInt(4, 18), c = randomInt(2, 6); return challenge(`(${a} + ${b}) × ${c}`, (a + b) * c, difficultyLabel); },
+        () => { const a = randomInt(18, 45), b = randomInt(4, Math.min(24, a - 1)), c = randomInt(2, 6); return challenge(`(${a} - ${b}) × ${c}`, (a - b) * c, difficultyLabel); },
+        () => { const a = randomInt(15, 60), b = randomInt(2, 9), c = randomInt(2, 9); return challenge(`${a} + (${b} × ${c})`, a + (b * c), difficultyLabel); },
+        () => { const b = randomInt(2, 9), c = randomInt(2, 9), product = b * c, a = randomInt(product + 5, product + 70); return challenge(`${a} - (${b} × ${c})`, a - product, difficultyLabel); }
+      ]);
+    }
+
+    if (level <= 80) {
+      return positiveTwoStep([
+        () => { const a = randomInt(25, 70), b = randomInt(10, 35), c = randomInt(8, 30); return challenge(`(${a} + ${b}) - ${c}`, (a + b) - c, difficultyLabel); },
+        () => { const a = randomInt(6, 9), b = randomInt(8, 14), c = randomInt(15, 45); return challenge(`(${a} × ${b}) + ${c}`, (a * b) + c, difficultyLabel); },
+        () => { const b = randomInt(6, 12), c = randomInt(6, 12), product = b * c, a = randomInt(product + 20, product + 120); return challenge(`${a} - (${b} × ${c})`, a - product, difficultyLabel); },
+        () => { const result = randomInt(6, 18), divisor = randomInt(2, 12), a = result * divisor, b = randomInt(12, 45); return challenge(`(${a} ÷ ${divisor}) + ${b}`, result + b, difficultyLabel); }
+      ]);
+    }
+
+    return positiveTwoStep([
+      () => { const a = randomInt(60, 180), b = randomInt(25, 90), c = randomInt(20, 100); return challenge(`(${a} + ${b}) - ${c}`, (a + b) - c, difficultyLabel); },
+      () => { const a = randomInt(8, 18), b = randomInt(12, 28), c = randomInt(30, 120); return challenge(`(${a} × ${b}) + ${c}`, (a * b) + c, difficultyLabel); },
+      () => { const b = randomInt(8, 18), c = randomInt(10, 24), product = b * c, a = randomInt(product + 30, product + 180); return challenge(`${a} - (${b} × ${c})`, a - product, difficultyLabel); },
+      () => { const result = randomInt(10, 36), divisor = randomInt(3, 24), a = result * divisor, b = randomInt(25, 100); return challenge(`(${a} ÷ ${divisor}) + ${b}`, result + b, difficultyLabel); }
+    ]);
+  }
+
+  function generateMathChallenge(level) {
+    if (level <= 5) return generateAddition(1, 10, "Somme semplici");
+    if (level <= 10) return generateAddition(5, 20, "Somme medie");
+    if (level <= 15) return generateSubtraction(1, 20, "Sottrazioni semplici");
+    if (level <= 20) return generateSingleStepAddSub(10, 30, "Somma o sottrazione");
+    if (level <= 25) return generateMultiplication(level, "Moltiplicazioni semplici");
+    if (level <= 30) return generateMultiplication(level, "Moltiplicazioni medie");
+    if (level <= 35) return generateDivision(level, "Divisioni intere");
+    if (level <= 40) return generateSingleStepMixed(level, "Operazioni miste");
+    if (level <= 50) return generateSingleStepMixed(level, "Operazioni grandi");
+    if (level <= 60) return generateTwoStepChallenge(level, "Due passaggi guidati");
+    if (level <= 80) return generateTwoStepChallenge(level, "Due passaggi misti");
+    return generateTwoStepChallenge(level, "Avanzato leggibile");
+  }
+
+  function evaluateDisplayedExpression(expression) {
+    const tokens = expression.match(/\d+|[()+\-×÷]/g) || [];
+    let index = 0;
+    const parseFactor = () => {
+      const token = tokens[index];
+      if (token === "(") {
+        index += 1;
+        const value = parseExpression();
+        index += 1;
+        return value;
+      }
+      index += 1;
+      return Number(token);
+    };
+    const parseTerm = () => {
+      let value = parseFactor();
+      while (tokens[index] === "×" || tokens[index] === "÷") {
+        const op = tokens[index];
+        index += 1;
+        const next = parseFactor();
+        value = op === "×" ? value * next : value / next;
+      }
+      return value;
+    };
+    const parseExpression = () => {
+      let value = parseTerm();
+      while (tokens[index] === "+" || tokens[index] === "-") {
+        const op = tokens[index];
+        index += 1;
+        const next = parseTerm();
+        value = op === "+" ? value + next : value - next;
+      }
+      return value;
+    };
+    return parseExpression();
+  }
+
+  function runMathChallengeSelfTest(iterations = 100) {
+    const bands = [3, 8, 13, 18, 23, 28, 33, 38, 46, 56, 70, 85];
+    const errors = [];
+    bands.forEach((level) => {
+      for (let i = 0; i < iterations; i += 1) {
+        const item = generateMathChallenge(level);
+        if (/[*/]/.test(item.expression)) errors.push(`Operator symbol at level ${level}: ${item.expression}`);
+        if ((item.expression.includes("×") || item.expression.includes("÷")) && /[*\/]/.test(item.expression)) errors.push(`Unreadable operator at level ${level}: ${item.expression}`);
+        const ops = (item.expression.match(/[+\-×÷]/g) || []).length;
+        if (level < 51 && ops > 1) errors.push(`Two operators before level 51: ${item.expression}`);
+        if (ops > 1 && !/[()]/.test(item.expression)) errors.push(`Missing parentheses: ${item.expression}`);
+        if (level <= 50 && item.expression.includes("×")) {
+          const factors = item.expression.match(/(\d+) × (\d+)/);
+          if (factors && Number(factors[1]) > 9 && Number(factors[2]) > 9) errors.push(`Hard multiplication before level 51: ${item.expression}`);
+        }
+        if (item.expression.includes("÷")) {
+          const division = item.expression.match(/(\d+) ÷ (\d+)/);
+          if (division && Number(division[1]) % Number(division[2]) !== 0) errors.push(`Non-integer division: ${item.expression}`);
+        }
+        const computed = evaluateDisplayedExpression(item.expression);
+        if (computed !== item.answer) errors.push(`Wrong answer ${item.expression} = ${item.answer}, computed ${computed}`);
+      }
+    });
+    return { passed: errors.length === 0, errors };
   }
   function levelBadge(level) { if (level <= 10) return "Riscaldamento"; if (level <= 20) return "Allenamento"; if (level <= 30) return "Esperto"; if (level <= 50) return "Campione"; return "Leggenda"; }
 
@@ -92,6 +258,8 @@
   function showToast(msg) { const toast = $("mathToast"); toast.textContent = msg; toast.classList.add("is-visible"); clearTimeout(state.toastId); state.toastId = setTimeout(() => toast.classList.remove("is-visible"), 2200); }
   async function loadLeaderboard(rows) { if (!rows) { const res = await fetch("/math-game/leaderboard"); rows = (await res.json()).leaderboard || []; } const list = $("leaderboardList"); const topRows = (rows || []).slice(0, 20); if (!topRows.length) { list.innerHTML = `<div class="leaderboardEmpty">${i18n.noScores || "No scores yet"}</div>`; return; } list.innerHTML = topRows.map((r, idx) => `<div class="leaderboardRow rank-${idx + 1}"><b>#${idx + 1}</b><span class="leaderboardName">${escapeHtml(r.playerName)}</span><small class="leaderboardLevels">${i18n.levels || "Levels"}: ${r.levelsCompleted}</small><small class="leaderboardTime">${i18n.time || "Time"}: ${formatSeconds(r.totalTimeMs)}</small><time>${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ""}</time></div>`).join(""); }
   async function saveScore() { playMainSound(); const playerName = $("playerName").value.trim(); if (!/^[\p{L}\p{N} _-]{1,30}$/u.test(playerName)) { $("scoreMessage").textContent = i18n.invalidName; playErrorSound(); return; } const res = await fetch("/math-game/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerName, levelsCompleted: state.levelsCompleted, reachedLevel: state.level, totalTimeMs: Math.max(1, Math.round(state.totalTimeMs)) }) }); const data = await res.json(); if (!res.ok) { $("scoreMessage").textContent = i18n.saveError; playErrorSound(); return; } state.scoreSaved = true; $("confirmScoreBtn").disabled = true; await loadLeaderboard(data.leaderboard); closeModal("gameOverModal"); showToast("Risultato salvato"); resetToStart(); }
+
+  window.__LWMathGame = { generateMathChallenge, runMathChallengeSelfTest };
 
   document.addEventListener("pointerdown", initAudio, { once: true });
   document.querySelectorAll("[data-number]").forEach((btn) => btn.addEventListener("click", () => { playTapSound(); if (!state.isGameOver && state.currentChallenge && state.answerInput.length < 6) { state.answerInput += btn.dataset.number; render(); } }));
