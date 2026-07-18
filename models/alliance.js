@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 const { normalizeAllianceCode } = require("../utils/tenant");
 
 const AllianceSchema = new mongoose.Schema({
-  allianceId: { type: Number, required: true, unique: true },
+  allianceId: { type: Number, required: true },
   code: { type: String, required: true, trim: true },
   codeNormalized: { type: String, required: true, uppercase: true, trim: true },
   serverNumber: { type: Number, required: true },
   displayName: { type: String, trim: true, default: null },
-  isActive: { type: Boolean, default: true, index: true }
+  isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
 AllianceSchema.pre("validate", function normalize(next) {
