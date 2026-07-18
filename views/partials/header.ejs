@@ -11,7 +11,12 @@
     <% }) %>
   <% } %>
 </head>
-<body>
+<%
+  const isAuthenticated = typeof user !== "undefined" && Boolean(user);
+  const requestPath = String(typeof currentUrl !== "undefined" ? currentUrl : "").split("?")[0];
+  const isLoginPage = requestPath === "/auth/login" || requestPath === "/login";
+%>
+<body class="<%= isLoginPage ? 'login-page' : '' %>">
   <div id="lwmanager-splash" class="splash" role="status" aria-live="polite" aria-label="<%= t('splash_label') %>" hidden>
     <div class="splash__scanline" aria-hidden="true"></div>
     <div class="splash__panel">
@@ -24,10 +29,11 @@
       <p class="splash__subtitle"><%= t('made_in_italy') %></p>
     </div>
   </div>
-  <header class="topbar">
+  <header class="topbar <%= isLoginPage ? 'topbar--login' : '' %>">
     <div class="container topbar__inner">
       <div class="brand">LWManager</div>
       <div class="topbarRight">
+        <% if (isAuthenticated || !isLoginPage) { %>
         <nav class="nav">
           <!--
           <details class="navGuide">
@@ -50,6 +56,7 @@
             </div>
           </details>
           -->
+          <% if (isAuthenticated) { %>
           <a href="mailto:info@bisslastwar.com"><%= t('contact_us') %> |</a>
           <a href="/dashboard"><%= t('nav_dashboard') %> |</a>
           <a href="/potenze"><%= t('nav_powers') %> |</a>
@@ -57,9 +64,12 @@
           <!--<% if (typeof user !== "undefined" && user && user.authLevel >= 3) { %><a href="/performance-vs"><%= t('perf_title') %> |</a><% } %>-->
           <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords"><%= t('password_management') %> |</a><% } %>
           <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %> |</a><% } %>
-          <a href="/auth/login"><%= t('nav_login') %> |</a>
           <a href="/logout"><%= t('nav_logout') %></a>
+          <% } else if (!isLoginPage) { %>
+          <a href="/auth/login"><%= t('nav_login') %></a>
+          <% } %>
         </nav>
+        <% } %>
 
         <details class="langPicker">
           <summary class="langPicker__summary" aria-label="<%= t('lang_selector') %>">
@@ -81,4 +91,4 @@
       </div>
     </div>
   </header>
-  <main class="container">
+  <main class="container <%= isLoginPage ? 'login-shell' : '' %>">
