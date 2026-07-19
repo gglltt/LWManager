@@ -5,70 +5,16 @@
   if (!page) return;
 
   const i18n = JSON.parse($("wordGameTranslations")?.textContent || "{}");
-  const FALLBACKS = {
-    it: "AEIORSTNLC".split(""), en: "AEIORSTNLD".split(""), fr: "AEIORSTNLU".split("")
-  };
-  const VOWELS = new Set("AEIOU".split(""));
-  const POOLS = {
-    it: "AAAAAAAAAAAAEEEEEEEEEEEEIIIIIIIIIOOOOOOOUUUUUBBBBBCCCCCCDDDDDFFFFGGGGHHHLLLLLLMMMMMNNNNNNNNPPPPPQRRRRRRRRSSSSSSSSTTTTTTTVVZZ",
-    en: "AAAAAAAAAAAAEEEEEEEEEEEEEEEEIIIIIIIIIOOOOOOOOUUUUUBBBBCCCCDDDDDDFFFFGGGGGHHHHHHLLLLLLMMMMNNNNNNNNPPPPQRRRRRRSSSSSSSSTTTTTTTTVVWWYY",
-    fr: "AAAAAAAAAAAAEEEEEEEEEEEEEEEEIIIIIIIIOOOOOOOUUUUUUUBBBBCCCCCDDDDDDFFFFGGGGHHHHLLLLLLMMMMMNNNNNNNNPPPPQRRRRRRRSSSSSSSSTTTTTTTTVV"
-  };
   const state = {
     level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: 10,
     totalTimeMs: 0, timerId: null, isRunning: false, language: page.dataset.language || "en",
-    dictionary: [], dictionarySet: new Set(), levelLimitMs: 10000, levelStartedAt: 0,
+    gameToken: "", validationPending: false, levelLimitMs: 10000, levelStartedAt: 0,
     deadline: 0, audioContext: null, audioEnabled: localStorage.getItem("wordGameAudio") !== "off",
     transitionId: null, toastId: null
   };
 
-  function normalizeWord(word) {
-    return String(word || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]/g, "");
-  }
-  function shuffle(items) {
-    const copy = [...items];
-    for (let i = copy.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [copy[i], copy[j]] = [copy[j], copy[i]]; }
-    return copy;
-  }
-  function counts(value) { const map = Object.create(null); for (const char of value) map[char] = (map[char] || 0) + 1; return map; }
-  function canBuild(word, lettersCount) {
-    const used = Object.create(null);
-    for (const char of word) { used[char] = (used[char] || 0) + 1; if (used[char] > (lettersCount[char] || 0)) return false; }
-    return true;
-  }
-  function possibleWords(letters, stopAt = Infinity) {
-    const available = counts(letters);
-    const result = [];
-    for (const word of state.dictionary) { if (word.length <= 10 && canBuild(word, available)) { result.push(word); if (result.length >= stopAt) break; } }
-    return result;
-  }
-  function targetForLevel() { return state.level <= 10 ? 8 : state.level <= 25 ? 6 : 5; }
-  function randomCandidate() {
-    const pool = POOLS[state.language] || POOLS.en;
-    const letters = [];
-    const consonants = [...pool].filter((c) => !VOWELS.has(c));
-    for (let i = 0; i < 3; i += 1) letters.push("AEIOU"[Math.floor(Math.random() * 5)]);
-    for (let i = 0; i < 4; i += 1) letters.push(consonants[Math.floor(Math.random() * consonants.length)]);
-    while (letters.length < 10) letters.push(pool[Math.floor(Math.random() * pool.length)]);
-    return shuffle(letters);
-  }
-  function generateLetters() {
-    const needed = targetForLevel();
-    for (let attempt = 0; attempt < 100; attempt += 1) {
-      const candidate = randomCandidate();
-      if (possibleWords(candidate, needed).length >= needed) return candidate;
-    }
-    return shuffle(FALLBACKS[state.language] || FALLBACKS.en);
-  }
-  async function loadDictionary() {
-    const language = ["it", "en", "fr"].includes(state.language) ? state.language : "en";
-    state.language = language;
-    const response = await fetch(`/data/word-game/words-${language}.json`, { cache: "force-cache" });
-    if (!response.ok) throw new Error("dictionary");
-    const words = await response.json();
-    state.dictionary = [...new Set(words.map(normalizeWord).filter((word) => word.length >= 3 && word.length <= 10))];
-    state.dictionarySet = new Set(state.dictionary);
-    if (state.dictionary.length < 25) throw new Error("dictionary");
+  function setLetters(letters) {
+    state.currentLetters = [...letters].map((letter, index) => ({ id: `L${state.level}-${index}-${Math.random().toString(36).slice(2, 7)}`, letter }));
   }
 
   function tileButton(tile, selected = false) {
@@ -117,27 +63,43 @@
     const top = page.getBoundingClientRect().top; document.documentElement.style.setProperty("--word-game-height", `${Math.max(320, window.innerHeight - top)}px`);
   }
   function startLevel() {
-    clearInterval(state.timerId); state.currentLetters = generateLetters().map((letter, index) => ({ id: `L${state.level}-${index}-${Math.random().toString(36).slice(2, 7)}`, letter }));
-    state.selectedTiles = []; state.levelStartedAt = performance.now(); state.deadline = state.levelStartedAt + state.levelLimitMs; state.remainingTime = state.levelLimitMs / 1000;
+    clearInterval(state.timerId); state.selectedTiles = []; state.levelStartedAt = performance.now(); state.deadline = state.levelStartedAt + state.levelLimitMs; state.remainingTime = state.levelLimitMs / 1000;
     setFeedback("", ""); render(); state.timerId = setInterval(tick, 100);
   }
   function tick() {
     const remainingMs = Math.max(0, state.deadline - performance.now()); state.remainingTime = remainingMs / 1000; $("wordTime").textContent = Math.ceil(state.remainingTime); $("wordTimer").classList.toggle("isLow", state.remainingTime <= 3);
     if (remainingMs <= 0) endGame();
   }
-  function startGame() {
+  async function startGame() {
     clearTimeout(state.transitionId); clearInterval(state.timerId); closeModal("wordGameOverModal");
-    Object.assign(state, { level: 1, wordsFound: 0, selectedTiles: [], totalTimeMs: 0, levelLimitMs: 10000, remainingTime: 10, isRunning: true });
-    startLevel();
+    $("wordStartBtn").disabled = true;
+    try {
+      const response = await fetch("/word-game/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "start");
+      Object.assign(state, { level: data.level, wordsFound: 0, selectedTiles: [], totalTimeMs: 0, levelLimitMs: 10000, remainingTime: 10, isRunning: true, gameToken: data.gameToken });
+      setLetters(data.letters); startLevel();
+    } catch (_) { setFeedback("bad", i18n.loadingError); }
+    finally { $("wordStartBtn").disabled = false; }
   }
   function clearWord(play = true) { if (!state.isRunning) return; state.selectedTiles = []; if (play) sound.tap(); renderBoard(); renderRack(); }
   function selectedWord() { return state.selectedTiles.map((id) => state.currentLetters.find((tile) => tile.id === id)?.letter || "").join(""); }
-  function confirmWord() {
-    if (!state.isRunning) return; const word = selectedWord();
-    if (word.length < 3 || !state.dictionarySet.has(word)) { sound.bad(); setFeedback("bad", i18n.invalidWord); return; }
-    const now = performance.now(), consumed = Math.min(state.levelLimitMs, now - state.levelStartedAt), remaining = Math.max(0, state.deadline - now);
-    clearInterval(state.timerId); state.totalTimeMs += consumed; state.wordsFound += 1; state.level += 1; state.levelLimitMs = remaining + 10000; state.remainingTime = state.levelLimitMs / 1000;
-    sound.good(); setFeedback("good", i18n.validWord); state.transitionId = setTimeout(startLevel, 420); render();
+  async function confirmWord() {
+    if (!state.isRunning || state.validationPending) return; const word = selectedWord();
+    if (word.length < 3) { sound.bad(); setFeedback("bad", i18n.invalidWord); return; }
+    state.validationPending = true; $("wordConfirmBtn").disabled = true;
+    const submittedAt = performance.now();
+    try {
+      const response = await fetch("/word-game/validate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ word, gameToken: state.gameToken }) });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "validate");
+      if (!data.valid) { sound.bad(); setFeedback("bad", i18n.invalidWord); return; }
+      if (!state.isRunning) return;
+      const consumed = Math.min(state.levelLimitMs, submittedAt - state.levelStartedAt), remaining = Math.max(0, state.deadline - submittedAt);
+      clearInterval(state.timerId); state.totalTimeMs += consumed; state.wordsFound += 1; state.level = data.level; state.gameToken = data.gameToken; state.levelLimitMs = remaining + 10000; state.remainingTime = state.levelLimitMs / 1000;
+      setLetters(data.letters); sound.good(); setFeedback("good", i18n.validWord); state.transitionId = setTimeout(startLevel, 420); render();
+    } catch (_) { if (state.isRunning) { sound.bad(); setFeedback("bad", i18n.loadingError); } }
+    finally { state.validationPending = false; if (state.isRunning) $("wordConfirmBtn").disabled = false; }
   }
   function endGame() {
     if (!state.isRunning) return; clearInterval(state.timerId); state.timerId = null; state.totalTimeMs += state.levelLimitMs; state.remainingTime = 0; state.isRunning = false; sound.over(); render();
@@ -145,7 +107,7 @@
     $("wordPlayerName").value = ""; $("wordScoreMessage").textContent = ""; $("wordSaveScoreBtn").disabled = false; openModal("wordGameOverModal");
   }
   function resetInitial() {
-    clearInterval(state.timerId); clearTimeout(state.transitionId); Object.assign(state, { level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: 10, totalTimeMs: 0, isRunning: false, levelLimitMs: 10000 }); setFeedback("", ""); render();
+    clearInterval(state.timerId); clearTimeout(state.transitionId); Object.assign(state, { level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: 10, totalTimeMs: 0, isRunning: false, validationPending: false, gameToken: "", levelLimitMs: 10000 }); setFeedback("", ""); render();
   }
   function openModal(id) { const modal = $(id); modal.classList.add("isOpen"); modal.setAttribute("aria-hidden", "false"); document.body.classList.add("wordModalOpen"); }
   function closeModal(id) { const modal = $(id); modal.classList.remove("isOpen"); modal.setAttribute("aria-hidden", "true"); if (!document.querySelector(".wordModalOverlay.isOpen")) document.body.classList.remove("wordModalOpen"); }
@@ -176,7 +138,7 @@
   $("wordCloseLeaderboardBtn").addEventListener("click", () => closeModal("wordLeaderboardModal")); $("wordLeaderboardModal").addEventListener("click", (event) => { if (event.target.id === "wordLeaderboardModal") closeModal("wordLeaderboardModal"); });
   $("wordAudioBtn").addEventListener("click", () => { state.audioEnabled = !state.audioEnabled; localStorage.setItem("wordGameAudio", state.audioEnabled ? "on" : "off"); $("wordAudioBtn").textContent = state.audioEnabled ? "🔊" : "🔇"; if (state.audioEnabled) sound.tap(); });
   document.addEventListener("pointerdown", initAudio, { once: true }); window.addEventListener("resize", syncHeight); window.addEventListener("orientationchange", syncHeight);
-  window.__LWWordGame = { normalizeWord, canBuild, possibleWords, generateLetters, state };
+  window.__LWWordGame = { state };
   $("wordAudioBtn").textContent = state.audioEnabled ? "🔊" : "🔇"; syncHeight(); render();
-  loadDictionary().then(() => { $("wordStartBtn").disabled = false; state.currentLetters = generateLetters().map((letter, index) => ({ id: `preview-${index}`, letter })); render(); }).catch(() => { $("wordFeedback").textContent = i18n.loadingError; $("wordStartBtn").disabled = true; });
+  $("wordStartBtn").disabled = false;
 })();

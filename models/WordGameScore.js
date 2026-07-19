@@ -6,7 +6,7 @@ const WordGameScoreSchema = new mongoose.Schema({
   wordsFound: { type: Number, required: true, min: 0, index: true },
   totalTimeMs: { type: Number, required: true, min: 1, index: true },
   totalTimeSeconds: { type: Number, required: true, min: 0 },
-  language: { type: String, required: true, enum: ["it", "en", "fr"] },
+  language: { type: String, required: true, enum: ["it"] },
   allianceId: { type: Number, default: null, index: true },
   serverNumber: { type: Number, default: null },
   allianceCode: { type: String, default: null, trim: true, maxlength: 20 }
