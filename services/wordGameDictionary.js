@@ -57,7 +57,8 @@ function loadItalianDictionary() {
 
   const playableWords = [...words].filter((word) => word.length <= 10);
   if (!playableWords.length) throw new Error("Word Game IT dictionary contains no words between 3 and 10 letters");
-  dictionaryCache = { words, playableWords, files: files.length };
+  const generationSeeds = playableWords.filter((word) => word.length >= 5 && word.length <= 8);
+  dictionaryCache = { words, playableWords, generationSeeds, files: files.length };
   console.info(`Word Game IT dictionary loaded: ${words.size} words from ${files.length} txt files.`);
   return dictionaryCache;
 }
@@ -94,11 +95,10 @@ function makeCandidate(seed) {
 }
 
 function generateLetters(level = 1) {
-  const { playableWords } = loadItalianDictionary();
+  const { playableWords, generationSeeds } = loadItalianDictionary();
   const needed = targetForLevel(level);
-  const seeds = playableWords.filter((word) => word.length >= 5 && word.length <= 8);
   for (let attempt = 0; attempt < 60; attempt += 1) {
-    const seed = seeds[Math.floor(Math.random() * seeds.length)];
+    const seed = generationSeeds[Math.floor(Math.random() * generationSeeds.length)];
     const candidate = makeCandidate(seed);
     if (countPossibleWords(candidate, playableWords, needed) >= needed) return candidate;
   }
@@ -116,6 +116,10 @@ function validateItalianWord(value, letters) {
   return { valid: true, word };
 }
 
+function timeBonusForWord(word) {
+  return normalizeItalianWord(word).length;
+}
+
 function clearDictionaryCache() { dictionaryCache = undefined; }
 
 module.exports = {
@@ -125,6 +129,7 @@ module.exports = {
   loadItalianDictionary,
   generateLetters,
   targetForLevel,
+  timeBonusForWord,
   validateItalianWord,
   clearDictionaryCache
 };

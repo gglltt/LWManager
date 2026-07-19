@@ -63,7 +63,7 @@
     const top = page.getBoundingClientRect().top; document.documentElement.style.setProperty("--word-game-height", `${Math.max(320, window.innerHeight - top)}px`);
   }
   function startLevel() {
-    clearInterval(state.timerId); state.selectedTiles = []; state.levelStartedAt = performance.now(); state.deadline = state.levelStartedAt + state.levelLimitMs; state.remainingTime = state.levelLimitMs / 1000;
+    clearInterval(state.timerId); state.isRunning = true; state.selectedTiles = []; state.levelStartedAt = performance.now(); state.deadline = state.levelStartedAt + state.levelLimitMs; state.remainingTime = state.levelLimitMs / 1000;
     setFeedback("", ""); render(); state.timerId = setInterval(tick, 100);
   }
   function tick() {
@@ -96,8 +96,10 @@
       if (!data.valid) { sound.bad(); setFeedback("bad", i18n.invalidWord); return; }
       if (!state.isRunning) return;
       const consumed = Math.min(state.levelLimitMs, submittedAt - state.levelStartedAt), remaining = Math.max(0, state.deadline - submittedAt);
-      clearInterval(state.timerId); state.totalTimeMs += consumed; state.wordsFound += 1; state.level = data.level; state.gameToken = data.gameToken; state.levelLimitMs = remaining + 10000; state.remainingTime = state.levelLimitMs / 1000;
-      setLetters(data.letters); sound.good(); setFeedback("good", i18n.validWord); state.transitionId = setTimeout(startLevel, 420); render();
+      const bonusSeconds = Number(data.bonusSeconds);
+      if (!Number.isInteger(bonusSeconds) || bonusSeconds < 3 || bonusSeconds > 10) throw new Error("bonus");
+      clearInterval(state.timerId); state.isRunning = false; state.totalTimeMs += consumed; state.wordsFound += 1; state.level = data.level; state.gameToken = data.gameToken; state.levelLimitMs = remaining + bonusSeconds * 1000; state.remainingTime = state.levelLimitMs / 1000;
+      setLetters(data.letters); sound.good(); setFeedback("good", `${i18n.validWord} +${bonusSeconds}s`); state.transitionId = setTimeout(startLevel, 650); render();
     } catch (_) { if (state.isRunning) { sound.bad(); setFeedback("bad", i18n.loadingError); } }
     finally { state.validationPending = false; if (state.isRunning) $("wordConfirmBtn").disabled = false; }
   }

@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const {
   loadItalianDictionary,
   generateLetters,
+  timeBonusForWord,
   validateItalianWord
 } = require("../services/wordGameDictionary");
 
@@ -14,7 +15,7 @@ const UNAVAILABLE_MESSAGE = "Word Game disponibile solo in italiano.";
 const DICTIONARY_UNAVAILABLE_MESSAGE = "Dizionario italiano non disponibile.";
 
 function isItalianLanguage(appLanguage) {
-  return /^it(?:$|[-_])/i.test(String(appLanguage || ""));
+  return /^it/i.test(String(appLanguage || ""));
 }
 
 function requireItalianApi(req, res, next) {
@@ -111,7 +112,15 @@ router.post("/validate", requireAuth, requireItalianApi, (req, res) => {
     if (!result.valid) return res.json({ success: true, valid: false, reason: result.reason });
     const nextLevel = state.level + 1;
     const letters = generateLetters(nextLevel);
-    return res.json({ success: true, valid: true, word: result.word, letters, level: nextLevel, gameToken: signGameState(req, letters, nextLevel) });
+    return res.json({
+      success: true,
+      valid: true,
+      word: result.word,
+      bonusSeconds: timeBonusForWord(result.word),
+      letters,
+      level: nextLevel,
+      gameToken: signGameState(req, letters, nextLevel)
+    });
   } catch (error) {
     console.error(error.message);
     return res.status(503).json({ success: false, message: DICTIONARY_UNAVAILABLE_MESSAGE });
