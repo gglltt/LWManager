@@ -514,7 +514,6 @@ textarea:focus{
 .menuText{ min-width:0; }
 .menuTitle{ font-weight:900; line-height:1.1; font-size:15px; }
 .menuDesc{ margin-top:4px; color:var(--muted); font-size:12.5px; line-height:1.2; }
-.menuCardCta{ display:inline-block; margin-top:8px; padding:4px 10px; border-radius:999px; background:var(--primary); color:#fff; font-size:12px; font-weight:900; }
 
 
 .filterBar{

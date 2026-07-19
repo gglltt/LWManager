@@ -2030,7 +2030,7 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.invalidName": "Use 1-30 letters, numbers, spaces, hyphens or underscores.",
     "wordGame.saveError": "Unable to save the score. Try again.", "wordGame.loading": "Loading leaderboard...",
     "wordGame.loadingError": "Unable to load game data.", "wordGame.dashboardTitle": "Words",
-    "wordGame.dashboardDesc": "Find Italian words using the available letters.", "wordGame.play": "Play"
+    "wordGame.dashboardDesc": "Find Italian words using the available letters."
   },
   it: {
     "wordGame.menu": "Gioco Parole", "wordGame.title": "Gioco Parole", "wordGame.start": "Start",
@@ -2043,7 +2043,7 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.invalidName": "Usa 1-30 lettere, numeri, spazi, trattini o underscore.",
     "wordGame.saveError": "Impossibile salvare il risultato. Riprova.", "wordGame.loading": "Caricamento classifica...",
     "wordGame.loadingError": "Impossibile caricare i dati del gioco.", "wordGame.dashboardTitle": "Parole",
-    "wordGame.dashboardDesc": "Trova parole italiane usando le lettere disponibili.", "wordGame.play": "Gioca"
+    "wordGame.dashboardDesc": "Trova parole italiane usando le lettere disponibili."
   },
   fr: {
     "wordGame.menu": "Jeu de mots", "wordGame.title": "Jeu de mots", "wordGame.start": "Démarrer",

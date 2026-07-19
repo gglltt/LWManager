@@ -1,14 +1,15 @@
-(() => {
+﻿(() => {
   "use strict";
   const $ = (id) => document.getElementById(id);
   const page = document.querySelector(".wordGamePage");
   if (!page) return;
 
   const i18n = JSON.parse($("wordGameTranslations")?.textContent || "{}");
+  const INITIAL_TIME_MS = 60000;
   const state = {
-    level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: 10,
+    level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: INITIAL_TIME_MS / 1000,
     totalTimeMs: 0, timerId: null, isRunning: false, language: page.dataset.language || "en",
-    gameToken: "", validationPending: false, levelLimitMs: 10000, levelStartedAt: 0,
+    gameToken: "", validationPending: false, levelLimitMs: INITIAL_TIME_MS, levelStartedAt: 0,
     deadline: 0, audioContext: null, audioEnabled: localStorage.getItem("wordGameAudio") !== "off",
     transitionId: null, toastId: null
   };
@@ -77,7 +78,7 @@
       const response = await fetch("/word-game/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || "start");
-      Object.assign(state, { level: data.level, wordsFound: 0, selectedTiles: [], totalTimeMs: 0, levelLimitMs: 10000, remainingTime: 10, isRunning: true, gameToken: data.gameToken });
+      Object.assign(state, { level: data.level, wordsFound: 0, selectedTiles: [], totalTimeMs: 0, levelLimitMs: INITIAL_TIME_MS, remainingTime: INITIAL_TIME_MS / 1000, isRunning: true, gameToken: data.gameToken });
       setLetters(data.letters); startLevel();
     } catch (_) { setFeedback("bad", i18n.loadingError); }
     finally { $("wordStartBtn").disabled = false; }
@@ -109,7 +110,7 @@
     $("wordPlayerName").value = ""; $("wordScoreMessage").textContent = ""; $("wordSaveScoreBtn").disabled = false; openModal("wordGameOverModal");
   }
   function resetInitial() {
-    clearInterval(state.timerId); clearTimeout(state.transitionId); Object.assign(state, { level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: 10, totalTimeMs: 0, isRunning: false, validationPending: false, gameToken: "", levelLimitMs: 10000 }); setFeedback("", ""); render();
+    clearInterval(state.timerId); clearTimeout(state.transitionId); Object.assign(state, { level: 1, wordsFound: 0, currentLetters: [], selectedTiles: [], remainingTime: INITIAL_TIME_MS / 1000, totalTimeMs: 0, isRunning: false, validationPending: false, gameToken: "", levelLimitMs: INITIAL_TIME_MS }); setFeedback("", ""); render();
   }
   function openModal(id) { const modal = $(id); modal.classList.add("isOpen"); modal.setAttribute("aria-hidden", "false"); document.body.classList.add("wordModalOpen"); }
   function closeModal(id) { const modal = $(id); modal.classList.remove("isOpen"); modal.setAttribute("aria-hidden", "true"); if (!document.querySelector(".wordModalOverlay.isOpen")) document.body.classList.remove("wordModalOpen"); }
