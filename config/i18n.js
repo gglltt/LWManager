@@ -2018,6 +2018,48 @@ for (const lang of SUPPORTED_LANGS) {
   Object.assign(translations[lang], MATH_GAME_TRANSLATIONS.en, MATH_GAME_TRANSLATIONS[lang] || {});
 }
 
+const WORD_GAME_TRANSLATIONS = {
+  en: {
+    "wordGame.menu": "Word Game", "wordGame.title": "Word Game", "wordGame.start": "Start",
+    "wordGame.leaderboard": "Leaderboard", "wordGame.confirm": "Confirm", "wordGame.clear": "Clear",
+    "wordGame.level": "Level", "wordGame.wordsFound": "Words found", "wordGame.time": "Time",
+    "wordGame.totalTime": "Total time", "wordGame.gameOver": "Game Over", "wordGame.saveScore": "Save score",
+    "wordGame.close": "Close", "wordGame.playerName": "Player name", "wordGame.invalidWord": "Word not valid",
+    "wordGame.validWord": "Valid word!", "wordGame.resultSaved": "Score saved", "wordGame.noScores": "No scores yet",
+    "wordGame.language": "Language", "wordGame.compose": "Build a word", "wordGame.availableLetters": "Available letters",
+    "wordGame.invalidName": "Use 1-30 letters, numbers, spaces, hyphens or underscores.",
+    "wordGame.saveError": "Unable to save the score. Try again.", "wordGame.loading": "Loading leaderboard...",
+    "wordGame.loadingError": "Unable to load game data."
+  },
+  it: {
+    "wordGame.menu": "Gioco Parole", "wordGame.title": "Gioco Parole", "wordGame.start": "Start",
+    "wordGame.leaderboard": "Classifica", "wordGame.confirm": "Conferma", "wordGame.clear": "Cancella",
+    "wordGame.level": "Livello", "wordGame.wordsFound": "Parole trovate", "wordGame.time": "Tempo",
+    "wordGame.totalTime": "Tempo totale", "wordGame.gameOver": "Game Over", "wordGame.saveScore": "Salva risultato",
+    "wordGame.close": "Chiudi", "wordGame.playerName": "Nome giocatore", "wordGame.invalidWord": "Parola non valida",
+    "wordGame.validWord": "Parola valida!", "wordGame.resultSaved": "Risultato salvato", "wordGame.noScores": "Nessun risultato",
+    "wordGame.language": "Lingua", "wordGame.compose": "Componi una parola", "wordGame.availableLetters": "Lettere disponibili",
+    "wordGame.invalidName": "Usa 1-30 lettere, numeri, spazi, trattini o underscore.",
+    "wordGame.saveError": "Impossibile salvare il risultato. Riprova.", "wordGame.loading": "Caricamento classifica...",
+    "wordGame.loadingError": "Impossibile caricare i dati del gioco."
+  },
+  fr: {
+    "wordGame.menu": "Jeu de mots", "wordGame.title": "Jeu de mots", "wordGame.start": "Démarrer",
+    "wordGame.leaderboard": "Classement", "wordGame.confirm": "Confirmer", "wordGame.clear": "Effacer",
+    "wordGame.level": "Niveau", "wordGame.wordsFound": "Mots trouvés", "wordGame.time": "Temps",
+    "wordGame.totalTime": "Temps total", "wordGame.gameOver": "Partie terminée", "wordGame.saveScore": "Enregistrer",
+    "wordGame.close": "Fermer", "wordGame.playerName": "Nom du joueur", "wordGame.invalidWord": "Mot non valide",
+    "wordGame.validWord": "Mot valide !", "wordGame.resultSaved": "Résultat enregistré", "wordGame.noScores": "Aucun résultat",
+    "wordGame.language": "Langue", "wordGame.compose": "Composez un mot", "wordGame.availableLetters": "Lettres disponibles",
+    "wordGame.invalidName": "Utilisez 1 à 30 lettres, chiffres, espaces, tirets ou tirets bas.",
+    "wordGame.saveError": "Impossible d’enregistrer le résultat. Réessayez.", "wordGame.loading": "Chargement du classement...",
+    "wordGame.loadingError": "Impossible de charger les données du jeu."
+  }
+};
+for (const lang of SUPPORTED_LANGS) {
+  Object.assign(translations[lang], WORD_GAME_TRANSLATIONS.en, WORD_GAME_TRANSLATIONS[lang] || {});
+}
+
 function resolveLang(candidate) {
   return SUPPORTED_LANGS.includes(candidate) ? candidate : "it";
 }
