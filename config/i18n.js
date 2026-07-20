@@ -1981,7 +1981,11 @@ const MATH_GAME_TRANSLATIONS = {
     "mathGame.wrong": "Try again",
     "mathGame.loading": "Loading leaderboard...",
     "mathGame.noScores": "No scores yet. Be the first champion!",
-    "mathGame.saveError": "Unable to save score. Check the data and try again."
+    "mathGame.saveError": "Unable to save score. Check the data and try again.",
+    "mathGame.howToPlay": "How to play", "mathGame.helpIntro": "Solve each arithmetic operation before the countdown reaches zero.",
+    "mathGame.helpTimer": "Every level has its own countdown. A wrong answer clears the streak; time running out ends the game.",
+    "mathGame.helpDifficulty": "Difficulty grows with the level: operations and numbers become progressively more challenging.",
+    "mathGame.helpProgress": "Each correct answer completes one level. Consecutive correct answers build the visible combo. The leaderboard ranks completed levels first, then the shortest total time."
   },
   it: {
     "mathGame.title": "Sfida Matematica",
@@ -2011,7 +2015,11 @@ const MATH_GAME_TRANSLATIONS = {
     "mathGame.wrong": "Riprova",
     "mathGame.loading": "Caricamento classifica...",
     "mathGame.noScores": "Nessun punteggio. Diventa il primo campione!",
-    "mathGame.saveError": "Impossibile salvare il risultato. Controlla i dati e riprova."
+    "mathGame.saveError": "Impossibile salvare il risultato. Controlla i dati e riprova.",
+    "mathGame.howToPlay": "Come si gioca", "mathGame.helpIntro": "Risolvi ogni operazione aritmetica prima che il conto alla rovescia arrivi a zero.",
+    "mathGame.helpTimer": "Ogni livello ha il proprio timer. Una risposta errata azzera la serie; allo scadere del tempo la partita termina.",
+    "mathGame.helpDifficulty": "La difficoltà cresce con il livello: operazioni e numeri diventano progressivamente più impegnativi.",
+    "mathGame.helpProgress": "Ogni risposta corretta completa un livello. Le risposte corrette consecutive alimentano la combo visibile. La classifica ordina prima per livelli completati e poi per minor tempo totale."
   }
 };
 for (const lang of SUPPORTED_LANGS) {
@@ -2030,7 +2038,14 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.invalidName": "Use 1-30 letters, numbers, spaces, hyphens or underscores.",
     "wordGame.saveError": "Unable to save the score. Try again.", "wordGame.loading": "Loading leaderboard...",
     "wordGame.loadingError": "Unable to load game data.", "wordGame.dashboardTitle": "Words",
-    "wordGame.dashboardDesc": "Find Italian words using the available letters."
+    "wordGame.dashboardDesc": "Find Italian words using the available letters.",
+    "wordGame.score": "Score", "wordGame.points": "points", "wordGame.combo": "Combo", "wordGame.remainingTime": "Time left",
+    "wordGame.timeBonus": "Time bonus", "wordGame.lastBonusNone": "Your latest bonus will appear here", "wordGame.legacy": "Legacy result",
+    "wordGame.howToPlay": "How to play", "wordGame.helpIntro": "Tap the ivory tiles to build an Italian word, then confirm it. Tap a selected tile to remove it.",
+    "wordGame.helpScoreTitle": "Letter score", "wordGame.helpScore": "A word scores the sum of its Scarabeo letter values plus its length bonus. Any active multiplier applies to that subtotal.",
+    "wordGame.helpBonusesTitle": "Length bonuses", "wordGame.letters": "letters", "wordGame.helpTimerTitle": "Timer",
+    "wordGame.helpTimer": "Every valid word adds as many seconds as it contains letters. Score and time bonuses are independent.",
+    "wordGame.helpLeaderboardTitle": "Leaderboard", "wordGame.helpLeaderboard": "Players are ranked by highest score; ties go to the shortest total play time. Legacy level-based results remain visible."
   },
   it: {
     "wordGame.menu": "Gioco Parole", "wordGame.title": "Gioco Parole", "wordGame.start": "Start",
@@ -2043,7 +2058,14 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.invalidName": "Usa 1-30 lettere, numeri, spazi, trattini o underscore.",
     "wordGame.saveError": "Impossibile salvare il risultato. Riprova.", "wordGame.loading": "Caricamento classifica...",
     "wordGame.loadingError": "Impossibile caricare i dati del gioco.", "wordGame.dashboardTitle": "Parole",
-    "wordGame.dashboardDesc": "Trova parole italiane usando le lettere disponibili."
+    "wordGame.dashboardDesc": "Trova parole italiane usando le lettere disponibili.",
+    "wordGame.score": "Punteggio", "wordGame.points": "punti", "wordGame.combo": "Combo", "wordGame.remainingTime": "Tempo rimasto",
+    "wordGame.timeBonus": "Bonus tempo", "wordGame.lastBonusNone": "Qui apparirà l'ultimo bonus", "wordGame.legacy": "Risultato legacy",
+    "wordGame.howToPlay": "Come si gioca", "wordGame.helpIntro": "Tocca le tessere avorio per comporre una parola italiana, poi confermala. Tocca una tessera selezionata per rimuoverla.",
+    "wordGame.helpScoreTitle": "Punteggio lettere", "wordGame.helpScore": "La parola vale la somma dei valori Scarabeo delle lettere più il bonus lunghezza. Un eventuale moltiplicatore si applica al subtotale.",
+    "wordGame.helpBonusesTitle": "Bonus lunghezza", "wordGame.letters": "lettere", "wordGame.helpTimerTitle": "Timer",
+    "wordGame.helpTimer": "Ogni parola valida aggiunge tanti secondi quante sono le sue lettere. Punteggio e bonus tempo sono indipendenti.",
+    "wordGame.helpLeaderboardTitle": "Classifica", "wordGame.helpLeaderboard": "La classifica ordina per punteggio più alto; a parità precede il minor tempo totale. I vecchi risultati a livelli restano visibili."
   },
   fr: {
     "wordGame.menu": "Jeu de mots", "wordGame.title": "Jeu de mots", "wordGame.start": "Démarrer",

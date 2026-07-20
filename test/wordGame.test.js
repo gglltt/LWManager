@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const dictionary = require("../services/wordGameDictionary");
-const { isItalianLanguage } = require("../routes/wordGame");
+const { isItalianLanguage, refillUsedLetters } = require("../routes/wordGame");
 
 test("Word Game accepts only language values beginning with it", () => {
   for (const value of ["it", "it-IT", "it_IT", "IT-it", "italiano"]) assert.equal(isItalianLanguage(value), true);
@@ -32,5 +32,16 @@ test("TXT dictionary is cached and creates playable letter sets", () => {
     assert.ok(possible.length >= dictionary.targetForLevel(level));
     assert.equal(dictionary.validateItalianWord(possible[0], letters).valid, true);
     assert.equal(dictionary.validateItalianWord("ZZZQQQ", letters).valid, false);
+  }
+});
+
+test("refill replaces only the used slots and preserves every other position", () => {
+  const before = "ACEFILOPRT";
+  const used = [1, 2, 6, 8];
+  const result = refillUsedLetters(before, used, 2);
+  assert.equal(result.letters.length, 10);
+  assert.deepEqual(result.replacements.map((item) => item.slot), used);
+  for (let slot = 0; slot < before.length; slot += 1) {
+    if (!used.includes(slot)) assert.equal(result.letters[slot], before[slot]);
   }
 });

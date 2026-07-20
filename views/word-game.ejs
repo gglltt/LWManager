@@ -3,12 +3,10 @@
 <section class="wordGamePage" data-language="<%= wordGameLanguage %>" data-locale="<%= localeTag %>">
   <div class="wordGameShell">
     <header class="wordGameHero">
-      <div class="wordGameHeading">
-        <p>Word Challenge</p>
-        <h1><%= t('wordGame.title') %></h1>
-      </div>
+      <div class="wordGameHeading"><p>Word Challenge</p><h1><%= t('wordGame.title') %></h1></div>
       <div class="wordGameActions">
-        <button id="wordLeaderboardBtn" class="wordButton wordButton--leaderboard" type="button" aria-label="<%= t('wordGame.leaderboard') %>">🏆 <span><%= t('wordGame.leaderboard') %></span></button>
+        <button id="wordHelpBtn" class="wordButton wordButton--icon" type="button" aria-label="<%= t('wordGame.howToPlay') %>">?</button>
+        <button id="wordLeaderboardBtn" class="wordButton wordButton--leaderboard" type="button">🏆 <span><%= t('wordGame.leaderboard') %></span></button>
         <button id="wordStartBtn" class="wordButton wordButton--start" type="button" disabled>▶ <%= t('wordGame.start') %></button>
         <button id="wordAudioBtn" class="wordButton wordButton--audio" type="button" aria-label="Audio">🔊</button>
       </div>
@@ -16,16 +14,15 @@
 
     <div class="wordGameCard">
       <div class="wordGameDashboard">
-        <div class="wordStat"><span><%= t('wordGame.level') %></span><b id="wordLevel">1</b></div>
+        <div class="wordStat wordStat--score"><span><%= t('wordGame.score') %></span><b id="wordScore">0</b></div>
         <div class="wordStat"><span><%= t('wordGame.wordsFound') %></span><b id="wordFound">0</b></div>
-        <div class="wordStat"><span><%= t('wordGame.language') %></span><b id="wordLanguage"><%= wordGameLanguage.toUpperCase() %></b></div>
-        <div class="wordTimer" id="wordTimer"><b id="wordTime">60</b><small>s</small></div>
+        <div class="wordCombo" id="wordCombo" aria-live="polite"><span><%= t('wordGame.combo') %></span><b>×1</b></div>
+        <div class="wordTimer" id="wordTimer"><span><%= t('wordGame.remainingTime') %></span><div><b id="wordTime">60</b><small>s</small></div></div>
       </div>
+      <div class="wordLastBonus" id="wordLastBonus" aria-live="polite"><%= t('wordGame.lastBonusNone') %></div>
 
       <div class="wordBoardWrap" id="wordBoardWrap">
-        <div id="wordBoard" class="wordBoard" aria-live="polite">
-          <span class="wordPlaceholder"><%= t('wordGame.compose') %></span>
-        </div>
+        <div id="wordBoard" class="wordBoard" aria-live="polite"><span class="wordPlaceholder"><%= t('wordGame.compose') %></span></div>
         <div id="wordFeedback" class="wordFeedback" aria-live="polite"></div>
       </div>
 
@@ -33,23 +30,21 @@
         <button id="wordClearBtn" class="wordControl wordControl--clear" type="button"><%= t('wordGame.clear') %></button>
         <button id="wordConfirmBtn" class="wordControl wordControl--confirm" type="button"><%= t('wordGame.confirm') %></button>
       </div>
-
       <div id="wordRack" class="wordRack" aria-label="<%= t('wordGame.availableLetters') %>"></div>
     </div>
   </div>
 
   <div id="wordToast" class="wordToast" role="status" aria-live="polite"></div>
-
   <div id="wordGameOverModal" class="wordModalOverlay" role="dialog" aria-modal="true" aria-labelledby="wordGameOverTitle" aria-hidden="true">
     <div class="wordModal wordGameOverDialog">
       <h2 id="wordGameOverTitle"><%= t('wordGame.gameOver') %></h2>
       <div class="wordGameOverStats">
-        <span><%= t('wordGame.level') %>: <b id="wordOverLevel">1</b></span>
+        <span><%= t('wordGame.score') %>: <b id="wordOverScore">0</b></span>
         <span><%= t('wordGame.wordsFound') %>: <b id="wordOverFound">0</b></span>
         <span><%= t('wordGame.totalTime') %>: <b id="wordOverTime">0.0s</b></span>
       </div>
       <label for="wordPlayerName"><%= t('wordGame.playerName') %></label>
-      <input id="wordPlayerName" maxlength="30" autocomplete="nickname" placeholder="Biss_Player" />
+      <input id="wordPlayerName" maxlength="30" autocomplete="nickname" placeholder="Biss_Player">
       <p id="wordScoreMessage" class="wordFormMessage"></p>
       <div class="wordModalActions">
         <button id="wordSaveScoreBtn" class="wordButton wordButton--start" type="button"><%= t('wordGame.saveScore') %></button>
@@ -60,11 +55,22 @@
 
   <div id="wordLeaderboardModal" class="wordModalOverlay" role="dialog" aria-modal="true" aria-labelledby="wordLeaderboardTitle" aria-hidden="true">
     <div class="wordModal wordLeaderboardModal">
-      <div class="wordModalHeader">
-        <h2 id="wordLeaderboardTitle">🏆 <%= t('wordGame.leaderboard') %></h2>
-        <button id="wordCloseLeaderboardBtn" class="wordModalClose" type="button" aria-label="<%= t('wordGame.close') %>">×</button>
-      </div>
+      <div class="wordModalHeader"><h2 id="wordLeaderboardTitle">🏆 <%= t('wordGame.leaderboard') %></h2><button id="wordCloseLeaderboardBtn" class="wordModalClose" type="button" aria-label="<%= t('wordGame.close') %>">×</button></div>
       <div id="wordLeaderboardList" class="wordLeaderboardList"><p><%= t('wordGame.loading') %></p></div>
+    </div>
+  </div>
+
+  <div id="wordHelpModal" class="wordModalOverlay" role="dialog" aria-modal="true" aria-labelledby="wordHelpTitle" aria-hidden="true">
+    <div class="wordModal wordHelpModal">
+      <div class="wordModalHeader"><h2 id="wordHelpTitle">📖 <%= t('wordGame.howToPlay') %></h2><button id="wordCloseHelpBtn" class="wordModalClose" type="button" aria-label="<%= t('wordGame.close') %>">×</button></div>
+      <div class="wordHelpContent">
+        <p><%= t('wordGame.helpIntro') %></p>
+        <h3><%= t('wordGame.helpScoreTitle') %></h3><p><%= t('wordGame.helpScore') %></p>
+        <div class="wordScoreLegend"><% [['A C E I O R S T','1'],['L M N','2'],['P','3'],['B D F G U V','4'],['H Z','8'],['Q','10']].forEach(([letters,score]) => { %><span><b><%= letters %></b><small><%= score %></small></span><% }) %></div>
+        <h3><%= t('wordGame.helpBonusesTitle') %></h3><ul><li>6 <%= t('wordGame.letters') %>: +10</li><li>7 <%= t('wordGame.letters') %>: +30</li><li>8 <%= t('wordGame.letters') %>: +50</li><li>9+ <%= t('wordGame.letters') %>: +100</li></ul>
+        <h3><%= t('wordGame.helpTimerTitle') %></h3><p><%= t('wordGame.helpTimer') %></p>
+        <h3><%= t('wordGame.helpLeaderboardTitle') %></h3><p><%= t('wordGame.helpLeaderboard') %></p>
+      </div>
     </div>
   </div>
 </section>
@@ -72,8 +78,9 @@
 <script id="wordGameTranslations" type="application/json"><%- JSON.stringify({
   compose: t('wordGame.compose'), invalidWord: t('wordGame.invalidWord'), validWord: t('wordGame.validWord'),
   resultSaved: t('wordGame.resultSaved'), noScores: t('wordGame.noScores'), invalidName: t('wordGame.invalidName'),
-  saveError: t('wordGame.saveError'), loadingError: t('wordGame.loadingError'), level: t('wordGame.level'),
-  wordsFound: t('wordGame.wordsFound'), time: t('wordGame.time')
+  saveError: t('wordGame.saveError'), loadingError: t('wordGame.loadingError'), score: t('wordGame.score'),
+  wordsFound: t('wordGame.wordsFound'), time: t('wordGame.time'), legacy: t('wordGame.legacy'),
+  points: t('wordGame.points'), timeBonus: t('wordGame.timeBonus'), lastBonusNone: t('wordGame.lastBonusNone')
 }) %></script>
 
 <%- include("partials/footer") %>

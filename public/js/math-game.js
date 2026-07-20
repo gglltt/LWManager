@@ -272,6 +272,9 @@
   $("leaderboardBtn").addEventListener("click", () => { playMainSound(); openModal("leaderboardModal"); loadLeaderboard().catch(() => { $("leaderboardList").innerHTML = `<div class="leaderboardEmpty">${i18n.saveError || "Unavailable"}</div>`; }); });
   $("closeLeaderboardBtn").addEventListener("click", () => { playMainSound(); closeModal("leaderboardModal"); });
   $("leaderboardModal").addEventListener("click", (e) => { if (e.target.id === "leaderboardModal") closeModal("leaderboardModal"); });
+  $("mathHelpBtn").addEventListener("click", () => { playMainSound(); openModal("mathHelpModal"); });
+  $("closeMathHelpBtn").addEventListener("click", () => { playMainSound(); closeModal("mathHelpModal"); });
+  $("mathHelpModal").addEventListener("click", (e) => { if (e.target.id === "mathHelpModal") closeModal("mathHelpModal"); });
   $("audioToggleBtn").addEventListener("click", () => { state.audioEnabled = !state.audioEnabled; setAudioPreference(state.audioEnabled); $("audioToggleBtn").textContent = state.audioEnabled ? "🔊" : "🔇"; if (state.audioEnabled) playMainSound(); });
   window.addEventListener("resize", syncViewportHeight);
   window.addEventListener("orientationchange", syncViewportHeight);

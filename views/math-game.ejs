@@ -8,6 +8,7 @@
       <h1><%= t('mathGame.title') %></h1>
     </div>
     <div class="mathHeroActions" aria-label="Math game actions">
+      <button id="mathHelpBtn" class="button mathAudioToggle" type="button" aria-label="<%= t('mathGame.howToPlay') %>">?</button>
       <button id="leaderboardBtn" class="button mathAction mathLeaderboardBtn" type="button">🏆 <span><%= t('mathGame.leaderboard') %></span></button>
       <button id="startGameBtn" class="button mathAction mathStart" type="button"><span>▶</span> <%= t('mathGame.start') %></button>
       <button id="audioToggleBtn" class="button mathAudioToggle" type="button" aria-label="Audio">🔊</button>
@@ -75,6 +76,18 @@
       </div>
       <div class="leaderboardList" id="leaderboardList">
         <div class="leaderboardEmpty"><%= t('mathGame.loading') %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="math-game-modal-overlay" id="mathHelpModal" role="dialog" aria-modal="true" aria-labelledby="mathHelpTitle" aria-hidden="true">
+    <div class="math-game-modal mathHelpModal">
+      <div class="modalHeader"><h2 id="mathHelpTitle">📖 <%= t('mathGame.howToPlay') %></h2><button id="closeMathHelpBtn" class="modalClose" type="button" aria-label="Close">×</button></div>
+      <div class="mathHelpContent">
+        <h3>🎯 <%= t('mathGame.title') %></h3><p><%= t('mathGame.helpIntro') %></p>
+        <h3>⏱ <%= t('mathGame.remainingTime') %></h3><p><%= t('mathGame.helpTimer') %></p>
+        <h3>📈 <%= t('mathGame.level') %></h3><p><%= t('mathGame.helpDifficulty') %></p>
+        <h3>🏆 <%= t('mathGame.leaderboard') %></h3><p><%= t('mathGame.helpProgress') %></p>
       </div>
     </div>
   </div>
