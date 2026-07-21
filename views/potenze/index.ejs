@@ -76,7 +76,6 @@
     </div>
 
     <div class="powersHeader__actions">
-      <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
       <% if (canExport) { %>
         <% const exportAllianceId = user && user.isMaster && tenantFilter && tenantFilter.allianceId ? Number(tenantFilter.allianceId) : null; %>
         <a class="button secondary" href="/potenze/export<%= exportAllianceId ? `?allianceId=${exportAllianceId}` : '' %>">⬇️ <%= t("export_excel") %></a>

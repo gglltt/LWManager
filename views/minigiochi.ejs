@@ -8,14 +8,16 @@
 
   <div class="minigamesGrid">
     <article class="minigameCard">
-      <div class="minigameCard__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" focusable="false">
-          <rect x="4" y="2.75" width="16" height="18.5" rx="2.5"></rect>
-          <path d="M7.5 6.5h9M8 11h2.5M13.5 11H16M8 15h2.5M13.5 15H16M8 18.25h8"></path>
-        </svg>
+      <div class="minigameCard__heading">
+        <div class="minigameCard__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <rect x="4" y="2.75" width="16" height="18.5" rx="2.5"></rect>
+            <path d="M7.5 6.5h9M8 11h2.5M13.5 11H16M8 15h2.5M13.5 15H16M8 18.25h8"></path>
+          </svg>
+        </div>
+        <h2><%= t('minigames.mathTitle') %></h2>
       </div>
       <div class="minigameCard__content">
-        <h2><%= t('minigames.mathTitle') %></h2>
         <p><%= t('minigames.mathDesc') %></p>
       </div>
       <a class="button minigameCard__action" href="/math-game"><%= t('minigames.play') %></a>
@@ -23,17 +25,19 @@
 
     <% if (showWordGame) { %>
       <article class="minigameCard">
-        <div class="minigameCard__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <rect x="3" y="3" width="8" height="8" rx="2"></rect>
-            <rect x="13" y="3" width="8" height="8" rx="2"></rect>
-            <rect x="3" y="13" width="8" height="8" rx="2"></rect>
-            <rect x="13" y="13" width="8" height="8" rx="2"></rect>
-            <path d="M6 8.5 7 5.5l1 3M5.6 7.4h2.8M15.5 6h3M17 4.5v3"></path>
-          </svg>
+        <div class="minigameCard__heading">
+          <div class="minigameCard__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <rect x="3" y="3" width="8" height="8" rx="2"></rect>
+              <rect x="13" y="3" width="8" height="8" rx="2"></rect>
+              <rect x="3" y="13" width="8" height="8" rx="2"></rect>
+              <rect x="13" y="13" width="8" height="8" rx="2"></rect>
+              <path d="M6 8.5 7 5.5l1 3M5.6 7.4h2.8M15.5 6h3M17 4.5v3"></path>
+            </svg>
+          </div>
+          <h2><%= t('minigames.wordTitle') %></h2>
         </div>
         <div class="minigameCard__content">
-          <h2><%= t('minigames.wordTitle') %></h2>
           <p><%= t('minigames.wordDesc') %></p>
         </div>
         <a

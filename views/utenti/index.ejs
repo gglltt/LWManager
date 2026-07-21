@@ -15,9 +15,6 @@
       <h1><%= t("users_management") %></h1>
       <p class="muted"><%= t("users_admin_note") %></p>
     </div>
-    <div class="pageHeaderActions">
-      <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
-    </div>
   </div>
 
   <% if (message) { %>
@@ -59,11 +56,11 @@
                 <% const selfId = String(user?._id || user?.id || ""); %>
                 <% if (String(u._id) !== selfId) { %>
                   <form method="POST" action="/utenti/<%= u._id %>/delete" class="inlineForm"
-                        onsubmit="return confirm('<%= t(&apos;confirm_delete_player&apos;) %> <%= u.email %>?');">
+                        onsubmit="return confirm('<%= t("confirm_delete_player") %> <%= u.email %>?');">
                     <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
                   </form>
                 <% } else { %>
-                  <span class="muted" title="<%= t(&apos;cannot_delete_self&apos;) %>">—</span>
+                  <span class="muted" title="<%= t("cannot_delete_self") %>">—</span>
                 <% } %>
               </div>
             </td>
