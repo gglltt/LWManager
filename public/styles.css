@@ -169,6 +169,48 @@ body{
   outline-offset:2px;
 }
 
+.headerContact{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  gap:7px;
+  padding:0 11px;
+  border:1px solid rgba(87,105,141,.65);
+  border-radius:8px;
+  background:rgba(9,12,20,.35);
+  color:var(--text);
+  font-size:.84rem;
+  font-weight:500;
+  line-height:1;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+.headerContact svg{
+  width:17px;
+  height:17px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.headerContact:hover,
+.headerContact:focus-visible{
+  border-color:rgba(117,144,207,.9);
+  background:rgba(48,69,112,.42);
+  color:#fff;
+  box-shadow:0 4px 12px rgba(0,0,0,.16);
+}
+
+.headerContact:focus-visible{
+  outline:2px solid rgba(82,139,255,.72);
+  outline-offset:2px;
+}
+
 .langPicker__summary::-webkit-details-marker{ display:none; }
 
 .langPicker__flag,
@@ -418,6 +460,16 @@ body{
     width:min(260px, calc(100vw - 24px));
     max-height:calc(100dvh - 68px);
   }
+}
+
+@media (max-width: 600px){
+  .headerContact{
+    width:40px;
+    min-width:40px;
+    padding:0;
+  }
+
+  .headerContact span{ display:none; }
 }
 
 /* Compact authentication layout */

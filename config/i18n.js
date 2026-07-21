@@ -1934,6 +1934,22 @@ for (const lang of SUPPORTED_LANGS) {
   Object.assign(translations[lang], UI_CLEANUP_TRANSLATIONS.en, UI_CLEANUP_TRANSLATIONS[lang] || {});
 }
 
+const LOGIN_TENANT_HINT_TRANSLATIONS = {
+  it: "Inserisci codice alleanza, server e PIN.",
+  en: "Enter alliance code, server and PIN.",
+  fr: "Saisissez le code alliance, le serveur et le PIN.",
+  es: "Introduce el código de alianza, el servidor y el PIN.",
+  de: "Gib Allianzcode, Server und PIN ein.",
+  ar: "أدخل رمز التحالف والخادم ورقم PIN.",
+  pl: "Wprowadź kod sojuszu, serwer i PIN.",
+  sv: "Ange allianskod, server och PIN-kod.",
+  da: "Indtast alliancekode, server og PIN-kode.",
+  uk: "Введіть код альянсу, сервер і PIN-код."
+};
+for (const lang of SUPPORTED_LANGS) {
+  translations[lang].login_tenant_hint = LOGIN_TENANT_HINT_TRANSLATIONS[lang];
+}
+
 
 const FORM_AND_ALLIANCE_TRANSLATIONS = {
   it: { dashboard_title: "Dashboard", dashboard_title_named: "Dashboard {alliance}", alliance_code: "Codice alleanza", server: "Server", display_name: "Nome visualizzato", standard_pin: "PIN standard", supervisor_pin: "PIN supervisore", alliances_management: "Gestione Alleanze", alliances: "Alleanze", new_alliance: "Nuova alleanza", create_alliance: "Crea alleanza", deactivate_alliance: "Disattiva alleanza", activate_alliance: "Riattiva alleanza", delete_alliance: "Cancella alleanza", update_pin: "Aggiorna PIN", all_alliances: "Tutte le alleanze", select_alliance: "Seleziona alleanza", credentials_to_share: "Credenziali da comunicare", alliance_admin: "Amministratore alleanza", status: "Stato", actions: "Azioni", created_at: "Data creazione", err_invalid_input: "Dati non validi" },

@@ -42,6 +42,39 @@
           </a>
         <% } %>
 
+        <a class="headerContact" href="mailto:info@bisslastwar.com" aria-label="<%= t('contact_us') %>" title="<%= t('contact_us') %>">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <rect x="3" y="5" width="18" height="14" rx="2.5"></rect>
+            <path d="m4.5 7 7.5 6 7.5-6"></path>
+          </svg>
+          <span><%= t('contact_us') %></span>
+        </a>
+
+        <% if (isAuthenticated || !isLoginPage) { %>
+          <div class="mainMenu" data-main-menu>
+            <button
+              class="mainMenu__toggle btn-icon"
+              type="button"
+              aria-label="Apri menu"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="mainMenuDropdown">
+              <span class="mainMenu__icon" aria-hidden="true">☰</span>
+            </button>
+            <nav id="mainMenuDropdown" class="mainMenu__dropdown" aria-label="<%= t('menu') %>" hidden>
+              <% if (isAuthenticated) { %>
+                <a href="/potenze"><%= t('nav_powers') %></a>
+                <a href="/minigiochi"><%= t('minigames.menu') %></a>
+                <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords"><%= t('password_management') %></a><% } %>
+                <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %></a><% } %>
+                <a class="mainMenu__logout" href="/logout"><%= t('nav_logout') %></a>
+              <% } else if (!isLoginPage) { %>
+                <a href="/auth/login"><%= t('nav_login') %></a>
+              <% } %>
+            </nav>
+          </div>
+        <% } %>
+
         <details class="langPicker">
           <summary class="langPicker__summary" aria-label="<%= t('lang_selector') %>">
             <span class="langPicker__flag"><%= currentFlag %></span>
@@ -59,32 +92,6 @@
             <% }) %>
           </div>
         </details>
-
-        <% if (isAuthenticated || !isLoginPage) { %>
-          <div class="mainMenu" data-main-menu>
-            <button
-              class="mainMenu__toggle btn-icon"
-              type="button"
-              aria-label="Apri menu"
-              aria-haspopup="true"
-              aria-expanded="false"
-              aria-controls="mainMenuDropdown">
-              <span class="mainMenu__icon" aria-hidden="true">☰</span>
-            </button>
-            <nav id="mainMenuDropdown" class="mainMenu__dropdown" aria-label="<%= t('menu') %>" hidden>
-              <% if (isAuthenticated) { %>
-                <a href="mailto:info@bisslastwar.com"><%= t('contact_us') %></a>
-                <a href="/potenze"><%= t('nav_powers') %></a>
-                <a href="/minigiochi"><%= t('minigames.menu') %></a>
-                <% if (typeof user !== "undefined" && user && (user.isMaster || user.role === 'supervisor')) { %><a href="/passwords"><%= t('password_management') %></a><% } %>
-                <% if (typeof user !== "undefined" && user && user.isMaster) { %><a href="/admin"><%= t('admin_title') %></a><% } %>
-                <a class="mainMenu__logout" href="/logout"><%= t('nav_logout') %></a>
-              <% } else if (!isLoginPage) { %>
-                <a href="/auth/login"><%= t('nav_login') %></a>
-              <% } %>
-            </nav>
-          </div>
-        <% } %>
       </div>
     </div>
   </header>
