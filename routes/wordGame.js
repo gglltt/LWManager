@@ -6,6 +6,7 @@ const { calculateWordScore } = require("../services/wordGameScoring");
 const {
   loadItalianDictionary,
   generateLetters,
+  refillUsedTiles,
   timeBonusForWord,
   validateItalianWord
 } = require("../services/wordGameDictionary");
@@ -57,19 +58,6 @@ function readGameState(req, token) {
 function leaderboardFilter(user) {
   const allianceId = Number(user?.allianceId);
   return !user?.isMaster && Number.isInteger(allianceId) ? { allianceId, language: "it" } : { language: "it" };
-}
-
-function refillUsedLetters(currentLetters, usedSlots, round) {
-  const slots = [...new Set(usedSlots)].sort((a, b) => a - b);
-  if (!slots.length || slots.some((slot) => !Number.isInteger(slot) || slot < 0 || slot >= 10)) return null;
-  const source = generateLetters(round);
-  const nextLetters = [...currentLetters];
-  const replacements = slots.map((slot, index) => {
-    const letter = source[index];
-    nextLetters[slot] = letter;
-    return { slot, letter };
-  });
-  return { letters: nextLetters.join(""), replacements };
 }
 
 async function loadLeaderboard(user) {
@@ -143,7 +131,7 @@ router.post("/validate", requireAuth, requireItalianApi, (req, res) => {
     const nextRound = state.round + 1;
     const score = state.score + scoreDetail.totalScore;
     const wordsFound = state.wordsFound + 1;
-    const refill = refillUsedLetters(state.letters, usedSlots, nextRound);
+    const refill = refillUsedTiles(state.letters, usedSlots, nextRound);
     if (!refill) return res.status(400).json({ success: false, message: "Selezione tessere non valida." });
     return res.json({
       success: true,
@@ -188,4 +176,4 @@ router.post("/score", requireAuth, requireItalianApi, async (req, res, next) => 
 module.exports = router;
 module.exports.isItalianLanguage = isItalianLanguage;
 module.exports.readGameState = readGameState;
-module.exports.refillUsedLetters = refillUsedLetters;
+module.exports.refillUsedLetters = refillUsedTiles;

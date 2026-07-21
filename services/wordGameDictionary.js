@@ -2,9 +2,59 @@ const fs = require("fs");
 const path = require("path");
 
 const DICTIONARY_DIR = path.join(__dirname, "..", "data", "word-game", "it");
-const VOWELS = new Set(["A", "E", "I", "O", "U"]);
+const BOARD_SIZE = 10;
+const MIN_VOWELS = 3;
+const VOWEL_LETTERS = Object.freeze(["A", "E", "I", "O", "U"]);
+const VOWELS = new Set(VOWEL_LETTERS);
 const LETTER_POOL = "AAAAAAAAAAAAEEEEEEEEEEEEIIIIIIIIIOOOOOOOUUUUUBBBBBCCCCCCDDDDDFFFFGGGGHHHLLLLLLMMMMMNNNNNNNNPPPPPQRRRRRRRRSSSSSSSSTTTTTTTVVZZ";
+const VOWEL_POOL = [...LETTER_POOL].filter((letter) => VOWELS.has(letter)).join("");
+const CONSONANT_POOL = [...LETTER_POOL].filter((letter) => !VOWELS.has(letter)).join("");
 let dictionaryCache;
+
+function randomFrom(pool) {
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function isVowel(letter) {
+  return VOWELS.has(String(letter || "").toUpperCase());
+}
+
+function countVowels(tiles) {
+  return [...String(Array.isArray(tiles) ? tiles.join("") : tiles || "")].filter(isVowel).length;
+}
+
+function generateRandomVowel() {
+  return randomFrom(VOWEL_POOL);
+}
+
+function generateRandomConsonant() {
+  return randomFrom(CONSONANT_POOL);
+}
+
+function generateRandomLetter() {
+  return randomFrom(LETTER_POOL);
+}
+
+function ensureMinimumVowels(tiles, mutableIndexes) {
+  const result = Array.isArray(tiles) ? [...tiles] : [...String(tiles || "")];
+  const missingVowels = Math.max(0, MIN_VOWELS - countVowels(result));
+  if (!missingVowels) return result;
+
+  const allowedIndexes = mutableIndexes == null
+    ? result.map((_, index) => index)
+    : [...new Set(mutableIndexes)];
+  const replaceableIndexes = shuffle(allowedIndexes.filter((index) => (
+    Number.isInteger(index)
+    && index >= 0
+    && index < result.length
+    && !isVowel(result[index])
+  )));
+
+  for (const index of replaceableIndexes.slice(0, missingVowels)) {
+    result[index] = generateRandomVowel();
+  }
+  return result;
+}
 
 function normalizeItalianWord(value) {
   const normalized = String(value ?? "")
@@ -86,12 +136,9 @@ function countPossibleWords(letters, words, stopAt) {
 }
 
 function makeCandidate(seed) {
-  const letters = [...seed];
-  while (letters.filter((letter) => VOWELS.has(letter)).length < 3) {
-    letters.push("AEIOU"[Math.floor(Math.random() * 5)]);
-  }
-  while (letters.length < 10) letters.push(LETTER_POOL[Math.floor(Math.random() * LETTER_POOL.length)]);
-  return shuffle(letters.slice(0, 10)).join("");
+  const letters = [...seed].slice(0, BOARD_SIZE);
+  while (letters.length < BOARD_SIZE) letters.push(generateRandomLetter());
+  return shuffle(ensureMinimumVowels(letters)).join("");
 }
 
 function generateLetters(level = 1) {
@@ -120,14 +167,39 @@ function timeBonusForWord(word) {
   return normalizeItalianWord(word).length;
 }
 
+function refillUsedTiles(currentLetters, usedIndexes, level = 1) {
+  const board = String(currentLetters || "").toUpperCase();
+  const slots = [...new Set(usedIndexes)].sort((a, b) => a - b);
+  if (!new RegExp(`^[A-Z]{${BOARD_SIZE}}$`).test(board)) return null;
+  if (!slots.length || slots.some((slot) => !Number.isInteger(slot) || slot < 0 || slot >= BOARD_SIZE)) return null;
+
+  const generatedLetters = generateLetters(level);
+  let nextLetters = [...board];
+  slots.forEach((slot, index) => { nextLetters[slot] = generatedLetters[index]; });
+  nextLetters = ensureMinimumVowels(nextLetters, slots);
+
+  const replacements = slots.map((slot) => ({ slot, letter: nextLetters[slot] }));
+  return { letters: nextLetters.join(""), replacements };
+}
+
 function clearDictionaryCache() { dictionaryCache = undefined; }
 
 module.exports = {
   DICTIONARY_DIR,
+  BOARD_SIZE,
+  MIN_VOWELS,
+  VOWEL_LETTERS,
+  isVowel,
+  countVowels,
+  generateRandomVowel,
+  generateRandomConsonant,
+  generateRandomLetter,
+  ensureMinimumVowels,
   normalizeItalianWord,
   canBuildWord,
   loadItalianDictionary,
   generateLetters,
+  refillUsedTiles,
   targetForLevel,
   timeBonusForWord,
   validateItalianWord,

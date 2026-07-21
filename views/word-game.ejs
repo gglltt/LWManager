@@ -76,7 +76,7 @@
         <p><%= t('wordGame.helpIntro') %></p>
         <h3><%= t('wordGame.helpScoreTitle') %></h3><p><%= t('wordGame.helpScore') %></p>
         <div class="wordScoreLegend"><% [['A C E I O R S T','1'],['L M N','2'],['P','3'],['B D F G U V','4'],['H Z','8'],['Q','10']].forEach(([letters,score]) => { %><span><b><%= letters %></b><small><%= score %></small></span><% }) %></div>
-        <h3><%= t('wordGame.helpBonusesTitle') %></h3><ul><li>6 <%= t('wordGame.letters') %>: +10</li><li>7 <%= t('wordGame.letters') %>: +30</li><li>8 <%= t('wordGame.letters') %>: +50</li><li>9+ <%= t('wordGame.letters') %>: +100</li></ul>
+        <h3><%= t('wordGame.helpBonusesTitle') %></h3><ul><li>5 <%= t('wordGame.letters') %>: +5</li><li>6 <%= t('wordGame.letters') %>: +10</li><li>7 <%= t('wordGame.letters') %>: +30</li><li>8 <%= t('wordGame.letters') %>: +50</li><li>9+ <%= t('wordGame.letters') %>: +100</li></ul>
         <h3><%= t('wordGame.helpTimerTitle') %></h3><p><%= t('wordGame.helpTimer') %></p>
         <h3><%= t('wordGame.helpLeaderboardTitle') %></h3><p><%= t('wordGame.helpLeaderboard') %></p>
       </div>
@@ -89,7 +89,8 @@
   resultSaved: t('wordGame.resultSaved'), noScores: t('wordGame.noScores'), invalidName: t('wordGame.invalidName'),
   saveError: t('wordGame.saveError'), loadingError: t('wordGame.loadingError'), score: t('wordGame.score'),
   wordsFound: t('wordGame.wordsFound'), time: t('wordGame.time'), legacy: t('wordGame.legacy'),
-  points: t('wordGame.points'), timeBonus: t('wordGame.timeBonus'), lastBonusNone: t('wordGame.lastBonusNone')
+  points: t('wordGame.points'), baseScore: t('wordGame.baseScore'), lengthBonus: t('wordGame.lengthBonus'),
+  timeBonus: t('wordGame.timeBonus'), lastBonusNone: t('wordGame.lastBonusNone')
 }) %></script>
 
 <%- include("partials/footer") %>

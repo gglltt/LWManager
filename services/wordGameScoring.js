@@ -4,7 +4,7 @@ const LETTER_SCORES = Object.freeze({
   U: 4, V: 4, H: 8, Z: 8, Q: 10
 });
 
-const LENGTH_BONUSES = Object.freeze({ 6: 10, 7: 30, 8: 50 });
+const LENGTH_BONUSES = Object.freeze({ 5: 5, 6: 10, 7: 30, 8: 50 });
 
 function normalizeWord(value) {
   const normalized = String(value ?? "").trim().normalize("NFD")
