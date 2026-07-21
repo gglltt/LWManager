@@ -114,8 +114,8 @@ const translations = {
     powers_mobile_desc: "Su smartphone la lista è mostrata come card verticali (una per giocatore).",
     players_registered: "Player registrati",
     current_role: "Ruolo attuale",
-    export_admin_only: "Export Excel disponibile solo per Admin",
-    export_requires_admin_pin: "Effettua login con PIN admin per abilitare l'export.",
+    export_admin_only: "Export Excel disponibile solo per Admin e Supervisori",
+    export_requires_admin_pin: "Accedi come Admin o Supervisore per abilitare l'export.",
     new_player: "Nuovo giocatore",
     new_player_button: "+ Nuovo",
     nickname_filter_placeholder: "Filtro nickname (es. GGL)",
@@ -272,8 +272,8 @@ const translations = {
     powers_mobile_desc: "On smartphones, the list is shown as vertical cards (one per player).",
     players_registered: "Registered players",
     current_role: "Current role",
-    export_admin_only: "Excel export is available only for Admin",
-    export_requires_admin_pin: "Log in with admin PIN to enable export.",
+    export_admin_only: "Excel export is available only for Admin and Supervisors",
+    export_requires_admin_pin: "Log in as an Admin or Supervisor to enable export.",
     new_player: "New player",
     new_player_button: "+ New",
     nickname_filter_placeholder: "Nickname filter (e.g. GGL)",
@@ -430,8 +430,8 @@ const translations = {
     powers_mobile_desc: "Sur smartphone, la liste est affichée en cartes verticales (une par joueur).",
     players_registered: "Joueurs enregistrés",
     current_role: "Rôle actuel",
-    export_admin_only: "Export Excel disponible uniquement pour Admin",
-    export_requires_admin_pin: "Connectez-vous avec un PIN admin pour activer l'export.",
+    export_admin_only: "L’export Excel est disponible uniquement pour les Admins et Superviseurs",
+    export_requires_admin_pin: "Connectez-vous comme Admin ou Superviseur pour activer l’export.",
     new_player: "Nouveau joueur",
     new_player_button: "+ Nouveau",
     nickname_filter_placeholder: "Filtre pseudo (ex. GGL)",
@@ -588,8 +588,8 @@ const translations = {
     powers_mobile_desc: "En smartphone la lista se muestra como tarjetas verticales (una por jugador).",
     players_registered: "Jugadores registrados",
     current_role: "Rol actual",
-    export_admin_only: "Exportación Excel disponible solo para Admin",
-    export_requires_admin_pin: "Inicia sesión con PIN admin para habilitar la exportación.",
+    export_admin_only: "La exportación Excel está disponible solo para Admins y Supervisores",
+    export_requires_admin_pin: "Inicia sesión como Admin o Supervisor para habilitar la exportación.",
     new_player: "Nuevo jugador",
     new_player_button: "+ Nuevo",
     nickname_filter_placeholder: "Filtro de nickname (ej. GGL)",
@@ -746,8 +746,8 @@ const translations = {
     powers_mobile_desc: "Auf Smartphones wird die Liste als vertikale Karten angezeigt (eine pro Spieler).",
     players_registered: "Registrierte Spieler",
     current_role: "Aktuelle Rolle",
-    export_admin_only: "Excel-Export ist nur für Admin verfügbar",
-    export_requires_admin_pin: "Melde dich mit Admin-PIN an, um den Export zu aktivieren.",
+    export_admin_only: "Excel-Export ist nur für Admins und Supervisoren verfügbar",
+    export_requires_admin_pin: "Melde dich als Admin oder Supervisor an, um den Export zu aktivieren.",
     new_player: "Neuer Spieler",
     new_player_button: "+ Neu",
     nickname_filter_placeholder: "Nickname-Filter (z. B. GGL)",
@@ -904,8 +904,8 @@ const translations = {
     powers_mobile_desc: "على الهواتف الذكية تُعرض القائمة كبطاقات عمودية (واحدة لكل لاعب).",
     players_registered: "اللاعبون المسجلون",
     current_role: "الدور الحالي",
-    export_admin_only: "تصدير Excel متاح للمشرف فقط",
-    export_requires_admin_pin: "سجّل الدخول باستخدام PIN المشرف لتفعيل التصدير.",
+    export_admin_only: "تصدير Excel متاح فقط للمسؤولين والمشرفين",
+    export_requires_admin_pin: "سجّل الدخول كمسؤول أو مشرف لتفعيل التصدير.",
     new_player: "لاعب جديد",
     new_player_button: "+ جديد",
     nickname_filter_placeholder: "تصفية الاسم المستعار (مثال: GGL)",
@@ -1064,8 +1064,8 @@ translations.pl = {
   "powers_mobile_desc": "Na smartfonach lista jest wyświetlana w postaci pionowych kart (po jednej na gracza).",
   "players_registered": "Zarejestrowani gracze",
   "current_role": "Obecna rola",
-  "export_admin_only": "Eksport do Excela jest dostępny tylko dla administratora",
-  "export_requires_admin_pin": "Zaloguj się przy użyciu kodu PIN administratora, aby włączyć eksport.",
+  "export_admin_only": "Eksport do Excela jest dostępny tylko dla administratorów i nadzorców",
+  "export_requires_admin_pin": "Zaloguj się jako administrator lub nadzorca, aby włączyć eksport.",
   "new_player": "Nowy gracz",
   "new_player_button": "+ Nowy",
   "nickname_filter_placeholder": "Filtr pseudonimów (np. GGL)",
@@ -1223,8 +1223,8 @@ translations.sv = {
   "powers_mobile_desc": "På smartphones visas listan som vertikala kort (ett per spelare).",
   "players_registered": "Registrerade spelare",
   "current_role": "Nuvarande roll",
-  "export_admin_only": "Excel-export är endast tillgängligt för admin",
-  "export_requires_admin_pin": "Logga in med admin-PIN för att aktivera export.",
+  "export_admin_only": "Excel-export är endast tillgängligt för administratörer och supervisorer",
+  "export_requires_admin_pin": "Logga in som administratör eller supervisor för att aktivera export.",
   "new_player": "Ny spelare",
   "new_player_button": "+ Nytt",
   "nickname_filter_placeholder": "Smeknamnsfilter (t.ex. GGL)",
@@ -1382,8 +1382,8 @@ translations.da = {
   "powers_mobile_desc": "På smartphones vises listen som lodrette kort (et pr. spiller).",
   "players_registered": "Registrerede spillere",
   "current_role": "Nuværende rolle",
-  "export_admin_only": "Excel-eksport er kun tilgængelig for Admin",
-  "export_requires_admin_pin": "Log ind med admin PIN for at aktivere eksport.",
+  "export_admin_only": "Excel-eksport er kun tilgængelig for administratorer og supervisorer",
+  "export_requires_admin_pin": "Log ind som administrator eller supervisor for at aktivere eksport.",
   "new_player": "Ny spiller",
   "new_player_button": "+ Ny",
   "nickname_filter_placeholder": "Kaldenavnsfilter (f.eks. GGL)",
@@ -1541,8 +1541,8 @@ translations.uk = {
     "powers_mobile_desc": "На смартфонах список відображається у вигляді вертикальних карток (по одній на гравця).",
     "players_registered": "Зареєстровані гравці",
     "current_role": "Актуальна роль",
-    "export_admin_only": "Експорт Excel доступний лише для адміністратора",
-    "export_requires_admin_pin": "Увійдіть за допомогою PIN-коду адміністратора, щоб увімкнути експорт.",
+    "export_admin_only": "Експорт Excel доступний лише адміністраторам і супервайзерам",
+    "export_requires_admin_pin": "Увійдіть як адміністратор або супервайзер, щоб увімкнути експорт.",
     "new_player": "Новий гравець",
     "new_player_button": "+ Нове",
     "nickname_filter_placeholder": "Фільтр псевдонімів (наприклад, GGL)",
@@ -2042,10 +2042,11 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.score": "Score", "wordGame.points": "points", "wordGame.combo": "Combo", "wordGame.remainingTime": "Time left",
     "wordGame.timeBonus": "Time bonus", "wordGame.lastBonusNone": "Your latest bonus will appear here", "wordGame.legacy": "Legacy result",
     "wordGame.howToPlay": "How to play", "wordGame.helpIntro": "Tap the ivory tiles to build an Italian word, then confirm it. Tap a selected tile to remove it.",
-    "wordGame.helpScoreTitle": "Letter score", "wordGame.helpScore": "A word scores the sum of its Scarabeo letter values plus its length bonus. Any active multiplier applies to that subtotal.",
+    "wordGame.helpScoreTitle": "Letter score", "wordGame.helpScore": "A word scores the sum of its letter values plus its length bonus. Any active multiplier applies to that subtotal.",
     "wordGame.helpBonusesTitle": "Length bonuses", "wordGame.letters": "letters", "wordGame.helpTimerTitle": "Timer",
     "wordGame.helpTimer": "Every valid word adds as many seconds as it contains letters. Score and time bonuses are independent.",
-    "wordGame.helpLeaderboardTitle": "Leaderboard", "wordGame.helpLeaderboard": "Players are ranked by highest score; ties go to the shortest total play time. Legacy level-based results remain visible."
+    "wordGame.helpLeaderboardTitle": "Leaderboard", "wordGame.helpLeaderboard": "Players are ranked by highest score; ties go to the shortest total play time. Legacy level-based results remain visible.",
+    "wordGame.loadingWords": "Loading words...", "wordGame.loadFailed": "Unable to load the game. Try again.", "wordGame.retry": "Try again"
   },
   it: {
     "wordGame.menu": "Gioco Parole", "wordGame.title": "Gioco Parole", "wordGame.start": "Start",
@@ -2062,10 +2063,11 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.score": "Punteggio", "wordGame.points": "punti", "wordGame.combo": "Combo", "wordGame.remainingTime": "Tempo rimasto",
     "wordGame.timeBonus": "Bonus tempo", "wordGame.lastBonusNone": "Qui apparirà l'ultimo bonus", "wordGame.legacy": "Risultato legacy",
     "wordGame.howToPlay": "Come si gioca", "wordGame.helpIntro": "Tocca le tessere avorio per comporre una parola italiana, poi confermala. Tocca una tessera selezionata per rimuoverla.",
-    "wordGame.helpScoreTitle": "Punteggio lettere", "wordGame.helpScore": "La parola vale la somma dei valori Scarabeo delle lettere più il bonus lunghezza. Un eventuale moltiplicatore si applica al subtotale.",
+    "wordGame.helpScoreTitle": "Punteggio lettere", "wordGame.helpScore": "La parola vale la somma dei valori delle lettere più il bonus lunghezza. Un eventuale moltiplicatore si applica al subtotale.",
     "wordGame.helpBonusesTitle": "Bonus lunghezza", "wordGame.letters": "lettere", "wordGame.helpTimerTitle": "Timer",
     "wordGame.helpTimer": "Ogni parola valida aggiunge tanti secondi quante sono le sue lettere. Punteggio e bonus tempo sono indipendenti.",
-    "wordGame.helpLeaderboardTitle": "Classifica", "wordGame.helpLeaderboard": "La classifica ordina per punteggio più alto; a parità precede il minor tempo totale. I vecchi risultati a livelli restano visibili."
+    "wordGame.helpLeaderboardTitle": "Classifica", "wordGame.helpLeaderboard": "La classifica ordina per punteggio più alto; a parità precede il minor tempo totale. I vecchi risultati a livelli restano visibili.",
+    "wordGame.loadingWords": "Caricamento parole...", "wordGame.loadFailed": "Impossibile caricare il gioco. Riprova.", "wordGame.retry": "Riprova"
   },
   fr: {
     "wordGame.menu": "Jeu de mots", "wordGame.title": "Jeu de mots", "wordGame.start": "Démarrer",
@@ -2077,11 +2079,29 @@ const WORD_GAME_TRANSLATIONS = {
     "wordGame.language": "Langue", "wordGame.compose": "Composez un mot", "wordGame.availableLetters": "Lettres disponibles",
     "wordGame.invalidName": "Utilisez 1 à 30 lettres, chiffres, espaces, tirets ou tirets bas.",
     "wordGame.saveError": "Impossible d’enregistrer le résultat. Réessayez.", "wordGame.loading": "Chargement du classement...",
-    "wordGame.loadingError": "Impossible de charger les données du jeu."
+    "wordGame.loadingError": "Impossible de charger les données du jeu.",
+    "wordGame.loadingWords": "Chargement des mots...", "wordGame.loadFailed": "Impossible de charger le jeu. Réessayez.", "wordGame.retry": "Réessayer"
   }
 };
 for (const lang of SUPPORTED_LANGS) {
   Object.assign(translations[lang], WORD_GAME_TRANSLATIONS.en, WORD_GAME_TRANSLATIONS[lang] || {});
+}
+
+const MINIGAMES_TRANSLATIONS = {
+  it: { menu: "Minigiochi", title: "Minigiochi", subtitle: "Scegli un gioco per iniziare", dashboardDesc: "Scegli tra i giochi disponibili e inizia una nuova sfida.", mathTitle: "Gioco Matematico", mathDesc: "Risolvi operazioni sempre più difficili contro il tempo.", wordTitle: "Gioco Parole", wordDesc: "Componi parole, accumula punti e sfida il countdown.", play: "Gioca" },
+  en: { menu: "Mini Games", title: "Mini Games", subtitle: "Choose a game to start", dashboardDesc: "Choose from the available games and start a new challenge.", mathTitle: "Math Game", mathDesc: "Solve increasingly difficult operations against the clock.", wordTitle: "Word Game", wordDesc: "Build words, collect points and beat the countdown.", play: "Play" },
+  fr: { menu: "Mini-jeux", title: "Mini-jeux", subtitle: "Choisissez un jeu pour commencer", dashboardDesc: "Choisissez un jeu disponible et lancez un nouveau défi.", mathTitle: "Jeu de maths", mathDesc: "Résolvez des opérations de plus en plus difficiles contre la montre.", wordTitle: "Jeu de mots", wordDesc: "Composez des mots, gagnez des points et défiez le compte à rebours.", play: "Jouer" },
+  es: { menu: "Minijuegos", title: "Minijuegos", subtitle: "Elige un juego para empezar", dashboardDesc: "Elige uno de los juegos disponibles y comienza un nuevo reto.", mathTitle: "Juego Matemático", mathDesc: "Resuelve operaciones cada vez más difíciles contra el reloj.", wordTitle: "Juego de Palabras", wordDesc: "Forma palabras, acumula puntos y vence la cuenta atrás.", play: "Jugar" },
+  de: { menu: "Minispiele", title: "Minispiele", subtitle: "Wähle ein Spiel, um zu beginnen", dashboardDesc: "Wähle ein verfügbares Spiel und starte eine neue Herausforderung.", mathTitle: "Mathe-Spiel", mathDesc: "Löse immer schwierigere Aufgaben gegen die Zeit.", wordTitle: "Wortspiel", wordDesc: "Bilde Wörter, sammle Punkte und schlage den Countdown.", play: "Spielen" },
+  ar: { menu: "ألعاب مصغرة", title: "ألعاب مصغرة", subtitle: "اختر لعبة للبدء", dashboardDesc: "اختر من الألعاب المتاحة وابدأ تحديًا جديدًا.", mathTitle: "لعبة الرياضيات", mathDesc: "حل عمليات تزداد صعوبة قبل انتهاء الوقت.", wordTitle: "لعبة الكلمات", wordDesc: "كوّن كلمات واجمع النقاط وتغلب على العد التنازلي.", play: "العب" },
+  pl: { menu: "Minigry", title: "Minigry", subtitle: "Wybierz grę, aby rozpocząć", dashboardDesc: "Wybierz dostępną grę i rozpocznij nowe wyzwanie.", mathTitle: "Gra Matematyczna", mathDesc: "Rozwiązuj coraz trudniejsze działania na czas.", wordTitle: "Gra Słowna", wordDesc: "Układaj słowa, zdobywaj punkty i pokonaj odliczanie.", play: "Graj" },
+  sv: { menu: "Minispel", title: "Minispel", subtitle: "Välj ett spel för att börja", dashboardDesc: "Välj ett tillgängligt spel och starta en ny utmaning.", mathTitle: "Mattespel", mathDesc: "Lös allt svårare uppgifter mot klockan.", wordTitle: "Ordspel", wordDesc: "Bygg ord, samla poäng och slå nedräkningen.", play: "Spela" },
+  da: { menu: "Minispil", title: "Minispil", subtitle: "Vælg et spil for at begynde", dashboardDesc: "Vælg et tilgængeligt spil og start en ny udfordring.", mathTitle: "Matematikspil", mathDesc: "Løs stadig sværere opgaver mod uret.", wordTitle: "Ordspil", wordDesc: "Byg ord, saml point og slå nedtællingen.", play: "Spil" },
+  uk: { menu: "Мініігри", title: "Мініігри", subtitle: "Виберіть гру, щоб почати", dashboardDesc: "Виберіть доступну гру та розпочніть новий виклик.", mathTitle: "Математична гра", mathDesc: "Розв’язуйте дедалі складніші завдання на час.", wordTitle: "Гра в слова", wordDesc: "Складайте слова, набирайте бали та випереджайте відлік.", play: "Грати" }
+};
+for (const lang of SUPPORTED_LANGS) {
+  const values = MINIGAMES_TRANSLATIONS[lang] || MINIGAMES_TRANSLATIONS.en;
+  for (const [key, value] of Object.entries(values)) translations[lang][`minigames.${key}`] = value;
 }
 
 function resolveLang(candidate) {

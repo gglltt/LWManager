@@ -11,6 +11,7 @@ const { HISTORY_RETENTION_DAYS } = require("../config/history");
 const rateLimit = require("express-rate-limit");
 const { scopeFilter, tenantFields, selectedTenantFromRequest } = require("../utils/tenant");
 const Alliance = require("../models/alliance");
+const { canExportPowers, buildPowerExportFilter } = require("../utils/powerExportScope");
 
 const router = express.Router();
 
@@ -75,6 +76,12 @@ function validateNickname(nickname, t) {
 function isAdmin(user) { return user && user.authLevel >= 5; }
 function canEdit(user) { return user && ["standard", "supervisor", "master"].includes(user.role); }
 function tenantQuery(req, base = {}) { return scopeFilter(req.user, { ...base, ...selectedTenantFromRequest(req) }); }
+
+async function requirePowerExport(req, res, next) {
+  if (canExportPowers(req.user)) return next();
+  await createEventLog(req, "power_export_access_denied", `role=${req.user?.role || "unknown"}`);
+  return res.status(403).send(`403 - ${(res.locals.t || ((key) => key))("forbidden")}`);
+}
 
 function normalizeSortParams(req) {
   const sort = SORT_FIELDS.includes(String(req.query.sort || "")) ? String(req.query.sort) : "powerT1";
@@ -172,6 +179,7 @@ router.get("/", requireAuth, async (req, res) => {
     return res.render("potenze/index", {
       user: req.user,
       isAdmin: isAdmin(req.user),
+      canExport: canExportPowers(req.user),
       canEdit: canEdit(req.user),
       tenantFilter: selectedTenantFromRequest(req),
       alliances: req.user.isMaster ? await Alliance.find({}).sort({ allianceId: 1 }).lean() : [],
@@ -193,6 +201,8 @@ router.get("/", requireAuth, async (req, res) => {
     return res.render("potenze/index", {
       user: req.user,
       isAdmin: isAdmin(req.user),
+      canExport: canExportPowers(req.user),
+      canEdit: canEdit(req.user),
       players: [],
       playerCount: 0,
       types: TYPE_OPTIONS,
@@ -204,6 +214,7 @@ router.get("/", requireAuth, async (req, res) => {
       q: "",
       historyRetentionDays: HISTORY_RETENTION_DAYS,
       query: req.query,
+      tenantFilter: selectedTenantFromRequest(req),
       alliances: []
     });
   }
@@ -320,9 +331,10 @@ router.post("/new", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/export", requireAuth, requireLevel(5), async (req, res) => {
+router.get("/export", requireAuth, requirePowerExport, async (req, res) => {
   try {
-    const players = await Player.find(tenantQuery(req)).sort({ allianceId: 1, nickname: 1 }).lean();
+    const exportFilter = buildPowerExportFilter(req.user, req.query.allianceId);
+    const players = await Player.find(exportFilter).sort({ allianceId: 1, nickname: 1 }).lean();
 
     const rows = players.map((p) => ({
       Nickname: p.nickname || "",
@@ -495,17 +507,18 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
     const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, 0, 0, 0, 0));
     const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
-    const records = await PlayerPowerHistory.find({
-      player: player.nickname,
-      allianceId: player.allianceId,
-      snapshotDate: { $gte: from, $lte: to }
-    })
-      .sort({ snapshotDate: 1 })
-      .lean();
+    const historyQuery = { player: player.nickname, allianceId: player.allianceId };
+    const [records, previousRecord] = await Promise.all([
+      PlayerPowerHistory.find({ ...historyQuery, snapshotDate: { $gte: from, $lte: to } })
+        .sort({ snapshotDate: 1 })
+        .lean(),
+      PlayerPowerHistory.findOne({ ...historyQuery, snapshotDate: { $lt: from } })
+        .sort({ snapshotDate: -1 })
+        .lean()
+    ]);
 
-    const history = records
-      .filter((record) => record && record.snapshotDay)
-      .map((record) => {
+    const mapHistoryRecord = (record) => {
+      if (!record || !record.snapshotDay) return null;
         const t1 = Math.round(Number(record.t1 || 0) * 100) / 100;
         const t2 = Math.round(Number(record.t2 || 0) * 100) / 100;
         const t3 = Math.round(Number(record.t3 || 0) * 100) / 100;
@@ -521,9 +534,12 @@ router.get("/:id/history-data", requireAuth, async (req, res) => {
           t4,
           total
         };
-      });
+    };
 
-    return res.json({ ok: true, player: player.nickname, days, from: from.toISOString(), to: to.toISOString(), history });
+    const history = records.map(mapHistoryRecord).filter(Boolean);
+    const previous = mapHistoryRecord(previousRecord);
+
+    return res.json({ ok: true, player: player.nickname, days, from: from.toISOString(), to: to.toISOString(), previous, history });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: (res.locals.t || ((k) => k))("err_internal") });

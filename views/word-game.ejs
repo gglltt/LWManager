@@ -1,6 +1,15 @@
 <%- include("partials/header") %>
 
-<section class="wordGamePage" data-language="<%= wordGameLanguage %>" data-locale="<%= localeTag %>">
+<% const initialWordGameError = typeof wordGameLoadError !== "undefined" && wordGameLoadError; %>
+<section class="wordGamePage <%= initialWordGameError ? 'hasLoadError' : 'isLoading' %>" data-language="<%= wordGameLanguage %>" data-locale="<%= localeTag %>" data-initial-error="<%= initialWordGameError %>" aria-busy="<%= initialWordGameError ? 'false' : 'true' %>">
+  <div id="wordGameLoader" class="wordGameLoader" role="status" aria-live="polite">
+    <div class="wordGameLoader__panel">
+      <span class="wordGameLoader__spinner" aria-hidden="true" <%= initialWordGameError ? 'hidden' : '' %>></span>
+      <p class="wordGameLoader__message" <%= initialWordGameError ? 'hidden' : '' %>><%= t('wordGame.loadingWords') %></p>
+      <p class="wordGameLoader__error" <%= initialWordGameError ? '' : 'hidden' %>><%= t('wordGame.loadFailed') %></p>
+      <button id="wordGameRetry" class="wordGameLoader__retry" type="button" <%= initialWordGameError ? '' : 'hidden' %>><%= t('wordGame.retry') %></button>
+    </div>
+  </div>
   <div class="wordGameShell">
     <header class="wordGameHero">
       <div class="wordGameHeading"><p>Word Challenge</p><h1><%= t('wordGame.title') %></h1></div>

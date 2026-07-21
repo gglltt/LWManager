@@ -13,7 +13,6 @@ const {
 const router = express.Router();
 const PLAYER_NAME_RE = /^[\p{L}\p{N} _-]{1,30}$/u;
 const UNAVAILABLE_MESSAGE = "Word Game disponibile solo in italiano.";
-const DICTIONARY_UNAVAILABLE_MESSAGE = "Dizionario italiano non disponibile.";
 
 function isItalianLanguage(appLanguage) {
   return /^it/i.test(String(appLanguage || ""));
@@ -98,14 +97,21 @@ router.get("/", requireAuth, (req, res) => {
   if (!isItalianLanguage(res.locals.currentLang)) return res.status(403).send(UNAVAILABLE_MESSAGE);
   try { loadItalianDictionary(); } catch (error) {
     console.error(error.message);
-    return res.status(503).send(DICTIONARY_UNAVAILABLE_MESSAGE);
+    return res.status(503).render("word-game", {
+      user: req.user,
+      title: res.locals.t("wordGame.title"),
+      wordGameLanguage: "it",
+      wordGameLoadError: true,
+      extraCss: ["/css/word-game.css"],
+      extraJs: ["/js/word-game-loader.js"]
+    });
   }
   res.render("word-game", {
     user: req.user,
     title: res.locals.t("wordGame.title"),
     wordGameLanguage: "it",
     extraCss: ["/css/word-game.css"],
-    extraJs: ["/js/word-game.js"]
+    extraJs: ["/js/word-game-loader.js", "/js/word-game.js"]
   });
 });
 

@@ -111,6 +111,15 @@ app.get("/dashboard", requireAuth, async (req, res) => {
   res.render("dashboard", { user: req.user, allianceName });
 });
 
+app.get("/minigiochi", requireAuth, (req, res) => {
+  res.render("minigiochi", {
+    user: req.user,
+    title: res.locals.t("minigames.title"),
+    showWordGame: /^it/i.test(String(res.locals.currentLang || "")),
+    extraJs: ["/js/minigiochi.js"]
+  });
+});
+
 
 app.get("/stagione-6", requireAuth, (req, res) => {
   const seasonContentLang = req.resolvedSeason6Lang || (["it", "fr"].includes(res.locals.currentLang) ? res.locals.currentLang : "en");

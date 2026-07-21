@@ -74,13 +74,14 @@
       <h1><%= t("powers_title") %></h1>
       <p class="muted"><%= t("powers_mobile_desc") %></p>
       <p><strong><%= t("players_registered") %>: <%= playerCount %></strong></p>
-      <p class="muted"><%= t("current_role") %>: <b><%= isAdmin ? t("admin") : t("standard") %></b></p>
+      <p class="muted"><%= t("current_role") %>: <b><%= user && user.isMaster ? t("admin") : (user && user.role === "supervisor" ? t("supervisor") : t("standard")) %></b></p>
     </div>
 
     <div class="pageHeaderActions">
       <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
-      <% if (isAdmin) { %>
-        <a class="button secondary" href="/potenze/export">⬇️ <%= t("export_excel") %></a>
+      <% if (canExport) { %>
+        <% const exportAllianceId = user && user.isMaster && tenantFilter && tenantFilter.allianceId ? Number(tenantFilter.allianceId) : null; %>
+        <a class="button secondary" href="/potenze/export<%= exportAllianceId ? `?allianceId=${exportAllianceId}` : '' %>">⬇️ <%= t("export_excel") %></a>
       <% } else { %>
         <span class="muted" title="<%= t('export_requires_admin_pin') %>"><%= t("export_admin_only") %></span>
       <% } %>
@@ -151,11 +152,11 @@
           </div>
 
           <div class="playerActions">
-            <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
-            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
+            <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>" aria-label="<%= t('edit') %>: <%= p.nickname %>">✏️</a>
+            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>" aria-label="<%= t('history_chart') %>: <%= p.nickname %>">📈</button>
             <% if (isAdmin) { %>
               <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
-                <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
+                <button class="iconBtn danger" type="submit" title="<%= t('delete') %>" aria-label="<%= t('delete') %>: <%= p.nickname %>">🗑️</button>
               </form>
             <% } %>
           </div>
@@ -294,13 +295,13 @@
               </div>
             </td>
 
-            <td class="colActions">
-              <div class="actionIcons">
-                <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>">✏️</a>
-            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>">📈</button>
+            <td class="colActions actions-cell">
+              <div class="actionIcons table-actions">
+                <a class="iconBtn" href="/potenze/<%= p._id %>/edit" title="<%= t('edit') %>" aria-label="<%= t('edit') %>: <%= p.nickname %>">✏️</a>
+            <button type="button" class="iconBtn playerHistoryOpenBtn" data-player-id="<%= p._id %>" data-player-name="<%= p.nickname %>" title="<%= t('history_chart') %>" aria-label="<%= t('history_chart') %>: <%= p.nickname %>">📈</button>
                 <% if (isAdmin) { %>
                   <form method="POST" action="/potenze/<%= p._id %>/delete" class="inlineForm" onsubmit="return confirm('<%= t('confirm_delete_player') %> <%= p.nickname %>?');">
-                    <button class="iconBtn danger" type="submit" title="<%= t('delete') %>">🗑️</button>
+                    <button class="iconBtn danger" type="submit" title="<%= t('delete') %>" aria-label="<%= t('delete') %>: <%= p.nickname %>">🗑️</button>
                   </form>
                 <% } %>
               </div>
@@ -370,6 +371,7 @@
   </div>
 </div>
 
+<script src="/js/power-history-series.js"></script>
 <script>
   (function () {
     const modal = document.getElementById("playerNotesModal");
@@ -481,7 +483,6 @@
     const historyTooltip = document.getElementById("playerHistoryTooltip");
 
     const HISTORY_RETENTION_DAYS = <%- JSON.stringify(historyRetentionDays) %>;
-    const HISTORY_DAY_MS = 24 * 60 * 60 * 1000;
     const HISTORY_LAST_YEAR_RANGE_TEXT = <%- JSON.stringify(t("history_period_range")) %>;
     const HISTORY_PERIODS = [
       { key: "month", days: 30, label: <%- JSON.stringify(t("last_month")) %>, noData: <%- JSON.stringify(t("no_history_last_month")) %> },
@@ -504,6 +505,7 @@
     let currentChartLayout = null;
     let currentHistoryPeriod = "year";
     let currentHistoryRows = [];
+    let currentHistoryBaseline = null;
     let currentPlayerName = "";
 
     const formatPointValue = (value) => Number(value || 0).toLocaleString(localeTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -857,60 +859,7 @@
       return `${y}-${m}-${d}`;
     }
 
-    function buildLastDaysForChart(realRows, daysCount) {
-      const count = Number.isFinite(daysCount) ? Math.max(1, Math.floor(daysCount) + 1) : HISTORY_RETENTION_DAYS + 1;
-      const rowsByDay = new Map(
-        (realRows || [])
-          .filter((row) => row && row.date)
-          .map((row) => [String(row.date), row])
-      );
-
-      const now = new Date();
-      const startUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (count - 1), 0, 0, 0, 0));
-      const result = [];
-      let lastKnown = null;
-      for (let i = 0; i < count; i++) {
-        const dayUTC = new Date(startUTC.getTime() + i * HISTORY_DAY_MS);
-        const isoDay = toIsoDayUTC(dayUTC);
-        const realRow = rowsByDay.get(isoDay);
-        if (realRow) {
-          const normalized = {
-            date: isoDay,
-            t1: Number(realRow.t1 || 0),
-            t2: Number(realRow.t2 || 0),
-            t3: Number(realRow.t3 || 0),
-            t4: Number(realRow.t4 || 0),
-            total: Number(realRow.total || 0),
-            _real: true
-          };
-          result.push(normalized);
-          lastKnown = normalized;
-        } else {
-          if (!lastKnown) {
-            result.push({
-              date: isoDay,
-              t1: 0,
-              t2: 0,
-              t3: 0,
-              t4: 0,
-              total: 0,
-              _real: false
-            });
-            continue;
-          }
-          result.push({
-            date: isoDay,
-            t1: lastKnown.t1,
-            t2: lastKnown.t2,
-            t3: lastKnown.t3,
-            t4: lastKnown.t4,
-            total: lastKnown.total,
-            _real: false
-          });
-        }
-      }
-      return result;
-    }
+    const { findPreviousRowForPeriod, buildLastDaysForChart } = window.LWPowerHistorySeries;
 
     function getPeriodStartIso(period) {
       const now = new Date();
@@ -972,7 +921,8 @@
       const period = getCurrentPeriod();
       const periodStart = getPeriodStartIso(period);
       const rowsInPeriod = currentHistoryRows.filter((row) => String(row?.date || "") >= periodStart);
-      const chartRows = buildLastDaysForChart(rowsInPeriod, period.days);
+      const previousRow = findPreviousRowForPeriod(currentHistoryRows, periodStart, currentHistoryBaseline);
+      const chartRows = buildLastDaysForChart(rowsInPeriod, period.days, previousRow);
       currentChartPoints = chartRows;
       historyMeta.innerHTML = `<strong>${escapeHtml(currentPlayerName)}</strong> · ${escapeHtml(getHistoryRangeLabel(chartRows))}`;
       updateHistoryControls();
@@ -1006,6 +956,7 @@
       seriesVisibility.t4 = false;
       currentChartPoints = [];
       currentHistoryRows = [];
+      currentHistoryBaseline = null;
       currentPlayerName = playerName;
       currentHistoryPeriod = "year";
       updateHistoryControls();
@@ -1022,6 +973,7 @@
 
         const rows = data.history || [];
         currentHistoryRows = rows;
+        currentHistoryBaseline = data.previous || null;
         currentHistoryPeriod = chooseDefaultHistoryPeriod(rows);
         const hasT4Entries = rows.some((row) => Number(row?.t4 || 0) > 0);
         seriesVisibility.t4 = hasT4Entries;

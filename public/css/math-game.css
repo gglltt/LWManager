@@ -137,3 +137,9 @@ body:has(.math-game-page) main.container{height:var(--math-game-available-height
 .math-game-modal{max-height:calc(100dvh - 20px)}
 .gameOverActions{grid-template-columns:1fr}
 }
+
+/* Compact button system overrides */
+.mathAction,.mathAudioToggle{border:1px solid #536b92;border-radius:8px;box-shadow:0 1px 3px rgba(32,74,130,.18);font-weight:500;transition:transform .14s ease,box-shadow .14s ease,background-color .14s ease}
+.mathAction:active,.mathAudioToggle:active{transform:translateY(1px);box-shadow:none;filter:none}.mathLeaderboardBtn{background:#263b61}.mathStart{background:#2863b9;border-color:#497dca}.mathAudioToggle{background:#eef4fb;border-color:#bdcde0;color:#17365d;font-size:1rem}
+.numKey{border:1px solid #c7d5e4;border-radius:8px;background:#f7fafe;box-shadow:0 1px 3px rgba(32,74,130,.14);font-size:clamp(1.02rem,5vw,1.35rem);font-weight:500;transition:transform .14s ease,box-shadow .14s ease,background-color .14s ease}.numKey:hover{background:#fff}.numKey:active{transform:translateY(1px);box-shadow:none;filter:none}.numKey.confirm{background:#2863b9;border-color:#497dca;box-shadow:0 1px 3px rgba(44,123,229,.2)}.numKey.clear{background:#f7edd9;border-color:#ddc79d}
+.modalClose{border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);width:38px;height:38px;min-height:38px;padding:0;font-size:1.35rem;font-weight:400;box-shadow:none}
