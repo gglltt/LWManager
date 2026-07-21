@@ -47,6 +47,23 @@
           data-loading-label="<%= t('wordGame.loadingWords') %>"><%= t('minigames.play') %></a>
       </article>
     <% } %>
+
+    <article class="minigameCard">
+      <div class="minigameCard__heading">
+        <div class="minigameCard__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <rect x="3" y="4" width="8" height="10" rx="1.5"></rect>
+            <rect x="13" y="4" width="8" height="10" rx="1.5"></rect>
+            <path d="M7 7.25 8.75 10H5.25L7 7.25ZM17 7v4M15 9h4M7 17.5h10M9.5 20h5"></path>
+          </svg>
+        </div>
+        <h2><%= t('minigames.memoryTitle') %></h2>
+      </div>
+      <div class="minigameCard__content">
+        <p><%= t('minigames.memoryDesc') %></p>
+      </div>
+      <a class="button minigameCard__action" href="/memory-game"><%= t('minigames.play') %></a>
+    </article>
   </div>
 </section>
 

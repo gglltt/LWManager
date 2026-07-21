@@ -14,6 +14,7 @@ const passwordsRoutes = require("./routes/passwords");
 const performanceVsRoutes = require("./routes/performanceVs");
 const mathGameRoutes = require("./routes/mathGame");
 const wordGameRoutes = require("./routes/wordGame");
+const memoryGameRoutes = require("./routes/memoryGame");
 const Alliance = require("./models/alliance");
 const { requireAuth } = require("./middleware/auth");
 const { cleanupOldEventLogs } = require("./utils/eventLog");
@@ -143,6 +144,7 @@ app.use("/registro", registroRoutes);
 app.use("/performance-vs", performanceVsRoutes);
 app.use("/math-game", mathGameRoutes);
 app.use("/word-game", wordGameRoutes);
+app.use("/memory-game", memoryGameRoutes);
 
 app.get("/logout", requireAuth, async (req, res) => {
   await cleanupOldEventLogs().catch(() => {});

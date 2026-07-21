@@ -1,0 +1,131 @@
+<%- include("partials/header") %>
+
+<section class="memory-game-page" data-locale="<%= localeTag %>" aria-labelledby="memoryGameTitle">
+  <svg class="memorySprite" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="memory-symbol-tank" viewBox="0 0 48 48"><path d="M9 31h30l-3 8H12zM15 31v-9h19l5 5v4M20 22v-6h12v6M32 18h11M14 39h20"/><circle cx="17" cy="35" r="2"/><circle cx="24" cy="35" r="2"/><circle cx="31" cy="35" r="2"/></symbol>
+      <symbol id="memory-symbol-jet" viewBox="0 0 48 48"><path d="m24 5 5 14 13 7-2 4-12-3-1 11 5 4-1 2-7-2-7 2-1-2 5-4-1-11-12 3-2-4 13-7z"/></symbol>
+      <symbol id="memory-symbol-missile" viewBox="0 0 48 48"><path d="M29 7c7 4 10 10 10 18L25 39c-8 0-14-3-18-10L21 15zM16 34l-7 7M12 31l-6 2M17 37l-2 6"/><circle cx="29" cy="19" r="3"/></symbol>
+      <symbol id="memory-symbol-zombie" viewBox="0 0 48 48"><path d="M15 40v-9l-4-4 3-15 8-5 11 3 4 9-2 12v9M18 40l2-8h9l3 8M18 19l5 2 4-3 5 2M19 27h12"/><circle cx="20" cy="17" r="1.5"/><circle cx="30" cy="16" r="1.5"/><path d="m24 25 2-3"/></symbol>
+      <symbol id="memory-symbol-shield" viewBox="0 0 48 48"><path d="M24 5 39 11v11c0 10-6 17-15 22C15 39 9 32 9 22V11zM17 24l5 5 10-11"/></symbol>
+      <symbol id="memory-symbol-radar" viewBox="0 0 48 48"><path d="M8 39h32M24 39V27M17 39l7-12 7 12M24 24 37 11M24 24l-9-9M24 24h15"/><path d="M29 9a17 17 0 0 1 10 10M32 15a9 9 0 0 1 3 6"/><circle cx="24" cy="24" r="2"/></symbol>
+      <symbol id="memory-symbol-helicopter" viewBox="0 0 48 48"><path d="M9 26h28l5 5H20c-6 0-10-2-11-5ZM19 26l4-9h8l7 9M27 17V9M13 9h28M12 31l-4 6M30 31l4 6M5 20h8v6"/></symbol>
+      <symbol id="memory-symbol-drone" viewBox="0 0 48 48"><path d="M17 23h14l3 8H14zM19 31v5h10v-5M17 25 9 16M31 25l8-9M8 13h9M31 13h9"/><circle cx="10" cy="13" r="4"/><circle cx="38" cy="13" r="4"/><circle cx="24" cy="26" r="2"/></symbol>
+      <symbol id="memory-symbol-turret" viewBox="0 0 48 48"><path d="M12 41h24M16 41l2-12h12l2 12M17 29v-8h17v8M20 21l3-7h8l3 7M31 16l12-4M24 29v12"/></symbol>
+      <symbol id="memory-symbol-base" viewBox="0 0 48 48"><path d="M7 41h34M10 41V19l14-9 14 9v22M17 41V29h14v12M14 22h5M29 22h5M21 14v-7h9l-2 3 2 3h-9"/></symbol>
+      <symbol id="memory-symbol-medal" viewBox="0 0 48 48"><path d="m14 6 7 14M34 6l-7 14M14 6h8l4 9M34 6h-8l-4 9"/><circle cx="24" cy="30" r="11"/><path d="m24 23 2 4 5 .7-3.5 3.4.8 4.9-4.3-2.3-4.3 2.3.8-4.9-3.5-3.4 5-.7z"/></symbol>
+      <symbol id="memory-symbol-resources" viewBox="0 0 48 48"><path d="M7 16h34v25H7zM7 16l8-8h18l8 8M15 8l5 8M33 8l-5 8M7 25h34M19 25v16M29 25v16"/></symbol>
+      <symbol id="memory-symbol-explosion" viewBox="0 0 48 48"><path d="m25 4 4 12 11-5-5 11 10 5-12 3 3 12-10-7-7 9-1-12-13 1 9-9-9-8 13 1z"/><path d="m24 18 5 7-7 7-5-6z"/></symbol>
+      <symbol id="memory-symbol-medical" viewBox="0 0 48 48"><rect x="7" y="12" width="34" height="29" rx="4"/><path d="M18 12V8h12v4M20 19h8v6h6v8h-6v6h-8v-6h-6v-8h6z"/></symbol>
+      <symbol id="memory-symbol-workshop" viewBox="0 0 48 48"><path d="m24 6 3 5 6-1 1 6 6 3-3 5 3 5-6 3-1 6-6-1-3 5-3-5-6 1-1-6-6-3 3-5-3-5 6-3 1-6 6 1z"/><circle cx="24" cy="24" r="7"/><path d="M24 20v8M20 24h8"/></symbol>
+      <symbol id="memory-symbol-energy" viewBox="0 0 48 48"><path d="M28 4 10 27h13l-3 17 18-24H26z"/></symbol>
+      <symbol id="memory-symbol-allianceFlag" viewBox="0 0 48 48"><path d="M12 44V7M13 9h24l-5 8 5 8H13"/><path d="m22 13 2 4 5 .5-3.5 3 1 4.5-4.5-2.5-4 2.5 1-4.5-3.5-3 4.5-.5z"/></symbol>
+      <symbol id="memory-symbol-target" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="3"/><path d="M24 3v8M24 37v8M3 24h8M37 24h8"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="memoryHero">
+    <div class="memoryHero__copy">
+      <p class="memoryEyebrow"><%= t('memoryGame.eyebrow') %></p>
+      <h1 id="memoryGameTitle"><%= t('memoryGame.title') %></h1>
+      <p><%= t('memoryGame.subtitle') %></p>
+    </div>
+    <div class="memoryHero__actions">
+      <button class="button mathAudioToggle" id="memoryHelpButton" type="button" aria-label="<%= t('memoryGame.howToPlay') %>">?</button>
+      <button class="button mathAction mathLeaderboardBtn" id="memoryLeaderboardButton" type="button">🏆 <span><%= t('memoryGame.leaderboard') %></span></button>
+      <button class="button mathAction mathStart" id="memoryStartButton" type="button"><span aria-hidden="true">▶</span> <span id="memoryStartLabel"><%= t('memoryGame.start') %></span></button>
+      <a class="button secondary memoryBackAction" href="/minigiochi"><%= t('memoryGame.backToMinigames') %></a>
+    </div>
+  </header>
+
+  <div class="memoryPanel">
+    <div class="memoryStats" aria-label="<%= t('memoryGame.gameStats') %>">
+      <div><span><%= t('memoryGame.level') %></span><strong id="memoryLevelValue">1/10</strong></div>
+      <div><span><%= t('memoryGame.score') %></span><strong id="memoryScoreValue">0</strong></div>
+      <div class="memoryStats__timer" id="memoryTimerStat"><span><%= t('memoryGame.time') %></span><strong id="memoryTimeValue">45</strong></div>
+      <div><span><%= t('memoryGame.errors') %></span><strong id="memoryErrorsValue">0</strong></div>
+      <div><span><%= t('memoryGame.pairs') %></span><strong id="memoryPairsValue">0/3</strong></div>
+    </div>
+
+    <div class="memoryStatus" id="memoryStatus" role="status" aria-live="polite"><%= t('memoryGame.ready') %></div>
+    <div class="memoryBoard" id="memoryBoard" role="group" aria-label="<%= t('memoryGame.boardLabel') %>" aria-busy="false"></div>
+  </div>
+
+  <div class="memoryToast" id="memoryToast" role="status" aria-live="polite"></div>
+
+  <div class="memoryModalOverlay" id="memoryHelpModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="memoryHelpTitle">
+    <div class="memoryModal memoryModal--help">
+      <header class="memoryModal__header"><h2 id="memoryHelpTitle"><%= t('memoryGame.instructionsTitle') %></h2><button class="modalClose" type="button" data-close-modal aria-label="<%= t('memoryGame.close') %>">&times;</button></header>
+      <ol class="memoryInstructions">
+        <li><%= t('memoryGame.instructionPreview') %></li>
+        <li><%= t('memoryGame.instructionPairs') %></li>
+        <li><%= t('memoryGame.instructionScore') %></li>
+        <li><%= t('memoryGame.instructionPenalty') %></li>
+        <li><%= t('memoryGame.instructionTimer') %></li>
+        <li><%= t('memoryGame.instructionLevels') %></li>
+        <li><%= t('memoryGame.instructionFinal') %></li>
+        <li><%= t('memoryGame.instructionRanking') %></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="memoryModalOverlay" id="memoryLevelModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="memoryLevelTitle">
+    <div class="memoryModal memoryModal--result">
+      <h2 id="memoryLevelTitle"><%= t('memoryGame.levelComplete') %></h2>
+      <div class="memoryResultStats">
+        <span><%= t('memoryGame.timeBonus') %><strong id="memoryLevelBonus">0</strong></span>
+        <span><%= t('memoryGame.score') %><strong id="memoryLevelScore">0</strong></span>
+      </div>
+      <button class="button mathAction mathStart" id="memoryNextLevelButton" type="button"><%= t('memoryGame.nextLevel') %></button>
+    </div>
+  </div>
+
+  <div class="memoryModalOverlay" id="memoryGameOverModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="memoryGameOverTitle">
+    <div class="memoryModal memoryModal--result">
+      <h2 id="memoryGameOverTitle"><%= t('memoryGame.gameOver') %></h2>
+      <p id="memoryFinalMessage"><%= t('memoryGame.finalSummary') %></p>
+      <div class="memoryResultStats memoryResultStats--final">
+        <span><%= t('memoryGame.levelReached') %><strong id="memoryFinalLevel">1</strong></span>
+        <span><%= t('memoryGame.score') %><strong id="memoryFinalScore">0</strong></span>
+        <span><%= t('memoryGame.pairs') %><strong id="memoryFinalPairs">0</strong></span>
+        <span><%= t('memoryGame.errors') %><strong id="memoryFinalErrors">0</strong></span>
+        <span><%= t('memoryGame.totalTime') %><strong id="memoryFinalTime">0.0s</strong></span>
+      </div>
+      <label class="memoryPlayerLabel" for="memoryPlayerName"><%= t('memoryGame.playerName') %></label>
+      <input id="memoryPlayerName" maxlength="30" autocomplete="nickname" />
+      <p class="memoryFormMessage" id="memoryScoreMessage" role="status"></p>
+      <div class="memoryModal__actions">
+        <button class="button mathAction mathStart" id="memorySaveButton" type="button"><%= t('memoryGame.saveScore') %></button>
+        <button class="button secondary" id="memoryRestartButton" type="button"><%= t('memoryGame.restart') %></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="memoryModalOverlay" id="memoryLeaderboardModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="memoryLeaderboardTitle">
+    <div class="memoryModal memoryModal--leaderboard">
+      <header class="memoryModal__header"><h2 id="memoryLeaderboardTitle"><%= t('memoryGame.leaderboard') %></h2><button class="modalClose" type="button" data-close-modal aria-label="<%= t('memoryGame.close') %>">&times;</button></header>
+      <div class="memoryLeaderboard" id="memoryLeaderboardList"><p><%= t('memoryGame.loading') %></p></div>
+    </div>
+  </div>
+</section>
+
+<script id="memoryGameTranslations" type="application/json"><%- JSON.stringify({
+  start: t('memoryGame.start'), restart: t('memoryGame.restart'), memorize: t('memoryGame.memorize'),
+  cardsHidden: t('memoryGame.cardsHidden'), matchFound: t('memoryGame.matchFound'), noMatch: t('memoryGame.noMatch'),
+  levelComplete: t('memoryGame.levelComplete'), gameOver: t('memoryGame.gameOver'), victory: t('memoryGame.victory'),
+  finalSummary: t('memoryGame.finalSummary'), invalidName: t('memoryGame.invalidName'), saveError: t('memoryGame.saveError'),
+  resultSaved: t('memoryGame.resultSaved'), noScores: t('memoryGame.noScores'), loading: t('memoryGame.loading'),
+  score: t('memoryGame.score'), level: t('memoryGame.level'), pairs: t('memoryGame.pairs'), errors: t('memoryGame.errors'),
+  totalTime: t('memoryGame.totalTime'), date: t('memoryGame.date'), revealCard: t('memoryGame.revealCard'),
+  hiddenCard: t('memoryGame.hiddenCard'), matchedCard: t('memoryGame.matchedCard'), points: t('memoryGame.points'),
+  symbols: {
+    tank: t('memoryGame.symbols.tank'), jet: t('memoryGame.symbols.jet'), missile: t('memoryGame.symbols.missile'),
+    zombie: t('memoryGame.symbols.zombie'), shield: t('memoryGame.symbols.shield'), radar: t('memoryGame.symbols.radar'),
+    helicopter: t('memoryGame.symbols.helicopter'), drone: t('memoryGame.symbols.drone'), turret: t('memoryGame.symbols.turret'),
+    base: t('memoryGame.symbols.base'), medal: t('memoryGame.symbols.medal'), resources: t('memoryGame.symbols.resources'),
+    explosion: t('memoryGame.symbols.explosion'), medical: t('memoryGame.symbols.medical'), workshop: t('memoryGame.symbols.workshop'),
+    energy: t('memoryGame.symbols.energy'), allianceFlag: t('memoryGame.symbols.allianceFlag'), target: t('memoryGame.symbols.target')
+  }
+}) %></script>
+
+<%- include("partials/footer") %>
