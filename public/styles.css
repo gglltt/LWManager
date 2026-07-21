@@ -297,6 +297,16 @@ body{
   font-weight:500;
 }
 
+.minigameCard__icon svg{
+  width:23px;
+  height:23px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.55;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
 .minigameCard__content{ flex:1; }
 
 .minigameCard h2{
