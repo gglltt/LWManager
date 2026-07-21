@@ -1,3 +1,4 @@
+// LWManager splash lifecycle.
 (() => {
   const STORAGE_KEY = "lwmanager_splash_seen";
   const SPLASH_DURATION_MS = 2500;

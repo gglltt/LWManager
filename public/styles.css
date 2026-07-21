@@ -2505,7 +2505,7 @@ button:disabled,.button:disabled{ opacity:.48; cursor:not-allowed; transform:non
 }
 
 /* ========================= */
-/* BISS SPLASH SCREEN        */
+/* LWMANAGER SPLASH SCREEN   */
 /* ========================= */
 
 .splash{
@@ -2565,8 +2565,8 @@ button:disabled,.button:disabled{ opacity:.48; cursor:not-allowed; transform:non
 .splash__panel{
   position:relative;
   z-index:1;
-  width:min(420px, 100%);
-  padding:30px 24px 28px;
+  width:min(440px, 100%);
+  padding:30px clamp(18px, 5vw, 30px) 28px;
   text-align:center;
   border:1px solid rgba(48,224,198,.34);
   border-radius:28px;
@@ -2626,10 +2626,12 @@ button:disabled,.button:disabled{ opacity:.48; cursor:not-allowed; transform:non
 
 .splash__title{
   margin:0;
+  max-width:100%;
   color:#f3fff9;
-  font-size:clamp(42px, 13vw, 72px);
-  line-height:.95;
-  letter-spacing:5px;
+  font-size:clamp(28px, 7.5vw, 48px);
+  line-height:1.05;
+  letter-spacing:clamp(1px, .4vw, 2.5px);
+  white-space:nowrap;
   text-transform:uppercase;
   text-shadow:0 0 22px rgba(48,224,198,.5);
 }
@@ -2654,6 +2656,24 @@ button:disabled,.button:disabled{ opacity:.48; cursor:not-allowed; transform:non
 
 @keyframes splashSweep{
   to{ transform:translateX(120%); }
+}
+
+@media (max-width:360px){
+  .splash{ padding:16px; }
+  .splash__panel{
+    padding:24px 16px 22px;
+    border-radius:24px;
+  }
+  .splash__logoWrap{
+    width:clamp(96px, 32vw, 116px);
+    height:clamp(96px, 32vw, 116px);
+    margin-bottom:14px;
+    border-radius:26px;
+  }
+  .splash__title{
+    font-size:clamp(22px, 8.5vw, 28px);
+    letter-spacing:1px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce){

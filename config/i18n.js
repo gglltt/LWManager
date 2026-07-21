@@ -73,7 +73,7 @@ const translations = {
     login_step_2: "Vai su Potenze dalla Dashboard.",
     login_step_3: "Clicca + Nuovo e inserisci Nickname, Ruolo, valori T1-T4 e Tipo T1-T4.",
     login_step_4: "Salva e ripeti per ogni squadra/giocatore; poi verifica il totale nella lista.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "Modalità accesso",
     admin: "Amministratore",
     standard: "Standard",
@@ -231,7 +231,7 @@ const translations = {
     login_step_2: "Open Powers from the Dashboard.",
     login_step_3: "Click + New and enter Nickname, Role, T1-T4 values, and T1-T4 Type.",
     login_step_4: "Save and repeat for each team/player, then check the total in the list.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "Access mode",
     admin: "Administrator",
     standard: "Standard",
@@ -389,7 +389,7 @@ const translations = {
     login_step_2: "Ouvrez Puissances depuis le tableau de bord.",
     login_step_3: "Cliquez sur + Nouveau et saisissez le pseudo, le rôle, les valeurs T1-T4 et le type T1-T4.",
     login_step_4: "Enregistrez et répétez pour chaque équipe/joueur, puis vérifiez le total dans la liste.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "Mode d'accès",
     admin: "Administrateur",
     standard: "Standard",
@@ -547,7 +547,7 @@ const translations = {
     login_step_2: "Abre Potencias desde el Panel.",
     login_step_3: "Haz clic en + Nuevo e introduce Nickname, Rol, valores T1-T4 y Tipo T1-T4.",
     login_step_4: "Guarda y repite para cada equipo/jugador; luego verifica el total en la lista.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "Modo de acceso",
     admin: "Administrador",
     standard: "Estándar",
@@ -705,7 +705,7 @@ const translations = {
     login_step_2: "Öffne Stärken im Dashboard.",
     login_step_3: "Klicke auf + Neu und gib Nickname, Rolle, T1-T4-Werte und T1-T4-Typ ein.",
     login_step_4: "Speichern und für jedes Team/jeden Spieler wiederholen; dann die Gesamtzahl in der Liste prüfen.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "Zugriffsmodus",
     admin: "Administrator",
     standard: "Standard",
@@ -863,7 +863,7 @@ const translations = {
     login_step_2: "افتح صفحة القوى من لوحة التحكم.",
     login_step_3: "اضغط + جديد وأدخل الاسم المستعار، الدور، قيم T1-T4 ونوع T1-T4.",
     login_step_4: "احفظ وكرر لكل فريق/لاعب، ثم تحقق من الإجمالي في القائمة.",
-    dashboard_title: "Dashboard Biss",
+    dashboard_title: "Dashboard",
     access_mode: "وضع الوصول",
     admin: "مشرف",
     standard: "عادي",
@@ -1023,7 +1023,7 @@ translations.pl = {
   "login_step_2": "Otwórz uprawnienia z pulpitu nawigacyjnego.",
   "login_step_3": "Kliknij + Nowy i wprowadź Pseudonim, Rola, Wartości T1-T4 i Typ T1-T4.",
   "login_step_4": "Zapisz i powtórz dla każdego zespołu/gracza, a następnie sprawdź sumę na liście.",
-  "dashboard_title": "Deska rozdzielcza Biss",
+  "dashboard_title": "Deska rozdzielcza",
   "access_mode": "Tryb dostępu",
   "admin": "Administrator",
   "standard": "Standard",
@@ -1182,7 +1182,7 @@ translations.sv = {
   "login_step_2": "Öppna Powers från instrumentpanelen.",
   "login_step_3": "Klicka på + Ny och ange Smeknamn, Roll, T1-T4-värden och T1-T4-typ.",
   "login_step_4": "Spara och upprepa för varje lag/spelare, kontrollera sedan summan i listan.",
-  "dashboard_title": "Instrumentbräda Biss",
+  "dashboard_title": "Instrumentbräda",
   "access_mode": "Åtkomstläge",
   "admin": "Administratör",
   "standard": "Standard",
@@ -1341,7 +1341,7 @@ translations.da = {
   "login_step_2": "Åbn Powers fra Dashboard.",
   "login_step_3": "Klik på + Ny, og indtast kaldenavn, rolle, T1-T4-værdier og T1-T4-type.",
   "login_step_4": "Gem og gentag for hvert hold/spiller, og tjek derefter totalen på listen.",
-  "dashboard_title": "Dashboard Biss",
+  "dashboard_title": "Dashboard",
   "access_mode": "Adgangstilstand",
   "admin": "Administrator",
   "standard": "Standard",
@@ -1500,7 +1500,7 @@ translations.uk = {
     "login_step_2": "Перейдіть до «Повноваження» на інформаційній панелі.",
     "login_step_3": "Натисніть + Новий і введіть псевдонім, роль, значення T1-T4 і тип T1-T4.",
     "login_step_4": "Збережіть і повторіть для кожної команди/гравця; потім перевірте загальну суму в списку.",
-    "dashboard_title": "Приладова панель Biss",
+    "dashboard_title": "Приладова панель",
     "access_mode": "Режим доступу",
     "admin": "Адміністратор",
     "standard": "Стандартний",
@@ -1910,24 +1910,24 @@ Object.assign(translations.uk, {
 
 const UI_CLEANUP_TRANSLATIONS = {
   it: {
-    splash_label: "Biss Made in Italy", biss_logo_alt: "Logo alleanza Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "Gestione PIN", season6_guide_short: "Guida S6", season6_dashboard_desc: "Priorità, edifici, War Merit, pesca e calendario iniziale", password_management_master_desc: "Reset PIN standard e supervisori di tutte le alleanze", password_management_supervisor_desc: "Modifica PIN standard e supervisore della tua alleanza", pin: "PIN", email: "Email", login_tenant_hint: "Inserisci codice alleanza, server e PIN.", invalid_credentials: "Credenziali non valide.", too_many_attempts: "Troppi tentativi. Riprova più tardi.", forbidden: "Accesso negato", not_found: "Non trovato", export_excel: "Esporta Excel", role: "Ruolo", total: "Totale", total_short: "Totale", date: "Data", alliances_management_desc: "Crea alleanze e gestisci i PIN standard/supervisore senza assegnare permessi amministrativi agli utenti standard.", active: "Attiva", inactive: "Disattivata", password_management_master_intro: "Master: puoi vedere tutti gli utenti attivi e resettare qualsiasi PIN senza conoscere quello precedente.", password_management_supervisor_intro: "Supervisore: puoi modificare solo i PIN standard e supervisore della tua alleanza inserendo il vecchio PIN e due volte quello nuovo.", no_users_available: "Nessun utente disponibile.", user: "Utente", old_pin: "Vecchio PIN", new_pin: "Nuovo PIN", repeat_pin: "Ripeti PIN", reset_pin: "Resetta PIN", change_pin: "Modifica PIN", err_new_pin_mismatch: "Il nuovo PIN deve essere di 6 cifre e deve combaciare in entrambi i campi.", err_old_pin_required: "Inserisci il vecchio PIN di 6 cifre.", err_cannot_edit_user: "Non puoi modificare questo utente.", err_old_pin_wrong: "Il vecchio PIN non è corretto.", pin_reset_success: "PIN resettato correttamente.", pin_changed_success: "PIN modificato correttamente."
+    splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "Gestione PIN", season6_guide_short: "Guida S6", season6_dashboard_desc: "Priorità, edifici, War Merit, pesca e calendario iniziale", password_management_master_desc: "Reset PIN standard e supervisori di tutte le alleanze", password_management_supervisor_desc: "Modifica PIN standard e supervisore della tua alleanza", pin: "PIN", email: "Email", login_tenant_hint: "Inserisci codice alleanza, server e PIN.", invalid_credentials: "Credenziali non valide.", too_many_attempts: "Troppi tentativi. Riprova più tardi.", forbidden: "Accesso negato", not_found: "Non trovato", export_excel: "Esporta Excel", role: "Ruolo", total: "Totale", total_short: "Totale", date: "Data", alliances_management_desc: "Crea alleanze e gestisci i PIN standard/supervisore senza assegnare permessi amministrativi agli utenti standard.", active: "Attiva", inactive: "Disattivata", password_management_master_intro: "Master: puoi vedere tutti gli utenti attivi e resettare qualsiasi PIN senza conoscere quello precedente.", password_management_supervisor_intro: "Supervisore: puoi modificare solo i PIN standard e supervisore della tua alleanza inserendo il vecchio PIN e due volte quello nuovo.", no_users_available: "Nessun utente disponibile.", user: "Utente", old_pin: "Vecchio PIN", new_pin: "Nuovo PIN", repeat_pin: "Ripeti PIN", reset_pin: "Resetta PIN", change_pin: "Modifica PIN", err_new_pin_mismatch: "Il nuovo PIN deve essere di 6 cifre e deve combaciare in entrambi i campi.", err_old_pin_required: "Inserisci il vecchio PIN di 6 cifre.", err_cannot_edit_user: "Non puoi modificare questo utente.", err_old_pin_wrong: "Il vecchio PIN non è corretto.", pin_reset_success: "PIN resettato correttamente.", pin_changed_success: "PIN modificato correttamente."
   },
   en: {
-    splash_label: "Biss Made in Italy", biss_logo_alt: "Biss alliance logo", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "PIN management", season6_guide_short: "S6 Guide", season6_dashboard_desc: "Priorities, buildings, War Merit, fishing and initial calendar", password_management_master_desc: "Reset standard and supervisor PINs for every alliance", password_management_supervisor_desc: "Change standard and supervisor PINs for your alliance", pin: "PIN", email: "Email", login_tenant_hint: "Enter alliance code, server and PIN.", invalid_credentials: "Invalid credentials.", too_many_attempts: "Too many attempts. Try again later.", forbidden: "Forbidden", not_found: "Not found", export_excel: "Export Excel", role: "Role", total: "Total", total_short: "Total", date: "Date", alliances_management_desc: "Create alliances and manage standard/supervisor PINs without granting administrator permissions to standard users.", active: "Active", inactive: "Inactive", password_management_master_intro: "Master: you can view all active users and reset any PIN without knowing the previous one.", password_management_supervisor_intro: "Supervisor: you can only change the standard and supervisor PINs for your alliance by entering the old PIN and the new one twice.", no_users_available: "No users available.", user: "User", old_pin: "Old PIN", new_pin: "New PIN", repeat_pin: "Repeat PIN", reset_pin: "Reset PIN", change_pin: "Change PIN", err_new_pin_mismatch: "The new PIN must be 6 digits and match in both fields.", err_old_pin_required: "Enter the old 6-digit PIN.", err_cannot_edit_user: "You cannot edit this user.", err_old_pin_wrong: "The old PIN is incorrect.", pin_reset_success: "PIN reset successfully.", pin_changed_success: "PIN changed successfully."
+    splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "PIN management", season6_guide_short: "S6 Guide", season6_dashboard_desc: "Priorities, buildings, War Merit, fishing and initial calendar", password_management_master_desc: "Reset standard and supervisor PINs for every alliance", password_management_supervisor_desc: "Change standard and supervisor PINs for your alliance", pin: "PIN", email: "Email", login_tenant_hint: "Enter alliance code, server and PIN.", invalid_credentials: "Invalid credentials.", too_many_attempts: "Too many attempts. Try again later.", forbidden: "Forbidden", not_found: "Not found", export_excel: "Export Excel", role: "Role", total: "Total", total_short: "Total", date: "Date", alliances_management_desc: "Create alliances and manage standard/supervisor PINs without granting administrator permissions to standard users.", active: "Active", inactive: "Inactive", password_management_master_intro: "Master: you can view all active users and reset any PIN without knowing the previous one.", password_management_supervisor_intro: "Supervisor: you can only change the standard and supervisor PINs for your alliance by entering the old PIN and the new one twice.", no_users_available: "No users available.", user: "User", old_pin: "Old PIN", new_pin: "New PIN", repeat_pin: "Repeat PIN", reset_pin: "Reset PIN", change_pin: "Change PIN", err_new_pin_mismatch: "The new PIN must be 6 digits and match in both fields.", err_old_pin_required: "Enter the old 6-digit PIN.", err_cannot_edit_user: "You cannot edit this user.", err_old_pin_wrong: "The old PIN is incorrect.", pin_reset_success: "PIN reset successfully.", pin_changed_success: "PIN changed successfully."
   },
   es: {
-    splash_label: "Biss Made in Italy", biss_logo_alt: "Logo de la alianza Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "Gestión de PIN", season6_guide_short: "Guía S6", season6_dashboard_desc: "Prioridades, edificios, Mérito de Guerra, pesca y calendario inicial", password_management_master_desc: "Restablece los PIN estándar y de supervisor de todas las alianzas", password_management_supervisor_desc: "Cambia los PIN estándar y de supervisor de tu alianza", pin: "PIN", email: "Email", login_tenant_hint: "Introduce código de alianza, servidor y PIN.", invalid_credentials: "Credenciales no válidas.", too_many_attempts: "Demasiados intentos. Inténtalo de nuevo más tarde.", forbidden: "Acceso denegado", not_found: "No encontrado", export_excel: "Exportar Excel", role: "Rol", total: "Total", total_short: "Total", date: "Fecha", alliances_management_desc: "Crea alianzas y gestiona los PIN estándar/supervisor sin conceder permisos de administrador a los usuarios estándar.", active: "Activa", inactive: "Inactiva", password_management_master_intro: "Master: puedes ver todos los usuarios activos y restablecer cualquier PIN sin conocer el anterior.", password_management_supervisor_intro: "Supervisor: solo puedes cambiar los PIN estándar y de supervisor de tu alianza introduciendo el PIN anterior y el nuevo dos veces.", no_users_available: "No hay usuarios disponibles.", user: "Usuario", old_pin: "PIN anterior", new_pin: "Nuevo PIN", repeat_pin: "Repetir PIN", reset_pin: "Restablecer PIN", change_pin: "Cambiar PIN", err_new_pin_mismatch: "El nuevo PIN debe tener 6 cifras y coincidir en ambos campos.", err_old_pin_required: "Introduce el PIN anterior de 6 cifras.", err_cannot_edit_user: "No puedes modificar este usuario.", err_old_pin_wrong: "El PIN anterior no es correcto.", pin_reset_success: "PIN restablecido correctamente.", pin_changed_success: "PIN cambiado correctamente."
+    splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "Gestión de PIN", season6_guide_short: "Guía S6", season6_dashboard_desc: "Prioridades, edificios, Mérito de Guerra, pesca y calendario inicial", password_management_master_desc: "Restablece los PIN estándar y de supervisor de todas las alianzas", password_management_supervisor_desc: "Cambia los PIN estándar y de supervisor de tu alianza", pin: "PIN", email: "Email", login_tenant_hint: "Introduce código de alianza, servidor y PIN.", invalid_credentials: "Credenciales no válidas.", too_many_attempts: "Demasiados intentos. Inténtalo de nuevo más tarde.", forbidden: "Acceso denegado", not_found: "No encontrado", export_excel: "Exportar Excel", role: "Rol", total: "Total", total_short: "Total", date: "Fecha", alliances_management_desc: "Crea alianzas y gestiona los PIN estándar/supervisor sin conceder permisos de administrador a los usuarios estándar.", active: "Activa", inactive: "Inactiva", password_management_master_intro: "Master: puedes ver todos los usuarios activos y restablecer cualquier PIN sin conocer el anterior.", password_management_supervisor_intro: "Supervisor: solo puedes cambiar los PIN estándar y de supervisor de tu alianza introduciendo el PIN anterior y el nuevo dos veces.", no_users_available: "No hay usuarios disponibles.", user: "Usuario", old_pin: "PIN anterior", new_pin: "Nuevo PIN", repeat_pin: "Repetir PIN", reset_pin: "Restablecer PIN", change_pin: "Cambiar PIN", err_new_pin_mismatch: "El nuevo PIN debe tener 6 cifras y coincidir en ambos campos.", err_old_pin_required: "Introduce el PIN anterior de 6 cifras.", err_cannot_edit_user: "No puedes modificar este usuario.", err_old_pin_wrong: "El PIN anterior no es correcto.", pin_reset_success: "PIN restablecido correctamente.", pin_changed_success: "PIN cambiado correctamente."
   }
 };
 
 Object.assign(UI_CLEANUP_TRANSLATIONS, {
-  fr: { splash_label: "Biss Made in Italy", biss_logo_alt: "Logo de l’alliance Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "Gestion des PIN", season6_guide_short: "Guide S6", season6_dashboard_desc: "Priorités, bâtiments, Mérite de guerre, pêche et calendrier initial", password_management_master_desc: "Réinitialise les PIN standard et superviseur de toutes les alliances", password_management_supervisor_desc: "Modifie les PIN standard et superviseur de votre alliance" },
-  de: { splash_label: "Biss Made in Italy", biss_logo_alt: "Biss-Allianzlogo", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "PIN-Verwaltung", season6_guide_short: "S6-Leitfaden", season6_dashboard_desc: "Prioritäten, Gebäude, Kriegsverdienst, Angeln und Startkalender", password_management_master_desc: "Standard- und Supervisor-PINs für alle Allianzen zurücksetzen", password_management_supervisor_desc: "Standard- und Supervisor-PINs deiner Allianz ändern" },
-  ar: { splash_label: "Biss Made in Italy", biss_logo_alt: "شعار تحالف Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "إدارة PIN", season6_guide_short: "دليل S6", season6_dashboard_desc: "الأولويات والمباني وجدارة الحرب والصيد والتقويم الأولي", password_management_master_desc: "إعادة تعيين أرقام PIN القياسية وأرقام PIN للمشرف لكل التحالفات", password_management_supervisor_desc: "تغيير أرقام PIN القياسية وأرقام PIN للمشرف في تحالفك" },
-  pl: { splash_label: "Biss Made in Italy", biss_logo_alt: "Logo sojuszu Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "Zarządzanie PIN", season6_guide_short: "Przewodnik S6", season6_dashboard_desc: "Priorytety, budynki, Zasługi Wojenne, łowienie i kalendarz początkowy", password_management_master_desc: "Resetuj standardowe i nadzorcy PIN-y we wszystkich sojuszach", password_management_supervisor_desc: "Zmień standardowy i nadzorcy PIN swojego sojuszu" },
-  sv: { splash_label: "Biss Made in Italy", biss_logo_alt: "Biss-allianslogotyp", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "PIN-hantering", season6_guide_short: "S6-guide", season6_dashboard_desc: "Prioriteringar, byggnader, War Merit, fiske och startkalender", password_management_master_desc: "Återställ standard- och supervisor-PIN för alla allianser", password_management_supervisor_desc: "Ändra standard- och supervisor-PIN för din allians" },
-  da: { splash_label: "Biss Made in Italy", biss_logo_alt: "Biss-alliance logo", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "PIN-administration", season6_guide_short: "S6-guide", season6_dashboard_desc: "Prioriteter, bygninger, War Merit, fiskeri og startkalender", password_management_master_desc: "Nulstil standard- og supervisor-PIN for alle alliancer", password_management_supervisor_desc: "Skift standard- og supervisor-PIN for din alliance" },
-  uk: { splash_label: "Biss Made in Italy", biss_logo_alt: "Логотип альянсу Biss", brand_biss: "Biss", made_in_italy: "Made in Italy", password_management: "Керування PIN", season6_guide_short: "Посібник S6", season6_dashboard_desc: "Пріоритети, будівлі, бойові заслуги, риболовля та початковий календар", password_management_master_desc: "Скидання стандартних PIN і PIN супервайзерів для всіх альянсів", password_management_supervisor_desc: "Зміна стандартного PIN і PIN супервайзера вашого альянсу" }
+  fr: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "Gestion des PIN", season6_guide_short: "Guide S6", season6_dashboard_desc: "Priorités, bâtiments, Mérite de guerre, pêche et calendrier initial", password_management_master_desc: "Réinitialise les PIN standard et superviseur de toutes les alliances", password_management_supervisor_desc: "Modifie les PIN standard et superviseur de votre alliance" },
+  de: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "PIN-Verwaltung", season6_guide_short: "S6-Leitfaden", season6_dashboard_desc: "Prioritäten, Gebäude, Kriegsverdienst, Angeln und Startkalender", password_management_master_desc: "Standard- und Supervisor-PINs für alle Allianzen zurücksetzen", password_management_supervisor_desc: "Standard- und Supervisor-PINs deiner Allianz ändern" },
+  ar: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "إدارة PIN", season6_guide_short: "دليل S6", season6_dashboard_desc: "الأولويات والمباني وجدارة الحرب والصيد والتقويم الأولي", password_management_master_desc: "إعادة تعيين أرقام PIN القياسية وأرقام PIN للمشرف لكل التحالفات", password_management_supervisor_desc: "تغيير أرقام PIN القياسية وأرقام PIN للمشرف في تحالفك" },
+  pl: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "Zarządzanie PIN", season6_guide_short: "Przewodnik S6", season6_dashboard_desc: "Priorytety, budynki, Zasługi Wojenne, łowienie i kalendarz początkowy", password_management_master_desc: "Resetuj standardowe i nadzorcy PIN-y we wszystkich sojuszach", password_management_supervisor_desc: "Zmień standardowy i nadzorcy PIN swojego sojuszu" },
+  sv: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "PIN-hantering", season6_guide_short: "S6-guide", season6_dashboard_desc: "Prioriteringar, byggnader, War Merit, fiske och startkalender", password_management_master_desc: "Återställ standard- och supervisor-PIN för alla allianser", password_management_supervisor_desc: "Ändra standard- och supervisor-PIN för din allians" },
+  da: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "PIN-administration", season6_guide_short: "S6-guide", season6_dashboard_desc: "Prioriteter, bygninger, War Merit, fiskeri og startkalender", password_management_master_desc: "Nulstil standard- og supervisor-PIN for alle alliancer", password_management_supervisor_desc: "Skift standard- og supervisor-PIN for din alliance" },
+  uk: { splash_label: "LWManager", splash_logo_alt: "LWManager logo", brand_name: "LWManager", password_management: "Керування PIN", season6_guide_short: "Посібник S6", season6_dashboard_desc: "Пріоритети, будівлі, бойові заслуги, риболовля та початковий календар", password_management_master_desc: "Скидання стандартних PIN і PIN супервайзерів для всіх альянсів", password_management_supervisor_desc: "Зміна стандартного PIN і PIN супервайзера вашого альянсу" }
 });
 
 for (const lang of SUPPORTED_LANGS) {

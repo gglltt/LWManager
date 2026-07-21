@@ -14,9 +14,9 @@
   <section class="adminSection allianceCreatePanel">
     <h2><%= t('new_alliance') %></h2>
     <form method="post" action="/admin/alliances" class="allianceCreateForm">
-      <label class="field"><span><%= t('alliance_code') %></span><input type="text" name="code" required placeholder="BISS" /></label>
-      <label class="field"><span><%= t('server') %></span><input type="text" name="serverNumber" required inputmode="numeric" placeholder="833" /></label>
-      <label class="field"><span><%= t('display_name') %></span><input type="text" name="displayName" placeholder="BISS" /></label>
+      <label class="field"><span><%= t('alliance_code') %></span><input type="text" name="code" required /></label>
+      <label class="field"><span><%= t('server') %></span><input type="text" name="serverNumber" required inputmode="numeric" /></label>
+      <label class="field"><span><%= t('display_name') %></span><input type="text" name="displayName" /></label>
       <label class="field"><span><%= t('standard_pin') %></span><input type="password" name="standardPin" required pattern="\d{6}" inputmode="numeric" placeholder="000000" /></label>
       <label class="field"><span><%= t('supervisor_pin') %></span><input type="password" name="supervisorPin" required pattern="\d{6}" inputmode="numeric" placeholder="000000" /></label>
       <button class="button" type="submit"><%= t('create_alliance') %></button>
