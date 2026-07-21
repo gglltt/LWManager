@@ -27,6 +27,7 @@
 
     const params = new URLSearchParams({ sort: field, dir: nextDir });
     if (q && String(q).trim().length > 0) params.set("q", String(q).trim());
+    if (user && user.isMaster && tenantFilter && tenantFilter.allianceId) params.set("allianceId", String(tenantFilter.allianceId));
     return `/potenze?${params.toString()}`;
   }
 
@@ -69,25 +70,25 @@
 %>
 
 <section class="card cardWide">
-  <div class="pageHeader">
-    <div>
+  <header class="powersHeader">
+    <div class="powersHeader__title">
       <h1><%= t("powers_title") %></h1>
-      <p class="muted"><%= t("powers_mobile_desc") %></p>
-      <p><strong><%= t("players_registered") %>: <%= playerCount %></strong></p>
-      <p class="muted"><%= t("current_role") %>: <b><%= user && user.isMaster ? t("admin") : (user && user.role === "supervisor" ? t("supervisor") : t("standard")) %></b></p>
     </div>
 
-    <div class="pageHeaderActions">
+    <div class="powersHeader__actions">
       <a class="button secondary" href="/dashboard">← <%= t("back_dashboard") %></a>
       <% if (canExport) { %>
         <% const exportAllianceId = user && user.isMaster && tenantFilter && tenantFilter.allianceId ? Number(tenantFilter.allianceId) : null; %>
         <a class="button secondary" href="/potenze/export<%= exportAllianceId ? `?allianceId=${exportAllianceId}` : '' %>">⬇️ <%= t("export_excel") %></a>
-      <% } else { %>
-        <span class="muted" title="<%= t('export_requires_admin_pin') %>"><%= t("export_admin_only") %></span>
       <% } %>
       <% if (typeof canEdit !== "undefined" ? canEdit : isAdmin) { %><a class="button" href="/potenze/new"><%= t("new_player_button") %></a><% } %>
     </div>
-  </div>
+
+    <div class="powersHeader__meta">
+      <span><%= t("players_registered") %>: <strong><%= playerCount %></strong></span>
+      <span><%= t("current_role") %>: <strong><%= user && user.isMaster ? t("admin") : (user && user.role === "supervisor" ? t("supervisor") : t("standard")) %></strong></span>
+    </div>
+  </header>
 
   <% if (message) { %>
     <div class="alert success"><%= message %></div>
@@ -97,11 +98,11 @@
     <div class="alert error"><%= error %></div>
   <% } %>
 
-  <form method="GET" action="/potenze" class="filterBar">
+  <form method="GET" action="/potenze" class="filterBar powersFilterBar <%= user && user.isMaster ? '' : 'powersFilterBar--singleTenant' %>">
     <input type="hidden" name="sort" value="<%= sort %>" />
     <input type="hidden" name="dir" value="<%= dir %>" />
     <% if (user && user.isMaster) { %>
-      <select name="allianceId" class="filterInput">
+      <select name="allianceId" class="filterInput powersFilterBar__alliance" aria-label="<%= t('select_alliance') %>">
         <option value=""><%= t("all_alliances") %></option>
         <% (alliances || []).forEach(a => { %>
           <option value="<%= a.allianceId %>" <%= Number(tenantFilter && tenantFilter.allianceId) === Number(a.allianceId) ? "selected" : "" %>><%= a.displayName || a.code %>#<%= a.serverNumber %></option>
@@ -113,11 +114,12 @@
       name="q"
       value="<%= q || "" %>"
       placeholder="<%= t('nickname_filter_placeholder') %>"
-      class="filterInput"
+      class="filterInput powersFilterBar__nickname"
+      aria-label="<%= t('nickname') %>"
     />
-    <button type="submit" class="button"><%= t("search") %></button>
-    <% if (q && String(q).trim().length > 0) { %>
-      <a class="button secondary" href="/potenze?sort=<%= encodeURIComponent(sort) %>&dir=<%= encodeURIComponent(dir) %>" title="<%= t('remove_filter') %>">✕</a>
+    <button type="submit" class="button powersFilterBar__submit"><%= t("search") %></button>
+    <% if ((q && String(q).trim().length > 0) || (user && user.isMaster && tenantFilter && tenantFilter.allianceId)) { %>
+      <a class="button secondary powersFilterBar__reset" href="/potenze?sort=<%= encodeURIComponent(sort) %>&dir=<%= encodeURIComponent(dir) %>" title="<%= t('remove_filter') %>"><%= t('reset') %></a>
     <% } %>
   </form>
 
@@ -312,11 +314,6 @@
     </table>
   </div>
 
-  <% if (!isAdmin) { %>
-    <p class="muted" style="margin-top: 12px;">
-      <%= t("standard_mode_hint") %>
-    </p>
-  <% } %>
 </section>
 
 

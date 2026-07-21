@@ -39,7 +39,7 @@ function renderFor(user, { canExport, tenantFilter = {}, alliances = [] } = {}) 
 test("power export UI follows standard, supervisor and master permissions", async () => {
   const standard = await renderFor({ role: "standard", authLevel: 1, allianceId: 1, isMaster: false }, { canExport: false });
   assert.doesNotMatch(standard, /href="\/potenze\/export/);
-  assert.match(standard, /export_admin_only/);
+  assert.doesNotMatch(standard, /export_admin_only/);
 
   const supervisor = await renderFor({ role: "supervisor", authLevel: 3, allianceId: 1, isMaster: false }, { canExport: true });
   assert.match(supervisor, /href="\/potenze\/export"/);
